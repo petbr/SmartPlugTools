@@ -1,0 +1,1 @@
+Received:  {"emeter":{"get_realtime":{"current":0.035590,"voltage":234.403830,"power":3.169993,"total":2.108000,"err_code":0}}}
