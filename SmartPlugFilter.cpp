@@ -59,6 +59,14 @@ int main(int argc, char **argv) {
 	ssize_t read = 0;
 	size_t len = 0;
 
+	for (int i=0; i<argc; i++)
+	{
+		printf("arg[%d] = %s\n", i, argv[i]);
+	}
+
+	char* fieldToSearchFor = argv[1];
+	printf("What to search for: %s\n", fieldToSearchFor);
+
 	while(read != -1)
 	{
 		read = getline(&line, &len, stdin);
