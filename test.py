@@ -72,18 +72,34 @@ def decrypt(string):
 
 	return result
 
-def findValue(inData, field):
-	findPos = inData.find(field)
-	findAndRest = inData[findPos:]
-	nextCommaPos = findAndRest.find(',')
-	findValue = findAndRest[len(field)+2:nextCommaPos]
+# Ex.     inData: "{"emeter":{"get_realtime":{"current":0.036836,"voltage":233.437091,"power":3.172235,"total":5.032000,"err_code":0}}}')"
+#         field:  "power"                                                              1      ffffffffncp
+#                                                                                      ssssssssssssssssssssssssssssssssssssssssssssssssss
+def findValueStr(inData, field):
 
-	print("inData    = ", inData)
-	print("find      = ", field)
-	print("findValue =", findValue)
+	findPos = inData.find(field)                       #1
+	findAndRest = inData[findPos:]                     #s
+	nextCommaPos = findAndRest.find(',')               #ncp
+	findValue = findAndRest[len(field)+2:nextCommaPos] #f
 
-	return float(findValue)
+	return findValue
 
+def sendAndReceiveOnSocket(ip, port, cmd):
+	try:
+		# Connect socket
+		sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock_tcp.connect((ip, port))
+
+		sock_tcp.send(encrypt(cmd))
+		data = sock_tcp.recv(2048)
+
+		#Close socket connection
+		sock_tcp.close()
+
+	except socket.error:
+		quit("Cound not connect to host " + ip + ":" + str(port))
+
+	return data
 
 
 # Parse commandline arguments
@@ -100,27 +116,22 @@ args = parser.parse_args()
 # Set target IP, port and command to send
 ip = args.target
 port = 9999
-if args.command is None:
-	cmd = args.json
-else:
-	cmd = commands[args.command]
+timeCommand   = "time"
+energyCommand = "energy"
 
+timeCmd   = commands[timeCommand]
+energyCmd = commands[energyCommand]
 
+timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
+decryptedTimeData = decrypt(timeData[4:])
+print("decryptedTimeData = ", decryptedTimeData)
 
-# Send command and receive reply
-try:
-	sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock_tcp.connect((ip, port))
-	sock_tcp.send(encrypt(cmd))
-	data = sock_tcp.recv(2048)
-	sock_tcp.close()
-	
-	decryptData = decrypt(data[4:])
-	print ("Received: ", decryptData)
+energyData = sendAndReceiveOnSocket(ip, port, energyCmd)
+decryptedEnergyData = decrypt(energyData[4:])
+print("decryptedEnergyData = ", decryptedEnergyData)
 
-	print("find = ", findValue(decryptData, "power"))
+print("findTime   = ", findValueStr(decryptedTimeData,   "sec"))
+print("findEnergy = ", findValueStr(decryptedEnergyData, "power"))
 
-except socket.error:
-	quit("Cound not connect to host " + ip + ":" + str(port))
 
 
