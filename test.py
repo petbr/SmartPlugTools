@@ -69,16 +69,33 @@ def decrypt(string):
 		a = key ^ ord(i)
 		key = ord(i)
 		result += chr(a)
+
 	return result
+
+def findValue(inData, field):
+	findPos = inData.find(field)
+	findAndRest = inData[findPos:]
+	nextCommaPos = findAndRest.find(',')
+	findValue = findAndRest[len(field)+2:nextCommaPos]
+
+	print("inData    = ", inData)
+	print("find      = ", field)
+	print("findValue =", findValue)
+
+	return float(findValue)
+
+
 
 # Parse commandline arguments
 parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
 parser.add_argument("-t", "--target", metavar="<hostname>", required=True, help="Target hostname or IP address", type=validHostname)
+
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(commands), choices=commands)
-group.add_argument("-j", "--json", metavar="<JSON string>", help="Full JSON string of command to send")
-args = parser.parse_args()
 
+group.add_argument("-j", "--json", metavar="<JSON string>", help="Full JSON string of command to send")
+
+args = parser.parse_args()
 
 # Set target IP, port and command to send
 ip = args.target
@@ -97,9 +114,13 @@ try:
 	sock_tcp.send(encrypt(cmd))
 	data = sock_tcp.recv(2048)
 	sock_tcp.close()
+	
+	decryptData = decrypt(data[4:])
+	print ("Received: ", decryptData)
 
-	print ("Sent:     ", cmd)
-	print ("Received: ", decrypt(data[4:]))
+	print("find = ", findValue(decryptData, "power"))
+
 except socket.error:
 	quit("Cound not connect to host " + ip + ":" + str(port))
+
 
