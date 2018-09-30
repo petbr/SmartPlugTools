@@ -73,14 +73,20 @@ def decrypt(string):
 	return result
 
 # Ex.     inData: "{"emeter":{"get_realtime":{"current":0.036836,"voltage":233.437091,"power":3.172235,"total":5.032000,"err_code":0}}}')"
-#         field:  "power"                                                              1      ffffffffncp
+#         field:  "power"                                                              1      ffffffffE
+#                                                                                      ssssssssssssssssssssssssssssssssssssssssssssssssss
+# Ex.     inData: "{"emeter":{"get_realtime":{"current":0.036836,"voltage":233.437091,"power":3.172235,"total":5.032000,"err_code":0}}}')"
+#         field:  "err_code"                                                                                             1         fE
 #                                                                                      ssssssssssssssssssssssssssssssssssssssssssssssssss
 def findValueStr(inData, field):
 
 	findPos = inData.find(field)                       #1
 	findAndRest = inData[findPos:]                     #s
-	nextCommaPos = findAndRest.find(',')               #ncp
-	findValue = findAndRest[len(field)+2:nextCommaPos] #f
+	nextValueEndPos = findAndRest.find(',')            #E
+	if nextValueEndPos == -1:
+		nextValueEndPos = findAndRest.find('}')        #E
+
+	findValue = findAndRest[len(field)+2 : nextValueEndPos] #f
 
 	return findValue
 
@@ -124,14 +130,28 @@ energyCmd = commands[energyCommand]
 
 timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
 decryptedTimeData = decrypt(timeData[4:])
-print("decryptedTimeData = ", decryptedTimeData)
+# print("decryptedTimeData = ", decryptedTimeData)
 
 energyData = sendAndReceiveOnSocket(ip, port, energyCmd)
 decryptedEnergyData = decrypt(energyData[4:])
-print("decryptedEnergyData = ", decryptedEnergyData)
+# print("decryptedEnergyData = ", decryptedEnergyData)
 
-print("findTime   = ", findValueStr(decryptedTimeData,   "sec"))
-print("findEnergy = ", findValueStr(decryptedEnergyData, "power"))
+# print("findTime   = ", findValueStr(decryptedTimeData,   "sec"))
+# print("findEnergy = ", findValueStr(decryptedEnergyData, "power"))
 
+date_year  = int(findValueStr(decryptedTimeData,   "year"))
+date_month = int(findValueStr(decryptedTimeData,   "month"))
+date_mday  = int(findValueStr(decryptedTimeData,   "mday"))
+print("year: ", date_year, "   month: ", date_month, "   mday: ", date_mday)
 
+time_hour = int(findValueStr(decryptedTimeData, "hour"))
+time_min  = int(findValueStr(decryptedTimeData, "min"))
+time_sec  = int(findValueStr(decryptedTimeData, "sec"))
+print("hour: ", time_hour, "   min: ", time_min, "   sec: ", time_sec)
 
+emeter_current = float(findValueStr(decryptedEnergyData, "current"))
+emeter_voltage = float(findValueStr(decryptedEnergyData, "voltage"))
+emeter_power   = float(findValueStr(decryptedEnergyData, "power"))
+print("current: ", emeter_current, "   voltage: ", emeter_voltage, "   power: ", emeter_power)
+
+print("This is what's going out")
