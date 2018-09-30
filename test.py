@@ -142,16 +142,20 @@ decryptedEnergyData = decrypt(energyData[4:])
 date_year  = int(findValueStr(decryptedTimeData,   "year"))
 date_month = int(findValueStr(decryptedTimeData,   "month"))
 date_mday  = int(findValueStr(decryptedTimeData,   "mday"))
-print("year: ", date_year, "   month: ", date_month, "   mday: ", date_mday)
+#print("year: ", date_year, "   month: ", date_month, "   mday: ", date_mday)
 
 time_hour = int(findValueStr(decryptedTimeData, "hour"))
 time_min  = int(findValueStr(decryptedTimeData, "min"))
 time_sec  = int(findValueStr(decryptedTimeData, "sec"))
-print("hour: ", time_hour, "   min: ", time_min, "   sec: ", time_sec)
+#print("hour: ", time_hour, "   min: ", time_min, "   sec: ", time_sec)
 
 emeter_current = float(findValueStr(decryptedEnergyData, "current"))
 emeter_voltage = float(findValueStr(decryptedEnergyData, "voltage"))
 emeter_power   = float(findValueStr(decryptedEnergyData, "power"))
-print("current: ", emeter_current, "   voltage: ", emeter_voltage, "   power: ", emeter_power)
+#print("current: ", emeter_current, "   voltage: ", emeter_voltage, "   power: ", emeter_power)
 
-print("This is what's going out")
+print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
+      .format(y=date_year, m=date_month, d=date_mday,
+              hr=time_hour, min=time_min, sec=time_sec,
+              p=emeter_power))
+
