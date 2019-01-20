@@ -110,23 +110,14 @@ def sendAndReceiveOnSocket(ip, port, cmd):
 
 	return data
 
-def getTime(ip):
-  print("getTime, ip = ", ip)
+def getDateTime(ip):
+  #print("getTime, ip = ", ip)
 
   timeCmd = commands[timeCommand]
 
   timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
   decryptedTimeData = decrypt(timeData[4:])
-  print("decryptedTimeData = ", decryptedTimeData)
-
-  date_year  = int(findValueStr(decryptedTimeData,   "year"))
-  date_month = int(findValueStr(decryptedTimeData,   "month"))
-  date_mday  = int(findValueStr(decryptedTimeData,   "mday"))
-  print("year: ", date_year, "   month: ", date_month, "   mday: ", date_mday)
-
-  time_hour = int(findValueStr(decryptedTimeData, "hour"))
-  time_min  = int(findValueStr(decryptedTimeData, "min"))
-  time_sec  = int(findValueStr(decryptedTimeData, "sec"))
+  #print("decryptedTimeData = ", decryptedTimeData)
   
   dateTime = {'year'  : int(findValueStr(decryptedTimeData, "year")),
               'month' : int(findValueStr(decryptedTimeData, "month")),
@@ -146,18 +137,18 @@ def getTime(ip):
   return dateTime
 
 def getPower(ip):
-  print("getPower, ip = ", ip)
+  #print("getPower, ip = ", ip)
 
   powerCmd = commands[powerCommand]
   powerData = sendAndReceiveOnSocket(ip, port, powerCmd)
   decryptedPowerData = decrypt(powerData[4:])
-  print("decryptedPowerData = ", decryptedPowerData)
 
-  current = float(findValueStr(decryptedPowerData, "current"))
-  voltage = float(findValueStr(decryptedPowerData, "voltage"))
-  power   = float(findValueStr(decryptedPowerData, "power"))
-  print("Power: I={i:5.5f} U={u:5.2f} P={p:5.5f}"
-        .format(i=current, u=voltage, p=power))
+  power = {'current' : float(findValueStr(decryptedPowerData, "current")),
+           'voltage' : float(findValueStr(decryptedPowerData, "voltage")),
+           'power'   : float(findValueStr(decryptedPowerData, "power"))}
+  
+  print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f}"
+        .format(i=power['current'], u=power['voltage'], p=power['power']))
   
   return power
 
@@ -175,10 +166,20 @@ args = parser.parse_args()
 # Set target IP, port and command to send
 ip = args.target
 
-getTime(ip)
-getPower(ip)
+dateTime=getDateTime(ip)
+power=getPower(ip)
 
+print("returned TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d}"
+      .format(y=dateTime["year"],
+              m=dateTime["month"],
+              d=dateTime["mday"],
+              hr=dateTime["hour"],
+              min=dateTime["min"],
+              sec=dateTime["sec"]))
 
+print("returned POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f}"
+      .format(i=power['current'], u=power['voltage'], p=power['power']))
+  
 #print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
 #      .format(y=date_year, m=date_month, d=date_mday,
 #              hr=time_hour, min=time_min, sec=time_sec,
