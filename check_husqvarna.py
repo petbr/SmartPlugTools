@@ -19,7 +19,7 @@
 # limitations under the License.
 #
 # Usage in Stora Hoga:
-# python tplink_smartplug.py -t 192.168.1.77 -c energy
+# python tplink_smartplug.py -t 192.168.1.18 -c energy
 
 import socket
 import argparse
