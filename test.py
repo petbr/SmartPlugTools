@@ -19,7 +19,7 @@
 # limitations under the License.
 #
 # Usage in Stora Hoga:
-# python tplink_smartplug.py -t 192.168.1.75 -c energy
+# python tplink_smartplug.py -t 192.168.1.18 -c energy
 
 import socket
 import argparse
@@ -51,6 +51,10 @@ commands = {'info'     : '{"system":{"get_sysinfo":{}}}',
 			'energy'   : '{"emeter":{"get_realtime":{}}}'
 }
 
+port = 9999
+timeCommand   = "time"
+powerCommand = "energy"
+
 # Encryption and Decryption of TP-Link Smart Home Protocol
 # XOR Autokey Cipher with starting key = 171
 def encrypt(string):
@@ -79,7 +83,6 @@ def decrypt(string):
 #         field:  "err_code"                                                                                             1         fE
 #                                                                                      ssssssssssssssssssssssssssssssssssssssssssssssssss
 def findValueStr(inData, field):
-
 	findPos = inData.find(field)                       #1
 	findAndRest = inData[findPos:]                     #s
 	nextValueEndPos = findAndRest.find(',')            #E
@@ -107,6 +110,56 @@ def sendAndReceiveOnSocket(ip, port, cmd):
 
 	return data
 
+def getTime(ip):
+  print("getTime, ip = ", ip)
+
+  timeCmd = commands[timeCommand]
+
+  timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
+  decryptedTimeData = decrypt(timeData[4:])
+  print("decryptedTimeData = ", decryptedTimeData)
+
+  date_year  = int(findValueStr(decryptedTimeData,   "year"))
+  date_month = int(findValueStr(decryptedTimeData,   "month"))
+  date_mday  = int(findValueStr(decryptedTimeData,   "mday"))
+  print("year: ", date_year, "   month: ", date_month, "   mday: ", date_mday)
+
+  time_hour = int(findValueStr(decryptedTimeData, "hour"))
+  time_min  = int(findValueStr(decryptedTimeData, "min"))
+  time_sec  = int(findValueStr(decryptedTimeData, "sec"))
+  
+  dateTime = {'year'  : int(findValueStr(decryptedTimeData, "year")),
+              'month' : int(findValueStr(decryptedTimeData, "month")),
+              'mday'  : int(findValueStr(decryptedTimeData, "mday")),
+              'hour'  : int(findValueStr(decryptedTimeData, "hour")),
+              'min'   : int(findValueStr(decryptedTimeData, "min")),
+              'sec'   : int(findValueStr(decryptedTimeData, "sec"))}
+  
+  print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d}"
+      .format(y=dateTime["year"],
+              m=dateTime["month"],
+              d=dateTime["mday"],
+              hr=dateTime["hour"],
+              min=dateTime["min"],
+              sec=dateTime["sec"]))
+  
+  return dateTime
+
+def getPower(ip):
+  print("getPower, ip = ", ip)
+
+  powerCmd = commands[powerCommand]
+  powerData = sendAndReceiveOnSocket(ip, port, powerCmd)
+  decryptedPowerData = decrypt(powerData[4:])
+  print("decryptedPowerData = ", decryptedPowerData)
+
+  current = float(findValueStr(decryptedPowerData, "current"))
+  voltage = float(findValueStr(decryptedPowerData, "voltage"))
+  power   = float(findValueStr(decryptedPowerData, "power"))
+  print("Power: I={i:5.5f} U={u:5.2f} P={p:5.5f}"
+        .format(i=current, u=voltage, p=power))
+  
+  return power
 
 # Parse commandline arguments
 parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
@@ -121,41 +174,13 @@ args = parser.parse_args()
 
 # Set target IP, port and command to send
 ip = args.target
-port = 9999
-timeCommand   = "time"
-energyCommand = "energy"
 
-timeCmd   = commands[timeCommand]
-energyCmd = commands[energyCommand]
+getTime(ip)
+getPower(ip)
 
-timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
-decryptedTimeData = decrypt(timeData[4:])
-# print("decryptedTimeData = ", decryptedTimeData)
 
-energyData = sendAndReceiveOnSocket(ip, port, energyCmd)
-decryptedEnergyData = decrypt(energyData[4:])
-# print("decryptedEnergyData = ", decryptedEnergyData)
-
-# print("findTime   = ", findValueStr(decryptedTimeData,   "sec"))
-# print("findEnergy = ", findValueStr(decryptedEnergyData, "power"))
-
-date_year  = int(findValueStr(decryptedTimeData,   "year"))
-date_month = int(findValueStr(decryptedTimeData,   "month"))
-date_mday  = int(findValueStr(decryptedTimeData,   "mday"))
-#print("year: ", date_year, "   month: ", date_month, "   mday: ", date_mday)
-
-time_hour = int(findValueStr(decryptedTimeData, "hour"))
-time_min  = int(findValueStr(decryptedTimeData, "min"))
-time_sec  = int(findValueStr(decryptedTimeData, "sec"))
-#print("hour: ", time_hour, "   min: ", time_min, "   sec: ", time_sec)
-
-emeter_current = float(findValueStr(decryptedEnergyData, "current"))
-emeter_voltage = float(findValueStr(decryptedEnergyData, "voltage"))
-emeter_power   = float(findValueStr(decryptedEnergyData, "power"))
-#print("current: ", emeter_current, "   voltage: ", emeter_voltage, "   power: ", emeter_power)
-
-print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
-      .format(y=date_year, m=date_month, d=date_mday,
-              hr=time_hour, min=time_min, sec=time_sec,
-              p=emeter_power))
+#print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
+#      .format(y=date_year, m=date_month, d=date_mday,
+#              hr=time_hour, min=time_min, sec=time_sec,
+#              p=emeter_power))
 
