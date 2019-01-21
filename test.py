@@ -22,6 +22,7 @@
 # python tplink_smartplug.py -t 192.168.1.18 -c energy
 
 import socket
+import time
 import argparse
 from struct import pack
 
@@ -112,32 +113,37 @@ def sendAndReceiveOnSocket(ip, port, cmd):
 
 	return data
 
+#python check_husqvarna.py -t 192.168.1.18 -c off
+#('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
+#('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
+def turnOff(ip):
+  print("turnOff(), ip = ", ip)
+
+  turnOffResult = sendAndReceiveOnSocket(ip, port, turnOffCmd)
+  decryptedTurnOffData = decrypt(turnOffResult[4:])
+  
+  turnOffRes = {'err_code' : int(findValueStr(decryptedTurnOffData, "err_code"))}
+  
+  print("TURN_OFF: E:{e:01d}"
+      .format(e=turnOffRes["err_code"]))
+  
+  return turnOffRes
+
 #python check_husqvarna.py -t 192.168.1.18 -c on
 #('Sent:     ', '{"system":{"set_relay_state":{"state":1}}}')
 #('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
 def turnOn(ip):
-  #print("getTime, ip = ", ip)
+  print("turnOn(), ip = ", ip)
 
-  turnOnResult = sendAndReceiveOnSocket(ip, port, TurnOnCmd)
-  decryptedTimeData = decrypt(timeData[4:])
-  #print("decryptedTimeData = ", decryptedTimeData)
+  turnOnResult = sendAndReceiveOnSocket(ip, port, turnOnCmd)
+  decryptedTimeData = decrypt(turnOnResult[4:])
   
-  dateTime = {'year'  : int(findValueStr(decryptedTimeData, "year")),
-              'month' : int(findValueStr(decryptedTimeData, "month")),
-              'mday'  : int(findValueStr(decryptedTimeData, "mday")),
-              'hour'  : int(findValueStr(decryptedTimeData, "hour")),
-              'min'   : int(findValueStr(decryptedTimeData, "min")),
-              'sec'   : int(findValueStr(decryptedTimeData, "sec"))}
+  turnOnRes = {'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
   
-  print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d}"
-      .format(y=dateTime["year"],
-              m=dateTime["month"],
-              d=dateTime["mday"],
-              hr=dateTime["hour"],
-              min=dateTime["min"],
-              sec=dateTime["sec"]))
+  print("TURN_ON: E:{e:01d}"
+      .format(e=turnOnRes["err_code"]))
   
-  return dateTime
+  return turnOnRes
 
 #python check_husqvarna.py -t 192.168.1.18 -c time
 #('Sent:     ', '{"time":{"get_time":{}}}')
@@ -149,20 +155,23 @@ def getDateTime(ip):
   decryptedTimeData = decrypt(timeData[4:])
   #print("decryptedTimeData = ", decryptedTimeData)
   
-  dateTime = {'year'  : int(findValueStr(decryptedTimeData, "year")),
-              'month' : int(findValueStr(decryptedTimeData, "month")),
-              'mday'  : int(findValueStr(decryptedTimeData, "mday")),
-              'hour'  : int(findValueStr(decryptedTimeData, "hour")),
-              'min'   : int(findValueStr(decryptedTimeData, "min")),
-              'sec'   : int(findValueStr(decryptedTimeData, "sec"))}
+  dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
+              'month'    : int(findValueStr(decryptedTimeData,  "month")),
+              'mday'     : int(findValueStr(decryptedTimeData,  "mday")),
+              'hour'     : int(findValueStr(decryptedTimeData,  "hour")),
+              'min'      : int(findValueStr(decryptedTimeData,  "min")),
+              'sec'      : int(findValueStr(decryptedTimeData,  "sec")),
+              'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
   
-  print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d}"
+  
+  print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
       .format(y=dateTime["year"],
               m=dateTime["month"],
               d=dateTime["mday"],
               hr=dateTime["hour"],
               min=dateTime["min"],
-              sec=dateTime["sec"]))
+              sec=dateTime["sec"],
+              e=dateTime["err_code"]))
   
   return dateTime
 
@@ -175,12 +184,18 @@ def getPower(ip):
   powerData = sendAndReceiveOnSocket(ip, port, powerCmd)
   decryptedPowerData = decrypt(powerData[4:])
 
-  power = {'current' : float(findValueStr(decryptedPowerData, "current")),
-           'voltage' : float(findValueStr(decryptedPowerData, "voltage")),
-           'power'   : float(findValueStr(decryptedPowerData, "power"))}
+  power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
+           'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
+           'power'    : float(findValueStr(decryptedPowerData, "power")),
+           'total'    : float(findValueStr(decryptedPowerData, "total")),
+           'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
   
-  print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f}"
-        .format(i=power['current'], u=power['voltage'], p=power['power']))
+  print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
+        .format(i=power['current'],
+                u=power['voltage'],
+                p=power['power'],
+                t=power['total'],
+                e=power['err_code']))
   
   return power
 
@@ -198,19 +213,37 @@ args = parser.parse_args()
 # Set target IP, port and command to send
 ip = args.target
 
-dateTime=getDateTime(ip)
-power=getPower(ip)
+# Turn OFF
+turnOff  = turnOff(ip)
+time.sleep(0.2)
 
-print("returned TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d}"
+# Turn ON
+turnOn  = turnOn(ip)
+time.sleep(0.2)
+
+dateTime =getDateTime(ip)
+power    =getPower(ip)
+
+print("returned TURN_OFF: E:{e:01d}"
+      .format(e=turnOff["err_code"]))
+
+print("returned TURN_ON: E:{e:01d}"
+      .format(e=turnOn["err_code"]))
+
+print("returned TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
       .format(y=dateTime["year"],
               m=dateTime["month"],
               d=dateTime["mday"],
               hr=dateTime["hour"],
               min=dateTime["min"],
-              sec=dateTime["sec"]))
+              sec=dateTime["sec"],
+              e=dateTime["err_code"]))
 
-print("returned POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f}"
-      .format(i=power['current'], u=power['voltage'], p=power['power']))
+print("returned POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
+      .format(i=power['current'],
+              u=power['voltage'],
+              p=power['power'],
+              e=dateTime["err_code"]))
   
 #print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
 #      .format(y=date_year, m=date_month, d=date_mday,
