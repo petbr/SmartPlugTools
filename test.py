@@ -31,18 +31,17 @@ version = 0.2
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
 commands = {'info'     : '{"system":{"get_sysinfo":{}}}',
-			'on'       : '{"system":{"set_relay_state":{"state":1}}}',
-			'off'      : '{"system":{"set_relay_state":{"state":0}}}',
-			'cloudinfo': '{"cnCloud":{"get_info":{}}}',
-			'wlanscan' : '{"netif":{"get_scaninfo":{"refresh":0}}}',
-			'time'     : '{"time":{"get_time":{}}}',
-			'schedule' : '{"schedule":{"get_rules":{}}}',
-			'countdown': '{"count_down":{"get_rules":{}}}',
-			'antitheft': '{"anti_theft":{"get_rules":{}}}',
-			'reboot'   : '{"system":{"reboot":{"delay":1}}}',
-			'reset'    : '{"system":{"reset":{"delay":1}}}',
-			'energy'   : '{"emeter":{"get_realtime":{}}}'
-}
+            'on'       : '{"system":{"set_relay_state":{"state":1}}}',
+            'off'      : '{"system":{"set_relay_state":{"state":0}}}',
+            'cloudinfo': '{"cnCloud":{"get_info":{}}}',
+            'wlanscan' : '{"netif":{"get_scaninfo":{"refresh":0}}}',
+            'time'     : '{"time":{"get_time":{}}}',
+            'schedule' : '{"schedule":{"get_rules":{}}}',
+            'countdown': '{"count_down":{"get_rules":{}}}',
+            'antitheft': '{"anti_theft":{"get_rules":{}}}',
+            'reboot'   : '{"system":{"reboot":{"delay":1}}}',
+            'reset'    : '{"system":{"reset":{"delay":1}}}',
+            'energy'   : '{"emeter":{"get_realtime":{}}}'}
 
 port = 9999
 timeCmd    = commands["time"]
@@ -215,14 +214,16 @@ ip = args.target
 
 # Turn OFF
 turnOff  = turnOff(ip)
-time.sleep(0.2)
+time.sleep(2)
+dateTimeAtOff = getDateTime(ip)
+powerAtOff    = getPower(ip)
 
 # Turn ON
 turnOn  = turnOn(ip)
-time.sleep(0.2)
+time.sleep(2)
 
-dateTime =getDateTime(ip)
-power    =getPower(ip)
+dateTimeAtOn = getDateTime(ip)
+powerAtOn    = getPower(ip)
 
 print("returned TURN_OFF: E:{e:01d}"
       .format(e=turnOff["err_code"]))
@@ -230,20 +231,35 @@ print("returned TURN_OFF: E:{e:01d}"
 print("returned TURN_ON: E:{e:01d}"
       .format(e=turnOn["err_code"]))
 
-print("returned TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
-      .format(y=dateTime["year"],
-              m=dateTime["month"],
-              d=dateTime["mday"],
-              hr=dateTime["hour"],
-              min=dateTime["min"],
-              sec=dateTime["sec"],
-              e=dateTime["err_code"]))
+print("returned TIME @ Off: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+      .format(y=dateTimeAtOff["year"],
+              m=dateTimeAtOff["month"],
+              d=dateTimeAtOff["mday"],
+              hr=dateTimeAtOff["hour"],
+              min=dateTimeAtOff["min"],
+              sec=dateTimeAtOff["sec"],
+              e=dateTimeAtOff["err_code"]))
 
-print("returned POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
-      .format(i=power['current'],
-              u=power['voltage'],
-              p=power['power'],
-              e=dateTime["err_code"]))
+print("returned POWER @ Off: I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
+      .format(i=powerAtOff['current'],
+              u=powerAtOff['voltage'],
+              p=powerAtOff['power'],
+              e=powerAtOff["err_code"]))
+
+print("returned TIME @ Off: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+      .format(y=dateTimeAtOn["year"],
+              m=dateTimeAtOn["month"],
+              d=dateTimeAtOn["mday"],
+              hr=dateTimeAtOn["hour"],
+              min=dateTimeAtOn["min"],
+              sec=dateTimeAtOn["sec"],
+              e=dateTimeAtOn["err_code"]))
+
+print("returned POWER @ On: I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
+      .format(i=powerAtOn['current'],
+              u=powerAtOn['voltage'],
+              p=powerAtOn['power'],
+              e=powerAtOn["err_code"]))
   
 #print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
 #      .format(y=date_year, m=date_month, d=date_mday,
