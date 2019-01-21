@@ -115,9 +115,7 @@ def sendAndReceiveOnSocket(ip, port, cmd):
 #python check_husqvarna.py -t 192.168.1.18 -c off
 #('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
 #('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
-def turnOff(ip):
-  print("turnOff(), ip = ", ip)
-
+def setTurnOff(ip):
   turnOffResult = sendAndReceiveOnSocket(ip, port, turnOffCmd)
   decryptedTurnOffData = decrypt(turnOffResult[4:])
   
@@ -131,9 +129,7 @@ def turnOff(ip):
 #python check_husqvarna.py -t 192.168.1.18 -c on
 #('Sent:     ', '{"system":{"set_relay_state":{"state":1}}}')
 #('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
-def turnOn(ip):
-  print("turnOn(), ip = ", ip)
-
+def setTurnOn(ip):
   turnOnResult = sendAndReceiveOnSocket(ip, port, turnOnCmd)
   decryptedTimeData = decrypt(turnOnResult[4:])
   
@@ -163,14 +159,14 @@ def getDateTime(ip):
               'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
   
   
-  print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
-      .format(y=dateTime["year"],
-              m=dateTime["month"],
-              d=dateTime["mday"],
-              hr=dateTime["hour"],
-              min=dateTime["min"],
-              sec=dateTime["sec"],
-              e=dateTime["err_code"]))
+  #print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+      #.format(y=dateTime["year"],
+              #m=dateTime["month"],
+              #d=dateTime["mday"],
+              #hr=dateTime["hour"],
+              #min=dateTime["min"],
+              #sec=dateTime["sec"],
+              #e=dateTime["err_code"]))
   
   return dateTime
 
@@ -189,14 +185,80 @@ def getPower(ip):
            'total'    : float(findValueStr(decryptedPowerData, "total")),
            'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
   
-  print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
-        .format(i=power['current'],
-                u=power['voltage'],
-                p=power['power'],
-                t=power['total'],
-                e=power['err_code']))
+  #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
+        #.format(i=power['current'],
+                #u=power['voltage'],
+                #p=power['power'],
+                #t=power['total'],
+                #e=power['err_code']))
   
   return power
+
+def someRunExamples(ip):
+  turnOff  = setTurnOff(ip)
+  dateTimeAtOff = getDateTime(ip)
+  powerAtOff    = getPower(ip)
+  
+  print("returned TURN_OFF: E:{e:01d}"
+        .format(e=turnOff["err_code"]))
+  print("returned TIME @ Off: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+        .format(y=dateTimeAtOff["year"],
+                m=dateTimeAtOff["month"],
+                d=dateTimeAtOff["mday"],
+                hr=dateTimeAtOff["hour"],
+                min=dateTimeAtOff["min"],
+                sec=dateTimeAtOff["sec"],
+                e=dateTimeAtOff["err_code"]))
+  print("returned POWER @ Off: I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}\n\n"
+        .format(i=powerAtOff['current'],
+                u=powerAtOff['voltage'],
+                p=powerAtOff['power'],
+                e=powerAtOff["err_code"]))
+              
+  time.sleep(2)
+
+  # Turn ON
+  turnOn  = setTurnOn(ip)
+  time.sleep(2)
+
+  dateTimeAtOn = getDateTime(ip)
+  powerAtOn    = getPower(ip)
+
+  print("returned TURN_ON: E:{e:01d}"
+        .format(e=turnOn["err_code"]))
+  print("returned TIME @ Off: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+        .format(y=dateTimeAtOn["year"],
+                m=dateTimeAtOn["month"],
+                d=dateTimeAtOn["mday"],
+                hr=dateTimeAtOn["hour"],
+                min=dateTimeAtOn["min"],
+                sec=dateTimeAtOn["sec"],
+                e=dateTimeAtOn["err_code"]))
+  print("returned POWER @ On: I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
+        .format(i=powerAtOn['current'],
+                u=powerAtOn['voltage'],
+                p=powerAtOn['power'],
+                e=powerAtOn["err_code"]))
+  return
+
+def printTime(dateTime):
+  print("TIME {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+        .format(y=dateTime["year"],
+                m=dateTime["month"],
+                d=dateTime["mday"],
+                hr=dateTime["hour"],
+                min=dateTime["min"],
+                sec=dateTime["sec"],
+                e=dateTime["err_code"]))
+  return
+
+def printPower(pwr):
+  print("POWER I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
+        .format(i=pwr['current'],
+                u=pwr['voltage'],
+                p=pwr['power'],
+                e=pwr["err_code"]))
+  return
 
 # Parse commandline arguments
 parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
@@ -212,54 +274,21 @@ args = parser.parse_args()
 # Set target IP, port and command to send
 ip = args.target
 
-# Turn OFF
-turnOff  = turnOff(ip)
-time.sleep(2)
-dateTimeAtOff = getDateTime(ip)
-powerAtOff    = getPower(ip)
+contRunning = True
+prevPower   = -100.0
+while contRunning:
+  dateTime = getDateTime(ip)
+  power    = getPower(ip)
+  powerValue = power['power']
+  
+  if (abs(powerValue - prevPower) > 50.0):
+    printTime(dateTime)
+    printPower(power)
+    print("\n")
+  
+  prevPower = powerValue
+  time.sleep(5)
 
-# Turn ON
-turnOn  = turnOn(ip)
-time.sleep(2)
-
-dateTimeAtOn = getDateTime(ip)
-powerAtOn    = getPower(ip)
-
-print("returned TURN_OFF: E:{e:01d}"
-      .format(e=turnOff["err_code"]))
-
-print("returned TURN_ON: E:{e:01d}"
-      .format(e=turnOn["err_code"]))
-
-print("returned TIME @ Off: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
-      .format(y=dateTimeAtOff["year"],
-              m=dateTimeAtOff["month"],
-              d=dateTimeAtOff["mday"],
-              hr=dateTimeAtOff["hour"],
-              min=dateTimeAtOff["min"],
-              sec=dateTimeAtOff["sec"],
-              e=dateTimeAtOff["err_code"]))
-
-print("returned POWER @ Off: I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
-      .format(i=powerAtOff['current'],
-              u=powerAtOff['voltage'],
-              p=powerAtOff['power'],
-              e=powerAtOff["err_code"]))
-
-print("returned TIME @ Off: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
-      .format(y=dateTimeAtOn["year"],
-              m=dateTimeAtOn["month"],
-              d=dateTimeAtOn["mday"],
-              hr=dateTimeAtOn["hour"],
-              min=dateTimeAtOn["min"],
-              sec=dateTimeAtOn["sec"],
-              e=dateTimeAtOn["err_code"]))
-
-print("returned POWER @ On: I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
-      .format(i=powerAtOn['current'],
-              u=powerAtOn['voltage'],
-              p=powerAtOn['power'],
-              e=powerAtOn["err_code"]))
   
 #print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
 #      .format(y=date_year, m=date_month, d=date_mday,
