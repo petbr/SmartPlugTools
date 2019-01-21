@@ -27,14 +27,6 @@ from struct import pack
 
 version = 0.2
 
-# Check if hostname is valid
-def validHostname(hostname):
-	try:
-		socket.gethostbyname(hostname)
-	except socket.error:
-		parser.error("Invalid hostname.")
-	return hostname
-
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
 commands = {'info'     : '{"system":{"get_sysinfo":{}}}',
@@ -52,8 +44,18 @@ commands = {'info'     : '{"system":{"get_sysinfo":{}}}',
 }
 
 port = 9999
-timeCommand   = "time"
-powerCommand = "energy"
+timeCmd    = commands["time"]
+powerCmd   = commands["energy"]
+turnOnCmd  = commands["on"]
+turnOffCmd = commands["off"]
+
+# Check if hostname is valid
+def validHostname(hostname):
+	try:
+		socket.gethostbyname(hostname)
+	except socket.error:
+		parser.error("Invalid hostname.")
+	return hostname
 
 # Encryption and Decryption of TP-Link Smart Home Protocol
 # XOR Autokey Cipher with starting key = 171
@@ -110,10 +112,38 @@ def sendAndReceiveOnSocket(ip, port, cmd):
 
 	return data
 
-def getDateTime(ip):
+#python check_husqvarna.py -t 192.168.1.18 -c on
+#('Sent:     ', '{"system":{"set_relay_state":{"state":1}}}')
+#('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
+def turnOn(ip):
   #print("getTime, ip = ", ip)
 
-  timeCmd = commands[timeCommand]
+  turnOnResult = sendAndReceiveOnSocket(ip, port, TurnOnCmd)
+  decryptedTimeData = decrypt(timeData[4:])
+  #print("decryptedTimeData = ", decryptedTimeData)
+  
+  dateTime = {'year'  : int(findValueStr(decryptedTimeData, "year")),
+              'month' : int(findValueStr(decryptedTimeData, "month")),
+              'mday'  : int(findValueStr(decryptedTimeData, "mday")),
+              'hour'  : int(findValueStr(decryptedTimeData, "hour")),
+              'min'   : int(findValueStr(decryptedTimeData, "min")),
+              'sec'   : int(findValueStr(decryptedTimeData, "sec"))}
+  
+  print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d}"
+      .format(y=dateTime["year"],
+              m=dateTime["month"],
+              d=dateTime["mday"],
+              hr=dateTime["hour"],
+              min=dateTime["min"],
+              sec=dateTime["sec"]))
+  
+  return dateTime
+
+#python check_husqvarna.py -t 192.168.1.18 -c time
+#('Sent:     ', '{"time":{"get_time":{}}}')
+#('Received: ', '{"time":{"get_time":{"err_code":0,"year":2019,"month":1,"mday":21,"wday":1,"hour":19,"min":33,"sec":47}}}')
+def getDateTime(ip):
+  #print("getTime, ip = ", ip)
 
   timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
   decryptedTimeData = decrypt(timeData[4:])
@@ -136,10 +166,12 @@ def getDateTime(ip):
   
   return dateTime
 
+#python check_husqvarna.py -t 192.168.1.18 -c energy
+#('Sent:     ', '{"emeter":{"get_realtime":{}}}')
+#('Received: ', '{"emeter":{"get_realtime":{"current":0.012866,"voltage":234.916847,"power":0.333881,"total":1.291000,"err_code":0}}}')
 def getPower(ip):
   #print("getPower, ip = ", ip)
 
-  powerCmd = commands[powerCommand]
   powerData = sendAndReceiveOnSocket(ip, port, powerCmd)
   decryptedPowerData = decrypt(powerData[4:])
 
