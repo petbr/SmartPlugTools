@@ -281,13 +281,16 @@ while contRunning:
   power    = getPower(ip)
   powerValue = power['power']
   
-  if (abs(powerValue - prevPower) > 50.0):
+  if (abs(powerValue - prevPower) > 20.0) or (powerValue > 50.0):
     printTime(dateTime)
     printPower(power)
     print("\n")
   
   prevPower = powerValue
-  time.sleep(5)
+  if (powerValue > 50.0):
+    time.sleep(1)
+  else:
+    time.sleep(5)
 
   
 #print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
