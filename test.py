@@ -23,6 +23,7 @@
 
 import socket
 import time
+import enum
 import argparse
 from struct import pack
 
@@ -49,6 +50,16 @@ powerCmd   = commands["energy"]
 turnOnCmd  = commands["on"]
 turnOffCmd = commands["off"]
 
+class PowerDirection(enum.Enum): 
+    powerStable      = 1
+    powerIncreasingt = 2
+    powerDecreasing  = 3
+
+class PumpMode(enum.Enum): 
+    idle         = 1
+    pumpingAir   = 2
+    pumpingWater = 3
+    
 # Check if hostname is valid
 def validHostname(hostname):
 	try:
@@ -274,23 +285,97 @@ args = parser.parse_args()
 # Set target IP, port and command to send
 ip = args.target
 
+
+#class PowerDirection(enum.Enum): 
+    #powerStable      = 1
+    #powerIncreasingt = 2
+    #powerDecreasing  = 3
+
+idleTreshold = 20
+airPumpingTreshold = 250
+waterPumpingTreshold = 350
+#class PumpMode(enum.Enum): 
+    #idle         = 1
+    #pumpingAir   = 2
+    #pumpingWater = 3
+
+
+# idle -> pumpingWater -> pumpingAir/idle -> idle
+
+powerState = PowerDirection.powerStable
+pumpMode   = PumpMode.idle
 contRunning = True
-prevPower   = -100.0
+prevPower   = 0
+virgin      = True
+previousTime = time.time()
 while contRunning:
   dateTime = getDateTime(ip)
   power    = getPower(ip)
   powerValue = power['power']
   
+  if (pumpMode is PumpMode.idle):
+    if virgin:
+      print ("Pump idle, P={p:5.5f}"
+           .format(p=powerValue))      
+    if powerValue > idleTreshold:
+      switchTime = time.time()      
+      print ("Duration = {t:5.2f}"
+             .format(t=switchTime-previousTime))
+      previousTime = switchTime
+
+      virgin      = True
+      pumpMode = PumpMode.pumpingWater
+      print ("===> Pumping water")
+      
+  elif pumpMode is PumpMode.pumpingWater:
+    print ("Pumping water, P={p:5.5f}"
+           .format(p=powerValue))
+    if powerValue < airPumpingTreshold:
+      switchTime = time.time()      
+      print ("Duration = {t:5.2f}"
+             .format(t=switchTime-previousTime))
+      previousTime = switchTime
+
+      virgin      = True
+      pumpMode = PumpMode.pumpingAir
+      print ("===> Pumping air")
+    
+  elif pumpMode is PumpMode.pumpingAir:
+    print ("Pumping air, P={p:5.5f}"
+           .format(p=powerValue))
+    if powerValue < idleTreshold:
+      switchTime = time.time()      
+      print ("Duration = {t:5.2f}"
+             .format(t=switchTime-previousTime))
+      previousTime = switchTime
+
+      virgin      = True
+      pumpMode = PumpMode.idle
+      print ("===> Idle")
+    
+  else:
+    print ("Pump mode = UNKNOWN, go to Idle")
+    pumpMode = PumpMode.idle
+    
   if (abs(powerValue - prevPower) > 20.0) or (powerValue > 50.0):
     printTime(dateTime)
     printPower(power)
     print("\n")
   
+  if virgin:
+    print ("Pump mode = {pm:s}"
+         .format(pm=pumpMode.name))
+    printTime(dateTime)
+    printPower(power)
+    print("")
+  
+
   prevPower = powerValue
-  if (powerValue > 50.0):
+  if (powerValue > idleTreshold):
     time.sleep(1)
   else:
     time.sleep(5)
+  virgin = False
 
   
 #print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
