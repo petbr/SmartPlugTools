@@ -364,11 +364,11 @@ while contRunning:
       changeTime = time.time()      
       print ("Duration = {t:5.2f}"
              .format(t=changeTime-switchTime))
-      #setTurnOff(ip)    
+      setTurnOff(ip)    
       virgin      = True
       pumpMode = PumpMode.pumpTurnedOff
       switchTime = changeTime      
-      print ("===> Turn OFF, but not in real!!!!")
+      print ("===> Turn OFF!!!!")
     
   elif pumpMode is PumpMode.pumpTurnedOff:
     #print ("Pump turned off, P={p:5.5f}"
