@@ -322,9 +322,8 @@ while contRunning:
   powerValue = power['power']
   
   if (pumpMode is PumpMode.idle):
-    if virgin:
-      print ("Pump idle, P={p:5.5f}"
-           .format(p=powerValue))      
+    #print ("Pump idle, P={p:5.5f}"
+    #       .format(p=powerValue))      
     if powerValue > P_idleTreshold:
       changeTime = time.time()      
       print ("Duration = {t:5.2f}"
@@ -336,8 +335,8 @@ while contRunning:
       print ("===> Pumping water")
       
   elif pumpMode is PumpMode.pumpingWater:
-    print ("Pumping water, P={p:5.5f}"
-           .format(p=powerValue))
+    #print ("Pumping water, P={p:5.5f}"
+    #       .format(p=powerValue))
     if powerValue < P_airPumpingTreshold:
       changeTime = time.time()      
       print ("Duration = {t:5.2f}"
@@ -349,8 +348,8 @@ while contRunning:
       print ("===> Pumping air")
     
   elif pumpMode is PumpMode.pumpingAir:
-    print ("Pumping air, P={p:5.5f}"
-           .format(p=powerValue))
+    #print ("Pumping air, P={p:5.5f}"
+    #       .format(p=powerValue))
     timePumpingAir = time.time()-switchTime
     if powerValue < P_idleTreshold:
       changeTime = time.time()      
@@ -372,13 +371,13 @@ while contRunning:
       print ("===> Turn OFF, but not in real!!!!")
     
   elif pumpMode is PumpMode.pumpTurnedOff:
-    print ("Pump turned off, P={p:5.5f}"
-           .format(p=powerValue))
+    #print ("Pump turned off, P={p:5.5f}"
+    #       .format(p=powerValue))
     offDuration = time.time() - changeTime      
     if offDuration > T_maxOffTime:
       changeTime = time.time()      
       print ("Duration = {t:5.2f}"
-             .format(t=changeTime-switchTime))
+             .format(t=offDuration))
       setTurnOn(ip)    
       virgin      = True
       pumpMode = PumpMode.idle
@@ -388,12 +387,7 @@ while contRunning:
   else:
     print ("Pump mode = UNKNOWN, go to Idle")
     pumpMode = PumpMode.idle
-    
-  if (abs(powerValue - prevPower) > 20.0) or (powerValue > 50.0):
-    printTime(dateTime)
-    printPower(power)
-    print("\n")
-  
+      
   if virgin:
     print ("Pump mode = {pm:s}"
          .format(pm=pumpMode.name))
@@ -406,7 +400,7 @@ while contRunning:
   if (powerValue > P_idleTreshold):
     time.sleep(1)
   else:
-    time.sleep(5)
+    time.sleep(2)
   virgin = False
 
   
