@@ -56,9 +56,10 @@ class PowerDirection(enum.Enum):
     powerDecreasing  = 3
 
 class PumpMode(enum.Enum): 
-    idle         = 1
-    pumpingAir   = 2
-    pumpingWater = 3
+    idle          = 1
+    pumpingAir    = 2
+    pumpTurnedOff = 3
+    pumpingWater  = 4
     
 # Check if hostname is valid
 def validHostname(hostname):
@@ -291,13 +292,20 @@ ip = args.target
     #powerIncreasingt = 2
     #powerDecreasing  = 3
 
-idleTreshold = 20
-airPumpingTreshold = 250
-waterPumpingTreshold = 350
+# Power tresholds
+P_idleTreshold = 20
+P_airPumpingTreshold = 250
+P_waterPumpingTreshold = 350
+
+# Time tresholds
+T_pumpingAirBeforeTurnOff = 10
+T_maxOffTime              = 300
+
 #class PumpMode(enum.Enum): 
-    #idle         = 1
-    #pumpingAir   = 2
-    #pumpingWater = 3
+    #idle          = 1
+    #pumpingAir    = 2
+    #pumpTurnedOff = 3
+    #pumpingWater  = 4
 
 
 # idle -> pumpingWater -> pumpingAir/idle -> idle
@@ -307,7 +315,7 @@ pumpMode   = PumpMode.idle
 contRunning = True
 prevPower   = 0
 virgin      = True
-previousTime = time.time()
+switchTime = time.time()
 while contRunning:
   dateTime = getDateTime(ip)
   power    = getPower(ip)
@@ -317,11 +325,11 @@ while contRunning:
     if virgin:
       print ("Pump idle, P={p:5.5f}"
            .format(p=powerValue))      
-    if powerValue > idleTreshold:
-      switchTime = time.time()      
+    if powerValue > P_idleTreshold:
+      changeTime = time.time()      
       print ("Duration = {t:5.2f}"
-             .format(t=switchTime-previousTime))
-      previousTime = switchTime
+             .format(t=changeTime-switchTime))
+      switchTime = changeTime
 
       virgin      = True
       pumpMode = PumpMode.pumpingWater
@@ -330,11 +338,11 @@ while contRunning:
   elif pumpMode is PumpMode.pumpingWater:
     print ("Pumping water, P={p:5.5f}"
            .format(p=powerValue))
-    if powerValue < airPumpingTreshold:
-      switchTime = time.time()      
+    if powerValue < P_airPumpingTreshold:
+      changeTime = time.time()      
       print ("Duration = {t:5.2f}"
-             .format(t=switchTime-previousTime))
-      previousTime = switchTime
+             .format(t=changeTime-switchTime))
+      switchTime = changeTime
 
       virgin      = True
       pumpMode = PumpMode.pumpingAir
@@ -343,15 +351,39 @@ while contRunning:
   elif pumpMode is PumpMode.pumpingAir:
     print ("Pumping air, P={p:5.5f}"
            .format(p=powerValue))
-    if powerValue < idleTreshold:
-      switchTime = time.time()      
+    timePumpingAir = time.time()-switchTime
+    if powerValue < P_idleTreshold:
+      changeTime = time.time()      
       print ("Duration = {t:5.2f}"
-             .format(t=switchTime-previousTime))
-      previousTime = switchTime
+             .format(t=changeTime-switchTime))
+      switchTime = changeTime
 
       virgin      = True
       pumpMode = PumpMode.idle
       print ("===> Idle")
+    elif timePumpingAir > T_pumpingAirBeforeTurnOff:
+      changeTime = time.time()      
+      print ("Duration = {t:5.2f}"
+             .format(t=changeTime-switchTime))
+      #setTurnOff(ip)    
+      virgin      = True
+      pumpMode = PumpMode.pumpTurnedOff
+      switchTime = changeTime      
+      print ("===> Turn OFF, but not in real!!!!")
+    
+  elif pumpMode is PumpMode.pumpTurnedOff:
+    print ("Pump turned off, P={p:5.5f}"
+           .format(p=powerValue))
+    offDuration = time.time() - changeTime      
+    if offDuration > T_maxOffTime:
+      changeTime = time.time()      
+      print ("Duration = {t:5.2f}"
+             .format(t=changeTime-switchTime))
+      setTurnOn(ip)    
+      virgin      = True
+      pumpMode = PumpMode.idle
+      switchTime = changeTime
+      print ("===> Turn ON + Idle")
     
   else:
     print ("Pump mode = UNKNOWN, go to Idle")
@@ -371,7 +403,7 @@ while contRunning:
   
 
   prevPower = powerValue
-  if (powerValue > idleTreshold):
+  if (powerValue > P_idleTreshold):
     time.sleep(1)
   else:
     time.sleep(5)
