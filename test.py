@@ -285,6 +285,8 @@ def printStatus(directive, duration,
          .format(t=duration))
   print ("Longest time pumping water = {t:d}"
          .format(t=longestPumpWaterDuration))
+  print ("Longest time pumping air = {t:d}"
+         .format(t=longestPumpAirDuration))
   printPower(pwr)
   printPumpMode(mode)
   print(directive)
@@ -316,7 +318,7 @@ P_airPumpingTreshold = 250
 P_waterPumpingTreshold = 350
 
 # Time tresholds
-T_pumpingAirBeforeTurnOff = 5
+T_pumpingAirBeforeTurnOff = 15
 T_maxOffTime              = 300
 
 #class PumpMode(enum.Enum): 
@@ -333,7 +335,7 @@ pumpMode    = PumpMode.idle
 contRunning = True
 prevPower   = 0
 longestPumpWaterDuration = 0
-
+longestPumpAirDuration   = 0
 switchTime = time.time()
 setTurnOn(ip)    
 dateTime = getDateTime(ip)
@@ -365,7 +367,7 @@ while contRunning:
     if powerValue < P_airPumpingTreshold:
       changeTime = time.time()      
       duration = changeTime-switchTime
-      longestPumpWaterTime = max(duration, longestPumpWaterDuration)
+      longestPumpWaterDuration = max(duration, longestPumpWaterDuration)
       switchTime = changeTime
       printStatus("Pumping water ===> Pumping air\n", duration,
                   dateTime, power, pumpMode)
@@ -379,6 +381,7 @@ while contRunning:
     if powerValue < P_idleTreshold:
       changeTime = time.time()      
       duration = changeTime-switchTime
+      longestPumpAirDuration = max(duration, longestPumpAirDuration)
       switchTime = changeTime
       printStatus("Pumping Air short time ===> Idle\n", duration,
                   dateTime, power, pumpMode)
@@ -425,9 +428,8 @@ while contRunning:
   if (powerValue > P_idleTreshold):
     time.sleep(1)
   else:
-    time.sleep(2)
+    time.sleep(.02)
 
-  
 #print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
 #      .format(y=date_year, m=date_month, d=date_mday,
 #              hr=time_hour, min=time_min, sec=time_sec,
