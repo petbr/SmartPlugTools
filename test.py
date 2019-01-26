@@ -283,9 +283,9 @@ def printStatus(directive, duration,
   printDateTime(dateTime)
   print ("Duration = {t:5.2f}"
          .format(t=duration))
-  print ("Longest time pumping water = {t:d}"
+  print ("Longest time pumping water = {t}"
          .format(t=longestPumpWaterDuration))
-  print ("Longest time pumping air = {t:d}"
+  print ("Longest time pumping air = {t}"
          .format(t=longestPumpAirDuration))
   printPower(pwr)
   printPumpMode(mode)
