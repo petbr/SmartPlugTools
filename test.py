@@ -285,7 +285,7 @@ def printStatus(directive, duration,
          .format(t=duration))
   print ("Longest time pumping water = {t}"
          .format(t=longestPumpWaterDuration))
-  print ("Longest time pumping air = {t}"
+  print ("Longest time pumping air   = {t}"
          .format(t=longestPumpAirDuration))
   printPower(pwr)
   printPumpMode(mode)
@@ -334,8 +334,8 @@ powerState  = PowerDirection.powerStable
 pumpMode    = PumpMode.idle
 contRunning = True
 prevPower   = 0
-longestPumpWaterDuration = 0
-longestPumpAirDuration   = 0
+longestPumpWaterDuration = 1/3.0
+longestPumpAirDuration   = 1/3.0
 switchTime = time.time()
 setTurnOn(ip)    
 dateTime = getDateTime(ip)
@@ -424,11 +424,12 @@ while contRunning:
 
     pumpMode = PumpMode.idle
       
-  prevPower = powerValue
   if (powerValue > P_idleTreshold):
-    time.sleep(1)
+    time.sleep(2)
   else:
-    time.sleep(.02)
+    time.sleep(5)
+
+  prevPower = powerValue
 
 #print("{y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} {p:f}"
 #      .format(y=date_year, m=date_month, d=date_mday,
