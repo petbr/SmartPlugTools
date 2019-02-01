@@ -56,10 +56,11 @@ class PowerDirection(enum.Enum):
     powerDecreasing  = 3
 
 class PumpMode(enum.Enum): 
-    idle          = 1
-    pumpingAir    = 2
-    pumpTurnedOff = 3
-    pumpingWater  = 4
+    idle_short    = 1
+    idle_long     = 2
+    pumpingAir    = 3
+    pumpTurnedOff = 4
+    pumpingWater  = 5
     
 # Check if hostname is valid
 def validHostname(hostname):
@@ -283,10 +284,14 @@ def printStatus(directive, duration,
   printDateTime(dateTime)
   print ("Duration = {t:5.2f}"
          .format(t=duration))
-  print ("Shortest idle time          = {t}"
-         .format(t=shortestIdleDuration))
-  print ("Longest idle time           = {t}"
-         .format(t=longestIdleDuration))
+  print ("Shortest idle short time          = {t}"
+         .format(t=shortestIdleShortDuration))
+  print ("Longest idle short time           = {t}"
+         .format(t=longestIdleShortDuration))
+  print ("Shortest idle long time          = {t}"
+         .format(t=shortestIdleLongDuration))
+  print ("Longest idle long time           = {t}"
+         .format(t=longestIdleLongDuration))
   print ("Shortest time pumping water = {t}"
          .format(t=shortestPumpWaterDuration))
   print ("Longest time pumping water  = {t}"
@@ -295,6 +300,10 @@ def printStatus(directive, duration,
          .format(t=shortestPumpAirDuration))
   print ("Longest time pumping air    = {t}"
          .format(t=longestPumpAirDuration))
+  print ("Counter short to pump = {c}"
+         .format(c=C_shortIdleToPump))
+  print ("Counter long to pump = {c}"
+         .format(c=C_longIdleToPump))
   printPower(pwr)
   printPumpMode(mode)
   print(directive)
@@ -328,7 +337,11 @@ P_waterPumpingTreshold = 350
 # Time tresholds
 T_pumpingAirBeforeTurnOff = 5
 T_maxOffTime              = 60
+T_shortIdleTime           = 20
 
+# Counter
+C_shortIdleToPump = 0
+C_longIdleToPump  = 0
 #class PumpMode(enum.Enum): 
     #idle          = 1
     #pumpingAir    = 2
@@ -339,11 +352,13 @@ T_maxOffTime              = 60
 # idle -> pumpingWater -> pumpingAir/idle -> idle
 
 powerState  = PowerDirection.powerStable
-pumpMode    = PumpMode.idle
+pumpMode    = PumpMode.idle_short
 contRunning = True
 prevPower   = 0
-shortestIdleDuration      = 1000000/3.0
-longestIdleDuration       = 1/3.0
+shortestIdleShortDuration      = 1000000/3.0
+longestIdleShortDuration       = 1/3.0
+shortestIdleLongDuration      = 1000000/3.0
+longestIdleLongDuration       = 1/3.0
 shortestPumpWaterDuration = 1000000/3.0
 longestPumpWaterDuration  = 1/3.0
 shortestPumpAirDuration   = 1000000/3.0
@@ -352,7 +367,7 @@ switchTime = time.time()
 setTurnOn(ip)    
 dateTime = getDateTime(ip)
 power    = getPower(ip)
-printStatus("Just started ====> Turn ON and Idle!\n", 0,
+printStatus("Just started ====> Turn ON and Idle short!\n", 0,
             dateTime, power, pumpMode)
 
 while contRunning:
@@ -360,20 +375,35 @@ while contRunning:
   power    = getPower(ip)
   powerValue = power['power']
     
-  if (pumpMode is PumpMode.idle):
-    #print ("Pump idle, P={p:5.5f}"
-    #       .format(p=powerValue))      
+  if (pumpMode is PumpMode.idle_short):
+    changeTime = time.time()
+    duration = changeTime-switchTime
     if powerValue > P_idleTreshold:
-      changeTime = time.time()
-      duration = changeTime-switchTime
-      shortestIdleDuration = min(duration, shortestIdleDuration)
-      longestIdleDuration  = max(duration, longestIdleDuration)
+      shortestIdleShortDuration = min(duration, shortestIdleShortDuration)
+      longestIdleShortDuration  = max(duration, longestIdleShortDuration)
       switchTime = changeTime
-
-      printStatus("Idle ===> Pumping water\n", duration,
+      C_shortIdleToPump = C_shortIdleToPump +1
+      printStatus("Idle short ===> Pumping water\n", duration,
                   dateTime, power, pumpMode)
 
       pumpMode = PumpMode.pumpingWater
+    elif duration > T_shortIdleTime:
+      printStatus("Short idle ===> Idle long\n", duration,
+                  dateTime, power, pumpMode)
+      pumpMode = PumpMode.idle_long
+      
+  elif (pumpMode is PumpMode.idle_long):
+    changeTime = time.time()
+    duration = changeTime-switchTime
+    if powerValue > P_idleTreshold:
+      shortestIdleLongDuration = min(duration, shortestIdleLongDuration)
+      longestIdleLongDuration  = max(duration, longestIdleLongDuration)
+      switchTime = changeTime
+      C_longIdleToPump = C_longIdleToPump +1
+      printStatus("Idle Long ===> Pumping water\n", duration,
+                  dateTime, power, pumpMode)
+      pumpMode = PumpMode.pumpingWater
+
       
   elif pumpMode is PumpMode.pumpingWater:
     #print ("Pumping water, P={p:5.5f}"
@@ -440,7 +470,7 @@ while contRunning:
     printStatus("OFF max time reached ===> Turn ON + Idle!!!!\n", duration,
                 dateTime, power, pumpMode)
 
-    pumpMode = PumpMode.idle
+    pumpMode = PumpMode.idle_short
       
   if (powerValue > P_idleTreshold):
     time.sleep(1)
