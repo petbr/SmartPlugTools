@@ -429,10 +429,10 @@ while contRunning:
       shortestPumpAirDuration = min(duration, shortestPumpAirDuration)
       longestPumpAirDuration  = max(duration, longestPumpAirDuration)
       switchTime = changeTime
-      printStatus("Pumping Air short time ===> Idle\n", duration,
+      printStatus("Pumping Air short time ===> Idle short\n", duration,
                   dateTime, power, pumpMode)
 
-      pumpMode = PumpMode.idle
+      pumpMode = PumpMode.idle_short
 
     elif timePumpingAir > T_pumpingAirBeforeTurnOff:
       changeTime = time.time()      
@@ -456,10 +456,10 @@ while contRunning:
              .format(t=offDuration))
       setTurnOn(ip)
       switchTime = changeTime
-      printStatus("OFF max time reached ===> Turn ON + Idle!!!!\n", offDuration,
+      printStatus("OFF max time reached ===> Turn ON + Idle short!!!!\n", offDuration,
                   dateTime, power, pumpMode)
 
-      pumpMode = PumpMode.idle
+      pumpMode = PumpMode.idle_short
     
   else:
     print ("Pump mode = UNKNOWN, go to Idle")
