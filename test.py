@@ -20,11 +20,15 @@
 #
 # Usage in Stora Hoga:
 # python tplink_smartplug.py -t 192.168.1.18 -c energy
+# Start web server
+# python -m SimpleHTTPServer 8000
 
 import socket
 import time
 import enum
 import argparse
+import sys
+
 from struct import pack
 
 version = 0.2
@@ -307,6 +311,9 @@ def printStatus(directive, duration,
   printPower(pwr)
   printPumpMode(mode)
   print(directive)
+  
+  sys.stdout.flush()
+ 
   return
 
 # Parse commandline arguments
