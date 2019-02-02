@@ -479,10 +479,10 @@ while contRunning:
 
     pumpMode = PumpMode.idle_short
       
-  if (powerValue > P_idleTreshold):
-    time.sleep(1)
-  else:
+  if pumpMode == PumpMode.idle_long:
     time.sleep(5)
+  else:
+    time.sleep(1)
 
   prevPower = powerValue
 
