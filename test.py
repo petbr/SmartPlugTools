@@ -21,7 +21,8 @@
 # Usage in Stora Hoga:
 # python tplink_smartplug.py -t 192.168.1.18 -c energy
 # Start web server
-# python -m SimpleHTTPServer 8000
+# *1* python -m SimpleHTTPServer 8000
+# *2* webfsd -F -p 5000
 
 import socket
 import time
@@ -211,6 +212,14 @@ def getPower(ip):
   
   return power
 
+def getGraphItem(dateTime, power):
+  s = "[{hr:02d}:{min:02d}:{sec:02d}, {p}]".format(hr=dateTime['hour'],
+                                                   min=dateTime['min'],
+                                                   sec=dateTime['sec'],
+                                                   p=power['power'])
+  return s
+
+
 def someRunExamples(ip):
   turnOff  = setTurnOff(ip)
   dateTimeAtOff = getDateTime(ip)
@@ -343,8 +352,8 @@ P_waterPumpingTreshold = 350
 
 # Time tresholds
 T_pumpingAirBeforeTurnOff = 5
-T_maxOffTime              = 60
-T_shortIdleTime           = 20
+T_maxOffTime              = 30
+T_shortIdleTime           = 15
 
 # Counter
 C_shortIdleToPump = 0
@@ -376,6 +385,7 @@ dateTime = getDateTime(ip)
 power    = getPower(ip)
 printStatus("Just started ====> Turn ON and Idle short!\n", 0,
             dateTime, power, pumpMode)
+
 
 while contRunning:
   dateTime = getDateTime(ip)
@@ -480,8 +490,9 @@ while contRunning:
     pumpMode = PumpMode.idle_short
       
   if pumpMode == PumpMode.idle_long:
-    time.sleep(5)
+    time.sleep(2)
   else:
+    print getGraphItem(dateTime, power)
     time.sleep(1)
 
   prevPower = powerValue
