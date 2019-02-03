@@ -213,7 +213,7 @@ def getPower(ip):
   return power
 
 def getGraphItem(dateTime, power):
-  s = "[{hr:02d}:{min:02d}:{sec:02d}, {p}]".format(hr=dateTime['hour'],
+  s = "['{hr:02d}:{min:02d}:{sec:02d}', {p}],".format(hr=dateTime['hour'],
                                                    min=dateTime['min'],
                                                    sec=dateTime['sec'],
                                                    p=power['power'])
@@ -305,22 +305,28 @@ def printStatus(directive, duration,
          .format(t=shortestIdleLongDuration))
   print ("Longest idle long time           = {t}"
          .format(t=longestIdleLongDuration))
-  print ("Shortest time pumping water = {t}"
+  print ("Shortest time pumping water      = {t}"
          .format(t=shortestPumpWaterDuration))
-  print ("Longest time pumping water  = {t}"
+  print ("Longest time pumping water       = {t}"
          .format(t=longestPumpWaterDuration))
-  print ("Shortest time pumping air   = {t}"
+  print ("Shortest time pumping air        = {t}"
          .format(t=shortestPumpAirDuration))
-  print ("Longest time pumping air    = {t}"
+  print ("Longest time pumping air         = {t}"
          .format(t=longestPumpAirDuration))
-  print ("Counter short to pump = {c}"
+  print ("Counter short to pump            = {c}"
          .format(c=C_shortIdleToPump))
-  print ("Counter long to pump = {c}"
+  print ("Counter long to pump             = {c}"
          .format(c=C_longIdleToPump))
+  print ("Times: T_pumpingAirBeforeTurnOff = {t}"
+         .format(t=T_pumpingAirBeforeTurnOff))
+  print ("Times: T_maxOffTime              = {t}"
+         .format(t=T_maxOffTime))
+  print ("Times: T_shortIdleTime           = {t}"
+         .format(t=T_shortIdleTime))
   printPower(pwr)
   printPumpMode(mode)
   print(directive)
-  
+
   sys.stdout.flush()
  
   return
@@ -351,8 +357,8 @@ P_airPumpingTreshold = 250
 P_waterPumpingTreshold = 350
 
 # Time tresholds
-T_pumpingAirBeforeTurnOff = 5
-T_maxOffTime              = 30
+T_pumpingAirBeforeTurnOff = 10
+T_maxOffTime              = 60
 T_shortIdleTime           = 15
 
 # Counter
@@ -490,10 +496,11 @@ while contRunning:
     pumpMode = PumpMode.idle_short
       
   if pumpMode == PumpMode.idle_long:
-    time.sleep(2)
+    time.sleep(0.5)
   else:
     print getGraphItem(dateTime, power)
-    time.sleep(1)
+    sys.stdout.flush()
+    time.sleep(0.5)
 
   prevPower = powerValue
 
