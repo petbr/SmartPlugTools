@@ -212,12 +212,13 @@ def getPower(ip):
   
   return power
 
-def getGraphListFileName(dateTime):
-  filename = "{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}.html".format(y=dateTime["year"],
-                                                                    m=dateTime["month"],
-                                                                    d=dateTime["mday"],
-                                                                    hr=dateTime["hour"],
-                                                                    min=dateTime["min"])
+def getGraphListFileName(dateTime, t1, t2, t3):
+  filename = "{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}.html".format(y=dateTime["year"],
+                                                                                                 m=dateTime["month"],
+                                                                                                 d=dateTime["mday"],
+                                                                                                 hr=dateTime["hour"],
+                                                                                                 min=dateTime["min"],
+                                                                                                 t1=t1, t2=t2, t3=t3)
   
   return filename
   
@@ -474,7 +475,10 @@ while contRunning:
       isVirginList = False
       # Report the current list of graph items and start a new one
       contents = createHtmlContents(listOfGraphItems)
-      filename = getGraphListFileName(dateTime)
+      filename = getGraphListFileName(dateTime,
+                                      T_pumpingAirBeforeTurnOff,
+                                      T_maxOffTime,
+                                      T_shortIdleTime)
       print "Filename: " + filename + "\n"
       print "Contents: " + contents + "\n"
       createFile(filename, contents)
