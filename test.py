@@ -23,7 +23,9 @@
 # Start web server
 # *1* python -m SimpleHTTPServer 8000
 # *2* webfsd -F -p 5000
-
+#
+# Start VNC viewer
+# /home/peter/Downloads/VNC-Viewer-6.19.107-Linux-x64
 import socket
 import time
 import enum
@@ -213,12 +215,12 @@ def getPower(ip):
   return power
 
 def getGraphListFileName(dateTime, t1, t2, t3):
-  filename = "{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}.html".format(y=dateTime["year"],
-                                                                                                 m=dateTime["month"],
-                                                                                                 d=dateTime["mday"],
-                                                                                                 hr=dateTime["hour"],
-                                                                                                 min=dateTime["min"],
-                                                                                                 t1=t1, t2=t2, t3=t3)
+  filename = "Data/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}.html".format(y=dateTime["year"],
+                                                                                                      m=dateTime["month"],
+                                                                                                      d=dateTime["mday"],
+                                                                                                      hr=dateTime["hour"],
+                                                                                                      min=dateTime["min"],
+                                                                                                      t1=t1, t2=t2, t3=t3)
   
   return filename
   
