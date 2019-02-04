@@ -212,6 +212,16 @@ def getPower(ip):
   
   return power
 
+def getGraphListFileName(dateTime):
+  filename = "{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}.html".format(y=dateTime["year"],
+                                                                    m=dateTime["month"],
+                                                                    d=dateTime["mday"],
+                                                                    hr=dateTime["hour"],
+                                                                    min=dateTime["min"])
+  
+  return filename
+  
+
 def getGraphItem(dateTime, power):
   s = "['{hr:02d}:{min:02d}:{sec:02d}', {p}],".format(hr=dateTime['hour'],
                                                    min=dateTime['min'],
@@ -219,6 +229,47 @@ def getGraphItem(dateTime, power):
                                                    p=power['power'])
   return s
 
+def createHtmlContents(listOfGraphItems):
+  cnts =        "<html>\n"
+  cnts = cnts + "  <head>\n"
+  cnts = cnts + "      <script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>\n"
+  cnts = cnts + "      <script type=\"text/javascript\">\n"
+  cnts = cnts + "      google.charts.load('current', {'packages':['corechart']});\n"
+  cnts = cnts + "      google.charts.setOnLoadCallback(drawChart);\n"
+  cnts = cnts + "\n"
+  cnts = cnts + "      function drawChart() {\n"
+  cnts = cnts + "        var data = google.visualization.arrayToDataTable([\n"
+  cnts = cnts + "                    ['Tid',  'Effekt'],\n"
+  cnts = cnts + listOfGraphItems + "\n"
+  cnts = cnts + "        ]);\n"
+  cnts = cnts + "\n"
+  cnts = cnts + "        var options = {\n"
+  cnts = cnts + "          title: 'Dranpump (W)',\n"
+  cnts = cnts + "          curveType: 'function',\n"
+  cnts = cnts + "          legend: { position: 'bottom' }\n"
+  cnts = cnts + "        };\n"
+  cnts = cnts + "\n"
+  cnts = cnts + "        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));\n"
+  cnts = cnts + "\n"
+  cnts = cnts + "        chart.draw(data, options);\n"
+  cnts = cnts + "      }\n"
+  cnts = cnts + "    </script>\n"
+  cnts = cnts + "  </head>\n"
+  cnts = cnts + "  <body>\n"
+  cnts = cnts + "    <div id=\"curve_chart\" style=\"width: 1000px; height: 500px\"></div>\n"
+  cnts = cnts + "  </body>\n"
+  cnts = cnts + "</html>\n"
+  return cnts
+
+def createFile(filename, contents):
+  f = open(filename, "w+")
+  f.write(contents)
+  f.close()
+  
+  print("File: " + filename + " created!")
+  sys.stdout.flush()
+  
+  return
 
 def someRunExamples(ip):
   turnOff  = setTurnOff(ip)
@@ -358,7 +409,7 @@ P_waterPumpingTreshold = 350
 
 # Time tresholds
 T_pumpingAirBeforeTurnOff = 10
-T_maxOffTime              = 60
+T_maxOffTime              = 120
 T_shortIdleTime           = 15
 
 # Counter
@@ -392,6 +443,8 @@ power    = getPower(ip)
 printStatus("Just started ====> Turn ON and Idle short!\n", 0,
             dateTime, power, pumpMode)
 
+isVirginList = True
+listOfGraphItems = ""
 
 while contRunning:
   dateTime = getDateTime(ip)
@@ -416,6 +469,21 @@ while contRunning:
       pumpMode = PumpMode.idle_long
       
   elif (pumpMode is PumpMode.idle_long):
+    
+    if isVirginList == True:
+      isVirginList = False
+      # Report the current list of graph items and start a new one
+      contents = createHtmlContents(listOfGraphItems)
+      filename = getGraphListFileName(dateTime)
+      print "Filename: " + filename + "\n"
+      print "Contents: " + contents + "\n"
+      createFile(filename, contents)
+      listOfGraphItems = ""
+      sys.stdout.flush()
+    
+      # A new one must be started
+      listOfGraphItems = ""
+    
     changeTime = time.time()
     duration = changeTime-switchTime
     if powerValue > P_idleTreshold:
@@ -429,6 +497,8 @@ while contRunning:
 
       
   elif pumpMode is PumpMode.pumpingWater:
+    isVirginList = True
+    
     #print ("Pumping water, P={p:5.5f}"
     #       .format(p=powerValue))
     if powerValue < P_airPumpingTreshold:
@@ -498,8 +568,11 @@ while contRunning:
   if pumpMode == PumpMode.idle_long:
     time.sleep(0.5)
   else:
-    print getGraphItem(dateTime, power)
-    sys.stdout.flush()
+    if isVirginList:
+      gItem = getGraphItem(dateTime, power)
+      listOfGraphItems = listOfGraphItems + gItem
+
+    #sys.stdout.flush()
     time.sleep(0.5)
 
   prevPower = powerValue
