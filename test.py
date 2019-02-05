@@ -26,6 +26,10 @@
 #
 # Start VNC viewer
 # /home/peter/Downloads/VNC-Viewer-6.19.107-Linux-x64
+# 
+# Raspberry web server
+# /etc/lighttpd/lighttpd.conf
+
 import socket
 import time
 import enum
@@ -314,10 +318,11 @@ def someRunExamples(ip):
                 min=dateTimeAtOn["min"],
                 sec=dateTimeAtOn["sec"],
                 e=dateTimeAtOn["err_code"]))
-  print("returned POWER @ On: I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
+  print("returned POWER @ On: I={i:5.5f} U={u:5.2f} P={p:5.5f}  Tot={tot:5.5f} E:{e:01d}"
         .format(i=powerAtOn['current'],
                 u=powerAtOn['voltage'],
                 p=powerAtOn['power'],
+                tot=powerAtOn['total'],
                 e=powerAtOn["err_code"]))
   return
 
@@ -333,10 +338,11 @@ def printDateTime(dateTime):
   return
 
 def printPower(pwr):
-  print("POWER I={i:5.5f} U={u:5.2f} P={p:5.5f} E:{e:01d}"
+  print("POWER I={i:5.5f} U={u:5.2f} P={p:5.5f} Tot={tot:5.5f} E:{e:01d}"
         .format(i=pwr['current'],
                 u=pwr['voltage'],
                 p=pwr['power'],
+                tot=pwr['total'],
                 e=pwr["err_code"]))
   return
 
@@ -407,7 +413,7 @@ ip = args.target
 
 # Power tresholds
 P_idleTreshold = 20
-P_airPumpingTreshold = 250
+P_airPumpingTreshold = 235
 P_waterPumpingTreshold = 350
 
 # Time tresholds
@@ -576,7 +582,7 @@ while contRunning:
   else:
     if isVirginList:
       gItem = getGraphItem(dateTime, power)
-      listOfGraphItems = listOfGraphItems + gItem
+      listOfGraphItems = listOfGraphItems + "\n" + gItem
 
     #sys.stdout.flush()
     time.sleep(0.5)
