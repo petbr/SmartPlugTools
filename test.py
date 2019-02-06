@@ -413,12 +413,12 @@ ip = args.target
 
 # Power tresholds
 P_idleTreshold = 20
-P_airPumpingTreshold = 235
+P_airPumpingTreshold = 238
 P_waterPumpingTreshold = 350
 
 # Time tresholds
 T_minPumpingWater         = 5
-T_pumpingAirBeforeTurnOff = 10
+T_pumpingAirBeforeTurnOff = 6
 T_maxOffTime              = 120
 T_shortIdleTime           = 15
 
