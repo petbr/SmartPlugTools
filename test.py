@@ -417,6 +417,7 @@ P_airPumpingTreshold = 235
 P_waterPumpingTreshold = 350
 
 # Time tresholds
+T_minPumpingWater         = 5
 T_pumpingAirBeforeTurnOff = 10
 T_maxOffTime              = 120
 T_shortIdleTime           = 15
@@ -479,6 +480,7 @@ while contRunning:
                   dateTime, power, pumpMode)
 
       pumpMode = PumpMode.pumpingWater
+      
     elif duration > T_shortIdleTime:
       printStatus("Short idle ===> Idle long\n", duration,
                   dateTime, power, pumpMode)
@@ -520,9 +522,9 @@ while contRunning:
     
     #print ("Pumping water, P={p:5.5f}"
     #       .format(p=powerValue))
-    if powerValue < P_airPumpingTreshold:
-      changeTime = time.time()      
-      duration = changeTime-switchTime
+    changeTime = time.time()      
+    duration = changeTime-switchTime
+    if (powerValue < P_airPumpingTreshold) and (duration >= T_minPumpingWater):
       shortestPumpWaterDuration = min(duration, shortestPumpWaterDuration)
       longestPumpWaterDuration = max(duration, longestPumpWaterDuration)
       switchTime = changeTime
