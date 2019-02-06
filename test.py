@@ -459,7 +459,14 @@ while contRunning:
   dateTime = getDateTime(ip)
   power    = getPower(ip)
   powerValue = power['power']
-    
+
+  print "{hr:2d}:{m:2d}.{s:2d}   Pump mode = {pm:10s}   P={p:5.5f}".format(hr=dateTime["hour"],
+                                                                           m=dateTime["min"],
+                                                                           s=dateTime["sec"],
+                                                                           pm=pumpMode.name,
+                                                                           p=powerValue)
+  sys.stdout.flush()
+
   if (pumpMode is PumpMode.idle_short):
     changeTime = time.time()
     duration = changeTime-switchTime
@@ -558,13 +565,12 @@ while contRunning:
     if offDuration > T_maxOffTime:
       changeTime = time.time()      
       print ("Duration = {t:5.2f}"
-             .format(t=offDuration))
+              .format(t=offDuration))
       setTurnOn(ip)
       switchTime = changeTime
       printStatus("OFF max time reached ===> Turn ON + Idle short!!!!\n", offDuration,
                   dateTime, power, pumpMode)
-
-      pumpMode = PumpMode.idle_short
+      pumpMode = PumpMode.idle_short      
     
   else:
     print ("Pump mode = UNKNOWN, go to Idle")
@@ -574,8 +580,8 @@ while contRunning:
     setTurnOn(ip)
     printStatus("OFF max time reached ===> Turn ON + Idle!!!!\n", duration,
                 dateTime, power, pumpMode)
-
     pumpMode = PumpMode.idle_short
+      
       
   if pumpMode == PumpMode.idle_long:
     time.sleep(0.5)
@@ -584,8 +590,8 @@ while contRunning:
       gItem = getGraphItem(dateTime, power)
       listOfGraphItems = listOfGraphItems + "\n" + gItem
 
-    #sys.stdout.flush()
-    time.sleep(0.5)
+      #sys.stdout.flush()
+      time.sleep(0.5)
 
   prevPower = powerValue
 
