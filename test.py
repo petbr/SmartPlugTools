@@ -419,7 +419,7 @@ ip = args.target
 
 # Power tresholds
 P_idleTreshold = 20
-P_airPumpingTreshold = 238
+P_airPumpingTreshold = 250
 P_waterPumpingTreshold = 350
 
 # Time tresholds
