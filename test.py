@@ -20,15 +20,21 @@
 #
 # Usage in Stora Hoga:
 # python tplink_smartplug.py -t 192.168.1.18 -c energy
+# python test.py -t 192.168.1.18 -c energy | tee ful_log.txt
+#
+# ~/repo/SmartPlugTools
+#
 # Start web server
 # *1* python -m SimpleHTTPServer 8000
 # *2* webfsd -F -p 5000
 #
 # Start VNC viewer
-# /home/peter/Downloads/VNC-Viewer-6.19.107-Linux-x64
+# ~/Downloads/VNC-Viewer-6.19.107-Linux-x64
 # 
 # Raspberry web server
 # /etc/lighttpd/lighttpd.conf
+#
+# redis-server
 
 import socket
 import time
@@ -461,11 +467,11 @@ while contRunning:
   power    = getPower(ip)
   powerValue = power['power']
 
-  print "{hr:2d}:{m:2d}.{s:2d}   Pump mode = {pm:10s}   P={p:5.5f}".format(hr=dateTime["hour"],
-                                                                           m=dateTime["min"],
-                                                                           s=dateTime["sec"],
-                                                                           pm=pumpMode.name,
-                                                                           p=powerValue)
+#  print "{hr:2d}:{m:2d}.{s:2d}   Pump mode = {pm:10s}   P={p:5.5f}".format(hr=dateTime["hour"],
+#                                                                           m=dateTime["min"],
+#                                                                           s=dateTime["sec"],
+#                                                                           pm=pumpMode.name,
+#                                                                           p=powerValue)
   sys.stdout.flush()
 
   if (pumpMode is PumpMode.idle_short):
