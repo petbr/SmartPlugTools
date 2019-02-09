@@ -242,7 +242,9 @@ def getGraphItem(dateTime, power):
                                                    p=power['power'])
   return s
 
-def createHtmlContents(listOfGraphItems):
+def createHtmlContents(listOfGraphItems, title):
+  print title
+  #title = "title: 'Dranpump (W)'"
   cnts =        "<html>\n"
   cnts = cnts + "  <head>\n"
   cnts = cnts + "      <script type=\"text/javascript\" src=\"https://www.gstatic.com/charts/loader.js\"></script>\n"
@@ -257,7 +259,7 @@ def createHtmlContents(listOfGraphItems):
   cnts = cnts + "        ]);\n"
   cnts = cnts + "\n"
   cnts = cnts + "        var options = {\n"
-  cnts = cnts + "          title: 'Dranpump (W)',\n"
+  cnts = cnts + title + ",\n"   
   cnts = cnts + "          curveType: 'function',\n"
   cnts = cnts + "          legend: { position: 'bottom' }\n"
   cnts = cnts + "        };\n"
@@ -397,6 +399,7 @@ def printStatus(directive, duration,
  
   return
 
+
 # Parse commandline arguments
 parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
 parser.add_argument("-t", "--target", metavar="<hostname>", required=True, help="Target hostname or IP address", type=validHostname)
@@ -425,7 +428,8 @@ P_waterPumpingTreshold = 350
 # Time tresholds
 T_minPumpingWater         = 5
 T_pumpingAirBeforeTurnOff = 6
-T_maxOffTime              = 120
+T_reportAfterOffTime      = 5
+T_maxOffTime              = 400
 T_shortIdleTime           = 15
 
 # Counter
@@ -461,6 +465,7 @@ printStatus("Just started ====> Turn ON and Idle short!\n", 0,
 
 isVirginList = True
 listOfGraphItems = ""
+latestWaterTime = 0
 
 while contRunning:
   dateTime = getDateTime(ip)
@@ -493,11 +498,13 @@ while contRunning:
       pumpMode = PumpMode.idle_long
       
   elif (pumpMode is PumpMode.idle_long):
-    
-    if isVirginList == True:
-      isVirginList = False
-      # Report the current list of graph items and start a new one
-      contents = createHtmlContents(listOfGraphItems)
+
+    if isVirginList:
+      # Report the current list of graph items and start a new one     
+      title = "          title: 'Dranpump (W) tOffTime={t_off:03d}  waterTime={waterTime:2.2f}'".format(t_off=T_maxOffTime,
+                                                                                                        waterTime=latestWaterTime)
+      print title
+      contents = createHtmlContents(listOfGraphItems, title)
       filename = getGraphListFileName(dateTime,
                                       T_pumpingAirBeforeTurnOff,
                                       T_maxOffTime,
@@ -509,8 +516,10 @@ while contRunning:
       sys.stdout.flush()
     
       # A new one must be started
+      isVirginList = False
       listOfGraphItems = ""
-    
+
+#
     changeTime = time.time()
     duration = changeTime-switchTime
     if powerValue > P_idleTreshold:
@@ -534,6 +543,7 @@ while contRunning:
       shortestPumpWaterDuration = min(duration, shortestPumpWaterDuration)
       longestPumpWaterDuration = max(duration, longestPumpWaterDuration)
       switchTime = changeTime
+      latestWaterTime = duration
       printStatus("Pumping water ===> Pumping air\n", duration,
                   dateTime, power, pumpMode)
 
@@ -570,6 +580,29 @@ while contRunning:
     #print ("Pump turned off, P={p:5.5f}"
     #       .format(p=powerValue))
     offDuration = time.time() - switchTime      
+    
+    if (offDuration > T_reportAfterOffTime) and isVirginList:
+      # Report the current list of graph items and start a new one
+      title = "          title: 'Dranpump (W) tOffTime={t_off:03d}  waterTime={waterTime:2.2f}'".format(t_off=T_maxOffTime,
+                                                                                                        waterTime=latestWaterTime)
+      print title
+      contents = createHtmlContents(listOfGraphItems, title)
+      
+      
+      filename = getGraphListFileName(dateTime,
+                                      T_pumpingAirBeforeTurnOff,
+                                      T_maxOffTime,
+                                      T_shortIdleTime)
+      print "Filename: " + filename + "\n"
+      print "Contents: " + contents + "\n"
+      createFile(filename, contents)
+      listOfGraphItems = ""
+      sys.stdout.flush()
+    
+      # A new one must be started
+      isVirginList = False
+      listOfGraphItems = ""
+
     if offDuration > T_maxOffTime:
       changeTime = time.time()      
       print ("Duration = {t:5.2f}"
