@@ -426,7 +426,7 @@ P_idleTreshold = 20
 P_airPumpingTreshold = 250
 P_waterPumpingTreshold = 350
 
-# Time tresholds
+# Time tresholds.
 T_minPumpingWater         = 5
 T_pumpingAirBeforeTurnOff = 3
 T_reportAfterOffTime      = 5
