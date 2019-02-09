@@ -224,13 +224,14 @@ def getPower(ip):
   
   return power
 
-def getGraphListFileName(dateTime, t1, t2, t3):
-  filename = "Data/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}.html".format(y=dateTime["year"],
+def getGraphListFileName(dateTime, t1, t2, t3, waterTime):
+  filename = "Data/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}_{wt:2.2f}.html".format(y=dateTime["year"],
                                                                                                       m=dateTime["month"],
                                                                                                       d=dateTime["mday"],
                                                                                                       hr=dateTime["hour"],
                                                                                                       min=dateTime["min"],
-                                                                                                      t1=t1, t2=t2, t3=t3)
+                                                                                                      t1=t1, t2=t2, t3=t3,
+                                                                                                      wt=waterTime)
   
   return filename
   
@@ -429,7 +430,7 @@ P_waterPumpingTreshold = 350
 T_minPumpingWater         = 5
 T_pumpingAirBeforeTurnOff = 6
 T_reportAfterOffTime      = 5
-T_maxOffTime              = 400
+T_maxOffTime              = 200
 T_shortIdleTime           = 15
 
 # Counter
@@ -508,7 +509,8 @@ while contRunning:
       filename = getGraphListFileName(dateTime,
                                       T_pumpingAirBeforeTurnOff,
                                       T_maxOffTime,
-                                      T_shortIdleTime)
+                                      T_shortIdleTime,
+                                      latestWaterTime)
       print "Filename: " + filename + "\n"
       print "Contents: " + contents + "\n"
       createFile(filename, contents)
@@ -592,7 +594,8 @@ while contRunning:
       filename = getGraphListFileName(dateTime,
                                       T_pumpingAirBeforeTurnOff,
                                       T_maxOffTime,
-                                      T_shortIdleTime)
+                                      T_shortIdleTime,
+                                      latestWaterTime)
       print "Filename: " + filename + "\n"
       print "Contents: " + contents + "\n"
       createFile(filename, contents)
