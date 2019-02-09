@@ -272,7 +272,7 @@ def createHtmlContents(listOfGraphItems, title):
   cnts = cnts + "    </script>\n"
   cnts = cnts + "  </head>\n"
   cnts = cnts + "  <body>\n"
-  cnts = cnts + "    <div id=\"curve_chart\" style=\"width: 1000px; height: 500px\"></div>\n"
+  cnts = cnts + "    <div id=\"curve_chart\" style=\"width: 1800px; height: 800px\"></div>\n"
   cnts = cnts + "  </body>\n"
   cnts = cnts + "</html>\n"
   return cnts
@@ -428,10 +428,10 @@ P_waterPumpingTreshold = 350
 
 # Time tresholds
 T_minPumpingWater         = 5
-T_pumpingAirBeforeTurnOff = 6
+T_pumpingAirBeforeTurnOff = 3
 T_reportAfterOffTime      = 5
 T_maxOffTime              = 200
-T_shortIdleTime           = 15
+T_shortIdleTime           = 5
 
 # Counter
 C_shortIdleToPump = 0
