@@ -399,8 +399,12 @@ def printStatus(directive, duration,
          .format(t=T_maxOffTime))
   print ("Times: T_shortIdleTime           = {t}"
          .format(t=T_shortIdleTime))
-  print ("Sleep time before water          = {t}"
+  print ("Sleep time prospect              = {t}"
+         .format(t=sleepTimeProspect))
+  print ("Sleep duration before water      = {t}"
          .format(t=sleepDurationBeforeWater))
+  
+  
   
   printPower(pwr)
   printPumpMode(mode)
@@ -512,14 +516,16 @@ while contRunning:
                   dateTime, power, pumpMode)
       pumpMode = PumpMode.idle_long
       
-  elif (pumpMode is PumpMode.idle_long):
+  elif pumpMode is PumpMode.idle_long:
 
+    changeTime = time.time()
     if isVirginList:
       # Report the current list of graph items and start a new one     
       title = "          title: 'Dranpump (W) tOffTime={t_off:03d}  waterTime={waterTime:2.2f}'".format(t_off=T_maxOffTime,
                                                                                                         waterTime=latestWaterTime)
       print title
       contents = createHtmlContents(listOfGraphItems, title)
+      sleepDurationBeforeWater = changeTime - sleepTimeProspect      
       filename = getGraphListFileName(dateTime,
                                       T_pumpingAirBeforeTurnOff,
                                       T_maxOffTime,
@@ -538,7 +544,6 @@ while contRunning:
       listOfGraphItems = ""
 
 #
-    changeTime = time.time()
     duration = changeTime-switchTime
     if powerValue > P_idleTreshold:
       shortestIdleLongDuration = min(duration, shortestIdleLongDuration)
