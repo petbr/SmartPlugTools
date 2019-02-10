@@ -226,14 +226,14 @@ def getPower(ip):
 
 def getGraphListFileName(dateTime, t1, t2, t3, waterTime, sleepDurationBeforeWater, isOffByItself):
   
-  filename = "Data/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}_WT_{wt:2.2f}__BW_{wt:4.2f}".format(y=dateTime["year"],
+  filename = "Data/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}_WT_{wt:2.2f}__BW_{bw:4.2f}".format(y=dateTime["year"],
               m=dateTime["month"],
               d=dateTime["mday"],
               hr=dateTime["hour"],
               min=dateTime["min"],
               t1=t1, t2=t2, t3=t3,
               wt=waterTime,
-              t=sleepDurationBeforeWater)
+              bw=sleepDurationBeforeWater)
   
   if isOffByItself:
     filename = filename + "__Good.html"
@@ -501,7 +501,7 @@ while contRunning:
       longestIdleShortDuration  = max(duration, longestIdleShortDuration)
       switchTime = changeTime
       C_shortIdleToPump = C_shortIdleToPump + 1
-      sleepDurationBeforeWater = sleepTimeProspect - changeTime
+      sleepDurationBeforeWater = changeTime - sleepTimeProspect
       printStatus("Idle short ===> Pumping water\n", duration,
                   dateTime, power, pumpMode)
 
@@ -545,7 +545,6 @@ while contRunning:
       longestIdleLongDuration  = max(duration, longestIdleLongDuration)
       switchTime = changeTime
       C_longIdleToPump = C_longIdleToPump + 1
-      sleepDurationBeforeWater = sleepTimeProspect - changeTime
       printStatus("Idle Long ===> Pumping water\n", duration,
                   dateTime, power, pumpMode)
       pumpMode = PumpMode.pumpingWater
