@@ -294,6 +294,22 @@ def createFile(filename, contents):
   
   return
 
+def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
+  # Typical at start the values == 0...then use default
+  if (sleepDurationBeforeWater == 0) or (latestWaterTime == 0):
+    t = T_defaultMaxOffTime
+  else:
+    t = sleepDurationBeforeWater * (T_wantedPumpTime / latestWaterTime)
+
+  print "------------------------------------------"
+  print "calcNewOffTime {bw}, {wt}".format(bw=sleepDurationBeforeWater,
+                                           wt=latestWaterTime)
+  print "=> new off time = {newOffT},".format(newOffT=t)
+  print "------------------------------------------"
+  
+  return t
+
+
 def someRunExamples(ip):
   turnOff  = setTurnOff(ip)
   dateTimeAtOff = getDateTime(ip)
@@ -441,10 +457,12 @@ P_airPumpingTreshold = 250
 P_waterPumpingTreshold = 350
 
 # Time tresholds.
+T_wantedPumpTime          = 10
 T_minPumpingWater         = 5
 T_pumpingAirBeforeTurnOff = 3
 T_reportAfterOffTime      = 5
-T_maxOffTime              = 200
+T_defaultMaxOffTime       = 200
+T_maxOffTime              = 0
 T_shortIdleTime           = 5
 
 # Counter
@@ -521,8 +539,9 @@ while contRunning:
     changeTime = time.time()
     if isVirginList:
       # Report the current list of graph items and start a new one     
-      title = "          title: 'Dranpump (W) tOffTime={t_off:03d}  waterTime={waterTime:2.2f}'".format(t_off=T_maxOffTime,
-                                                                                                        waterTime=latestWaterTime)
+      title  = "          title: 'Dranpump (W) tOffTime={t_off:03d}  "
+      title += "waterTime={waterTime:2.2f}'"
+      title = title.format(t_off=T_maxOffTime, waterTime=latestWaterTime)
       print title
       contents = createHtmlContents(listOfGraphItems, title)
       filename = getGraphListFileName(dateTime,
@@ -592,6 +611,9 @@ while contRunning:
       duration = sleepTimeProspect-switchTime
       shortestPumpAirDuration = min(duration, shortestPumpAirDuration)
       longestPumpAirDuration  = max(duration, longestPumpAirDuration)
+      
+      T_maxOffTime = calcNewOffTime(sleepDurationBeforeWater,
+                                    latestWaterTime)
       setTurnOff(ip)    
       switchTime = sleepTimeProspect      
       printStatus("Pumping Air too long time ===> Turn OFF!!!!\n", duration,
@@ -606,7 +628,7 @@ while contRunning:
     
     if (offDuration > T_reportAfterOffTime) and isVirginList:
       # Report the current list of graph items and start a new one
-      title = "          title: 'Dranpump (W) tOffTime={t_off:03d}  waterTime={waterTime:2.2f}'".format(t_off=T_maxOffTime,
+      title = "          title: 'Dranpump (W) tOffTime={t_Off:4d}  waterTime={waterTime:4d}'".format(t_Off=T_maxOffTime,
                                                                                                         waterTime=latestWaterTime)
       print title
       contents = createHtmlContents(listOfGraphItems, title)
