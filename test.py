@@ -525,7 +525,6 @@ while contRunning:
                                                                                                         waterTime=latestWaterTime)
       print title
       contents = createHtmlContents(listOfGraphItems, title)
-      sleepDurationBeforeWater = changeTime - sleepTimeProspect      
       filename = getGraphListFileName(dateTime,
                                       T_pumpingAirBeforeTurnOff,
                                       T_maxOffTime,
@@ -550,6 +549,7 @@ while contRunning:
       longestIdleLongDuration  = max(duration, longestIdleLongDuration)
       switchTime = changeTime
       C_longIdleToPump = C_longIdleToPump + 1
+      sleepDurationBeforeWater = changeTime - sleepTimeProspect      
       printStatus("Idle Long ===> Pumping water\n", duration,
                   dateTime, power, pumpMode)
       pumpMode = PumpMode.pumpingWater
