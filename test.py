@@ -224,15 +224,22 @@ def getPower(ip):
   
   return power
 
-def getGraphListFileName(dateTime, t1, t2, t3, waterTime):
-  filename = "Data/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}_{wt:2.2f}.html".format(y=dateTime["year"],
-                                                                                                      m=dateTime["month"],
-                                                                                                      d=dateTime["mday"],
-                                                                                                      hr=dateTime["hour"],
-                                                                                                      min=dateTime["min"],
-                                                                                                      t1=t1, t2=t2, t3=t3,
-                                                                                                      wt=waterTime)
+def getGraphListFileName(dateTime, t1, t2, t3, waterTime, sleepDurationBeforeWater, isOffByItself):
   
+  filename = "Data/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}_WT_{wt:2.2f}__BW_{wt:4.2f}".format(y=dateTime["year"],
+              m=dateTime["month"],
+              d=dateTime["mday"],
+              hr=dateTime["hour"],
+              min=dateTime["min"],
+              t1=t1, t2=t2, t3=t3,
+              wt=waterTime,
+              t=sleepDurationBeforeWater)
+  
+  if isOffByItself:
+    filename = filename + "__Good.html"
+  else:
+    filename = filename + ".html"
+    
   return filename
   
 
@@ -392,6 +399,9 @@ def printStatus(directive, duration,
          .format(t=T_maxOffTime))
   print ("Times: T_shortIdleTime           = {t}"
          .format(t=T_shortIdleTime))
+  print ("Sleep time before water          = {t}"
+         .format(t=sleepDurationBeforeWater))
+  
   printPower(pwr)
   printPumpMode(mode)
   print(directive)
@@ -461,12 +471,15 @@ switchTime = time.time()
 setTurnOn(ip)    
 dateTime = getDateTime(ip)
 power    = getPower(ip)
-printStatus("Just started ====> Turn ON and Idle short!\n", 0,
-            dateTime, power, pumpMode)
 
 isVirginList = True
 listOfGraphItems = ""
 latestWaterTime = 0
+sleepTimeProspect = time.time()
+sleepDurationBeforeWater = 0
+
+printStatus("Just started ====> Turn ON and Idle short!\n", 0,
+            dateTime, power, pumpMode)
 
 while contRunning:
   dateTime = getDateTime(ip)
@@ -487,7 +500,8 @@ while contRunning:
       shortestIdleShortDuration = min(duration, shortestIdleShortDuration)
       longestIdleShortDuration  = max(duration, longestIdleShortDuration)
       switchTime = changeTime
-      C_shortIdleToPump = C_shortIdleToPump +1
+      C_shortIdleToPump = C_shortIdleToPump + 1
+      sleepDurationBeforeWater = sleepTimeProspect - changeTime
       printStatus("Idle short ===> Pumping water\n", duration,
                   dateTime, power, pumpMode)
 
@@ -510,7 +524,9 @@ while contRunning:
                                       T_pumpingAirBeforeTurnOff,
                                       T_maxOffTime,
                                       T_shortIdleTime,
-                                      latestWaterTime)
+                                      latestWaterTime,
+                                      sleepDurationBeforeWater,
+                                      True)
       print "Filename: " + filename + "\n"
       print "Contents: " + contents + "\n"
       createFile(filename, contents)
@@ -528,7 +544,8 @@ while contRunning:
       shortestIdleLongDuration = min(duration, shortestIdleLongDuration)
       longestIdleLongDuration  = max(duration, longestIdleLongDuration)
       switchTime = changeTime
-      C_longIdleToPump = C_longIdleToPump +1
+      C_longIdleToPump = C_longIdleToPump + 1
+      sleepDurationBeforeWater = sleepTimeProspect - changeTime
       printStatus("Idle Long ===> Pumping water\n", duration,
                   dateTime, power, pumpMode)
       pumpMode = PumpMode.pumpingWater
@@ -556,23 +573,23 @@ while contRunning:
     #       .format(p=powerValue))
     timePumpingAir = time.time()-switchTime
     if powerValue < P_idleTreshold:
-      changeTime = time.time()      
-      duration = changeTime-switchTime
+      sleepTimeProspect = time.time()
+      duration = sleepTimeProspect-switchTime
       shortestPumpAirDuration = min(duration, shortestPumpAirDuration)
       longestPumpAirDuration  = max(duration, longestPumpAirDuration)
-      switchTime = changeTime
+      switchTime = sleepTimeProspect
       printStatus("Pumping Air short time ===> Idle short\n", duration,
                   dateTime, power, pumpMode)
 
       pumpMode = PumpMode.idle_short
 
     elif timePumpingAir > T_pumpingAirBeforeTurnOff:
-      changeTime = time.time()      
-      duration = changeTime-switchTime
+      sleepTimeProspect = time.time()      
+      duration = sleepTimeProspect-switchTime
       shortestPumpAirDuration = min(duration, shortestPumpAirDuration)
       longestPumpAirDuration  = max(duration, longestPumpAirDuration)
       setTurnOff(ip)    
-      switchTime = changeTime      
+      switchTime = sleepTimeProspect      
       printStatus("Pumping Air too long time ===> Turn OFF!!!!\n", duration,
                   dateTime, power, pumpMode)
 
@@ -595,7 +612,9 @@ while contRunning:
                                       T_pumpingAirBeforeTurnOff,
                                       T_maxOffTime,
                                       T_shortIdleTime,
-                                      latestWaterTime)
+                                      latestWaterTime,
+                                      sleepDurationBeforeWater,
+                                      False)
       print "Filename: " + filename + "\n"
       print "Contents: " + contents + "\n"
       createFile(filename, contents)
