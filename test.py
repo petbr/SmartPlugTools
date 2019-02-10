@@ -299,11 +299,11 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
   if (sleepDurationBeforeWater == 0) or (latestWaterTime == 0):
     t = T_defaultMaxOffTime
   else:
-    t = sleepDurationBeforeWater * (T_wantedPumpTime / latestWaterTime)
+    t = int(sleepDurationBeforeWater * (T_wantedPumpTime / latestWaterTime))
 
   print "------------------------------------------"
-  print "calcNewOffTime {bw}, {wt}".format(bw=sleepDurationBeforeWater,
-                                           wt=latestWaterTime)
+  print "calcNewOffTime BW:{bw}, WT:{wt}".format(bw=sleepDurationBeforeWater,
+                                                 wt=latestWaterTime)
   print "=> new off time = {newOffT},".format(newOffT=t)
   print "------------------------------------------"
   
@@ -628,8 +628,9 @@ while contRunning:
     
     if (offDuration > T_reportAfterOffTime) and isVirginList:
       # Report the current list of graph items and start a new one
-      title = "          title: 'Dranpump (W) tOffTime={t_Off:4d}  waterTime={waterTime:4d}'".format(t_Off=T_maxOffTime,
-                                                                                                        waterTime=latestWaterTime)
+      title  = "          title: 'Dranpump (W) tOffTime={t_Off:4d}"
+      title += "  waterTime={wt:4.2f}'"
+      title = title.format(t_Off=T_maxOffTime, wt=latestWaterTime)
       print title
       contents = createHtmlContents(listOfGraphItems, title)
       
