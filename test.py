@@ -384,7 +384,7 @@ def printPumpMode(pumpMode):
   return
 
 def printStatus(directive, duration,
-                dateTime, pwr, mode):
+                dateTime, pwr, mode, tMaxOffTime):
 
   printDateTime(dateTime)
   print ("Duration = {t:5.2f}"
@@ -419,8 +419,10 @@ def printStatus(directive, duration,
          .format(t=sleepTimeProspect))
   print ("Sleep duration before water      = {t}"
          .format(t=sleepDurationBeforeWater))
-  
-  
+  print ("T_wantedPumpTime                 = {t}"
+         .format(t=T_wantedPumpTime))
+  print ("tMaxOffTime                      = {t}"
+         .format(t=tMaxOffTime))
   
   printPower(pwr)
   printPumpMode(mode)
@@ -457,7 +459,7 @@ P_airPumpingTreshold = 250
 P_waterPumpingTreshold = 350
 
 # Time tresholds.
-T_wantedPumpTime          = 10
+T_wantedPumpTime          = 9
 T_minPumpingWater         = 5
 T_pumpingAirBeforeTurnOff = 3
 T_reportAfterOffTime      = 5
@@ -501,7 +503,7 @@ sleepTimeProspect = time.time()
 sleepDurationBeforeWater = 0
 
 printStatus("Just started ====> Turn ON and Idle short!\n", 0,
-            dateTime, power, pumpMode)
+            dateTime, power, pumpMode, T_maxOffTime)
 
 while contRunning:
   dateTime = getDateTime(ip)
@@ -525,13 +527,13 @@ while contRunning:
       C_shortIdleToPump = C_shortIdleToPump + 1
       sleepDurationBeforeWater = changeTime - sleepTimeProspect
       printStatus("Idle short ===> Pumping water\n", duration,
-                  dateTime, power, pumpMode)
+                  dateTime, power, pumpMode, T_maxOffTime)
 
       pumpMode = PumpMode.pumpingWater
       
     elif duration > T_shortIdleTime:
       printStatus("Short idle ===> Idle long\n", duration,
-                  dateTime, power, pumpMode)
+                  dateTime, power, pumpMode, T_maxOffTime)
       pumpMode = PumpMode.idle_long
       
   elif pumpMode is PumpMode.idle_long:
@@ -570,7 +572,7 @@ while contRunning:
       C_longIdleToPump = C_longIdleToPump + 1
       sleepDurationBeforeWater = changeTime - sleepTimeProspect      
       printStatus("Idle Long ===> Pumping water\n", duration,
-                  dateTime, power, pumpMode)
+                  dateTime, power, pumpMode, T_maxOffTime)
       pumpMode = PumpMode.pumpingWater
 
       
@@ -587,7 +589,7 @@ while contRunning:
       switchTime = changeTime
       latestWaterTime = duration
       printStatus("Pumping water ===> Pumping air\n", duration,
-                  dateTime, power, pumpMode)
+                  dateTime, power, pumpMode, T_maxOffTime)
 
       pumpMode = PumpMode.pumpingAir
     
@@ -602,7 +604,7 @@ while contRunning:
       longestPumpAirDuration  = max(duration, longestPumpAirDuration)
       switchTime = sleepTimeProspect
       printStatus("Pumping Air short time ===> Idle short\n", duration,
-                  dateTime, power, pumpMode)
+                  dateTime, power, pumpMode, T_maxOffTime)
 
       pumpMode = PumpMode.idle_short
 
@@ -617,7 +619,7 @@ while contRunning:
       setTurnOff(ip)    
       switchTime = sleepTimeProspect      
       printStatus("Pumping Air too long time ===> Turn OFF!!!!\n", duration,
-                  dateTime, power, pumpMode)
+                  dateTime, power, pumpMode, T_maxOffTime)
 
       pumpMode = PumpMode.pumpTurnedOff
     
@@ -659,7 +661,7 @@ while contRunning:
       setTurnOn(ip)
       switchTime = changeTime
       printStatus("OFF max time reached ===> Turn ON + Idle short!!!!\n", offDuration,
-                  dateTime, power, pumpMode)
+                  dateTime, power, pumpMode, T_maxOffTime)
       pumpMode = PumpMode.idle_short      
     
   else:
@@ -669,7 +671,7 @@ while contRunning:
     switchTime = changeTime
     setTurnOn(ip)
     printStatus("OFF max time reached ===> Turn ON + Idle!!!!\n", duration,
-                dateTime, power, pumpMode)
+                dateTime, power, pumpMode, T_maxOffTime)
     pumpMode = PumpMode.idle_short
       
       
@@ -679,9 +681,9 @@ while contRunning:
     if isVirginList:
       gItem = getGraphItem(dateTime, power)
       listOfGraphItems = listOfGraphItems + "\n" + gItem
-
       #sys.stdout.flush()
-      time.sleep(0.5)
+    
+    time.sleep(0.5)
 
   prevPower = powerValue
 
