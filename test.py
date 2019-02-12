@@ -41,6 +41,9 @@
 # /etc/init.d/lighttpd restart
 #
 # redis-server
+# /etc/init.d/redis-server restart
+# /etc/init.d/redis-server stop
+# /etc/init.d/redis-server start
 
 import socket
 import time

@@ -1,4 +1,6 @@
 import redis
+from datetime import date
+from datetime import datetime
 
 redis_host = "localhost"
 redis_port = 6379
@@ -45,4 +47,42 @@ if __name__ == '__main__':
   
   print "After Petra is set"
   print(rDb.get("msg:Petra"))
+  
+  today = date.today()
+  print "Current date = ", today
+
+  fromTimeStamp = date.fromtimestamp(1)
+  print "From timestamp = ", fromTimeStamp
+  
+  fromDatetime = datetime(1967,6,6,
+                          23,59,30,0)
+  print "Petras birthdate year = ", fromDatetime.year
+  print "Petras birthdate month = ", fromDatetime.month
+  print "Petras birthdate = ",       fromDatetime.timestamp()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
