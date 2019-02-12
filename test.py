@@ -34,6 +34,12 @@
 # Raspberry web server
 # /etc/lighttpd/lighttpd.conf
 #
+# Lighttpd config file
+# /etc/lighttpd/lighttpd.conf
+#
+# Restart web server
+# /etc/init.d/lighttpd restart
+#
 # redis-server
 
 import socket
@@ -224,14 +230,18 @@ def getPower(ip):
   
   return power
 
-def getGraphListFileName(dateTime, t1, t2, t3, waterTime, sleepDurationBeforeWater, isOffByItself):
+def getGraphListFileName(dateTime,
+                         tPumpAirBeforeTurnOff,
+                         tMaxOffTime,
+                         tShortIdleTime,
+                         waterTime, sleepDurationBeforeWater, isOffByItself):
   
-  filename = "Data/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_{t1:02d}_{t2:03d}_{t3:02d}_BW_{bw:4.2f}__WT_{wt:2.2f}".format(y=dateTime["year"],
+  filename = "Data/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_AirBOff:{t1:02d}_tMaxOff:{t2:03d}_tShortIdle:{t3:02d}_BW:{bw:4.2f}_WT:{wt:2.2f}".format(y=dateTime["year"],
               m=dateTime["month"],
               d=dateTime["mday"],
               hr=dateTime["hour"],
               min=dateTime["min"],
-              t1=t1, t2=t2, t3=t3,
+              t1=tPumpAirBeforeTurnOff, t2=tMaxOffTime, t3=tShortIdleTime,
               bw=sleepDurationBeforeWater,
               wt=waterTime)
   
@@ -269,17 +279,20 @@ def createHtmlContents(listOfGraphItems, title):
   cnts = cnts + "        var options = {\n"
   cnts = cnts + title + ",\n"   
   cnts = cnts + "          curveType: 'function',\n"
+  cnts = cnts + "          lineWidth: 5,\n"
   cnts = cnts + "          legend: { position: 'bottom' }\n"
   cnts = cnts + "        };\n"
   cnts = cnts + "\n"
-  cnts = cnts + "        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));\n"
+#  cnts = cnts + "        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));\n"
+  cnts = cnts + "        var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));\n"
   cnts = cnts + "\n"
   cnts = cnts + "        chart.draw(data, options);\n"
   cnts = cnts + "      }\n"
   cnts = cnts + "    </script>\n"
   cnts = cnts + "  </head>\n"
   cnts = cnts + "  <body>\n"
-  cnts = cnts + "    <div id=\"curve_chart\" style=\"width: 1800px; height: 800px\"></div>\n"
+#  cnts = cnts + "    <div id=\"curve_chart\" style=\"width: 1800px; height: 800px\"></div>\n"
+  cnts = cnts + "    <div id=\"chart_div\" style=\"width: 100%; height: 100%\"></div>\n"
   cnts = cnts + "  </body>\n"
   cnts = cnts + "</html>\n"
   return cnts
