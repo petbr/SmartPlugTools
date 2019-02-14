@@ -672,7 +672,7 @@ while contRunning:
       if powerValue > P_idleTreshold:
         startup()
 
-      ifisVirginList:
+      if isVirginList:
         # Report the current list of graph items and start a new one
         title  = "          title: 'Dranpump (W) tOffTime={t_Off:4d}"
         title += "  waterTime={wt:4.2f}'"
