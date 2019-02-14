@@ -469,33 +469,29 @@ ip = args.target
     #powerIncreasingt = 2
     #powerDecreasing  = 3
 
-# Power tresholds
-P_idleTreshold = 20
-P_airPumpingTreshold = 250
-P_waterPumpingTreshold = 350
-
-# Time tresholds.
-T_wantedPumpTime          = 9
-T_minPumpingWater         = 5
-T_pumpingAirBeforeTurnOff = 3
-T_reportAfterOffTime      = 5
-T_defaultMaxOffTime       = 200
-T_maxOffTime              = 0
-T_shortIdleTime           = 5
-
-# Counter
-C_shortIdleToPump = 0
-C_longIdleToPump  = 0
-#class PumpMode(enum.Enum): 
-    #idle          = 1
-    #pumpingAir    = 2
-    #pumpTurnedOff = 3
-    #pumpingWater  = 4
 
 
 # idle -> pumpingWater -> pumpingAir/idle -> idle
 
 def startup():
+  # Power tresholds
+  global P_idleTreshold
+  global P_airPumpingTreshold
+  global P_waterPumpingTreshold
+
+  # Time tresholds.
+  global T_wantedPumpTime
+  global T_minPumpingWater
+  global T_pumpingAirBeforeTurnOff
+  global T_reportAfterOffTime
+  global T_defaultMaxOffTime
+  global T_maxOffTime
+  global T_shortIdleTime
+
+  # Counter
+  global C_shortIdleToPump
+  global C_longIdleToPump
+
   global powerState
   global pumpMode
   global contRunning
@@ -516,6 +512,29 @@ def startup():
   global latestWaterTime
   global sleepTimeProspect
   global sleepDurationBeforeWater
+
+  # Power tresholds
+  P_idleTreshold = 20
+  P_airPumpingTreshold = 250
+  P_waterPumpingTreshold = 350
+
+  # Time tresholds.
+  T_wantedPumpTime          = 9
+  T_minPumpingWater         = 5
+  T_pumpingAirBeforeTurnOff = 3
+  T_reportAfterOffTime      = 5
+  T_defaultMaxOffTime       = 200
+  T_maxOffTime              = 0
+  T_shortIdleTime           = 5
+
+  # Counter
+  C_shortIdleToPump = 0
+  C_longIdleToPump  = 0
+  #class PumpMode(enum.Enum): 
+  #idle          = 1
+  #pumpingAir    = 2
+  #pumpTurnedOff = 3
+  #pumpingWater  = 4
 
   powerState  = PowerDirection.powerStable
   pumpMode    = PumpMode.idle_short
