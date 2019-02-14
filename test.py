@@ -495,32 +495,33 @@ C_longIdleToPump  = 0
 
 # idle -> pumpingWater -> pumpingAir/idle -> idle
 
-powerState  = PowerDirection.powerStable
-pumpMode    = PumpMode.idle_short
-contRunning = True
-prevPower   = 0
-shortestIdleShortDuration      = 1000000/3.0
-longestIdleShortDuration       = 1/3.0
-shortestIdleLongDuration      = 1000000/3.0
-longestIdleLongDuration       = 1/3.0
-shortestPumpWaterDuration = 1000000/3.0
-longestPumpWaterDuration  = 1/3.0
-shortestPumpAirDuration   = 1000000/3.0
-longestPumpAirDuration    = 1/3.0
-switchTime = time.time()
-setTurnOn(ip)    
-dateTime = getDateTime(ip)
-power    = getPower(ip)
+def startup():
+  global powerState  = PowerDirection.powerStable
+  global pumpMode    = PumpMode.idle_short
+  global contRunning = True
+  global prevPower   = 0
+  global shortestIdleShortDuration      = 1000000/3.0
+  global longestIdleShortDuration       = 1/3.0
+  global shortestIdleLongDuration      = 1000000/3.0
+  global longestIdleLongDuration       = 1/3.0
+  global shortestPumpWaterDuration = 1000000/3.0
+  global longestPumpWaterDuration  = 1/3.0
+  global shortestPumpAirDuration   = 1000000/3.0
+  global longestPumpAirDuration    = 1/3.0
+  global switchTime = time.time()
+  global dateTime = getDateTime(ip)
+  global power    = getPower(ip)
 
-isVirginList = True
-listOfGraphItems = ""
-latestWaterTime = 0
-sleepTimeProspect = time.time()
-sleepDurationBeforeWater = 0
+  global isVirginList = True
+  global listOfGraphItems = ""
+  global latestWaterTime = 0
+  global sleepTimeProspect = time.time()
+  global sleepDurationBeforeWater = 0
+  setTurnOn(ip)
+  printStatus("Just started ====> Turn ON and Idle short!\n", 0,
+              dateTime, power, pumpMode, T_maxOffTime)
 
-printStatus("Just started ====> Turn ON and Idle short!\n", 0,
-            dateTime, power, pumpMode, T_maxOffTime)
-
+setStartValues()
 while contRunning:
   dateTime = getDateTime(ip)
   power    = getPower(ip)
@@ -643,7 +644,11 @@ while contRunning:
     #print ("Pump turned off, P={p:5.5f}"
     #       .format(p=powerValue))
     offDuration = time.time() - switchTime      
-    
+
+    # Maybe user remotely did start the pump....
+    if powerValue > P_idleTreshold:
+      setStartValues()
+
     if (offDuration > T_reportAfterOffTime) and isVirginList:
       # Report the current list of graph items and start a new one
       title  = "          title: 'Dranpump (W) tOffTime={t_Off:4d}"
