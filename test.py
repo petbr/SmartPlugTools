@@ -666,35 +666,37 @@ while contRunning:
     #       .format(p=powerValue))
     offDuration = time.time() - switchTime      
 
-    # Maybe user remotely did start the pump....
-    if powerValue > P_idleTreshold:
-      startup()
+    if (offDuration > T_reportAfterOffTime):
 
-    if (offDuration > T_reportAfterOffTime) and isVirginList:
-      # Report the current list of graph items and start a new one
-      title  = "          title: 'Dranpump (W) tOffTime={t_Off:4d}"
-      title += "  waterTime={wt:4.2f}'"
-      title = title.format(t_Off=T_maxOffTime, wt=latestWaterTime)
-      print title
-      contents = createHtmlContents(listOfGraphItems, title)
+      # Maybe user remotely did start the pump....
+      if powerValue > P_idleTreshold:
+        startup()
+
+      ifisVirginList:
+        # Report the current list of graph items and start a new one
+        title  = "          title: 'Dranpump (W) tOffTime={t_Off:4d}"
+        title += "  waterTime={wt:4.2f}'"
+        title = title.format(t_Off=T_maxOffTime, wt=latestWaterTime)
+        print title
+        contents = createHtmlContents(listOfGraphItems, title)
+        
+        
+        filename = getGraphListFileName(dateTime,
+                                        T_pumpingAirBeforeTurnOff,
+                                        T_maxOffTime,
+                                        T_shortIdleTime,
+                                        latestWaterTime,
+                                        sleepDurationBeforeWater,
+                                        False)
+        print "Filename: " + filename + "\n"
+        print "Contents: " + contents + "\n"
+        createFile(filename, contents)
+        listOfGraphItems = ""
+        sys.stdout.flush()
       
-      
-      filename = getGraphListFileName(dateTime,
-                                      T_pumpingAirBeforeTurnOff,
-                                      T_maxOffTime,
-                                      T_shortIdleTime,
-                                      latestWaterTime,
-                                      sleepDurationBeforeWater,
-                                      False)
-      print "Filename: " + filename + "\n"
-      print "Contents: " + contents + "\n"
-      createFile(filename, contents)
-      listOfGraphItems = ""
-      sys.stdout.flush()
-    
-      # A new one must be started
-      isVirginList = False
-      listOfGraphItems = ""
+        # A new one must be started
+        isVirginList = False
+        listOfGraphItems = ""
 
     if offDuration > T_maxOffTime:
       changeTime = time.time()      
