@@ -326,7 +326,7 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
   print "------------------------------------------"
   
   ##########################
-  Always use default!
+  # Always use default!
   ##########################
   return t
 
