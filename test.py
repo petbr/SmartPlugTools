@@ -319,17 +319,17 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
     if t < T_defaultMaxOffTime :
       t = T_defaultMaxOffTime
 
+  ##########################
+  # Always use default!
+  ##########################
+  t = T_defaultMaxOffTime
+
   print "------------------------------------------"
   print "calcNewOffTime BW:{bw}, WT:{wt}".format(bw=sleepDurationBeforeWater,
                                                  wt=latestWaterTime)
   print "=> new off time = {newOffT},".format(newOffT=t)
   print "------------------------------------------"
   
-  ##########################
-  # Always use default!
-  ##########################
-  t = T_defaultMaxOffTime
-
   return t
 
 
