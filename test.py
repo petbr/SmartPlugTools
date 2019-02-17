@@ -527,11 +527,11 @@ def startup():
 
   # Time tresholds.
   T_wantedPumpTime          = 9
-  T_minPumpingWater         = 5
-  T_pumpingAirBeforeTurnOff = 3
-  T_reportAfterOffTime      = 5
+  T_minPumpingWater         = 2
+  T_pumpingAirBeforeTurnOff = 1
+  T_reportAfterOffTime      = 2
   T_defaultMaxOffTime       = 200
-  T_maxOffTime              = 0
+  T_maxOffTime              = 10
   T_shortIdleTime           = 5
 
   # Counter
