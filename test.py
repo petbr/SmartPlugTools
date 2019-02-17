@@ -328,6 +328,8 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
   ##########################
   # Always use default!
   ##########################
+  t = T_defaultMaxOffTime
+
   return t
 
 
