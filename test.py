@@ -746,14 +746,14 @@ while contRunning:
       
       
   if pumpMode == PumpMode.idle_long:
-    time.sleep(0.5)
+    time.sleep(0.25)
   else:
     if isVirginList:
       gItem = getGraphItem(dateTime, power)
       listOfGraphItems = listOfGraphItems + "\n" + gItem
       #sys.stdout.flush()
     
-    time.sleep(0.5)
+    time.sleep(0.25)
 
   prevPower = powerValue
 
