@@ -308,8 +308,9 @@ def createFile(filename, contents):
   print("File: " + filename + " created!")
   t = time.time()
   
-  est_WakeupTime = t + datetime.timedelta(0,T_maxOffTime)
-  print("Estimated wake up time: " + est_WakeupTime)
+  ###############
+  #est_WakeupTime = t + datetime.timedelta(0,T_maxOffTime)
+  #print("Estimated wake up time: " + est_WakeupTime)
   
   sys.stdout.flush()
   
