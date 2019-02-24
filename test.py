@@ -317,15 +317,17 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
   else:
     # Ex wanted = 8, latest = 4     => ration = 2
     # Ex wanted = 8, latest = 16    => ration = 0.5
-    ratio = T_wantedPumpTime / latestWaterTime
+    ratio1 = T_wantedPumpTime / latestWaterTime
     
     # If ration < 1 use ratio = ration^2
     # ratio #1 = 2   => ration #2 = 2          Don't change
     # ratio #1 = 0.5 => ration #2 = 0.25       Change with ^2
-    if ratio < 1.0:
-      ratio = ratio * ratio
+    if ratio1 < 1.0:
+      ratio2 = ratio1 * ratio1
+    else:
+      ratio2 = ratio1
       
-    t = int(sleepDurationBeforeWater * ratio)
+    t = int(sleepDurationBeforeWater * ratio2)
     if t < T_defaultMaxOffTime :
       t = T_defaultMaxOffTime
 
@@ -335,8 +337,10 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
   #t = T_defaultMaxOffTime
 
   print "------------------------------------------"
-  print "calcNewOffTime BW:{bw}, WT:{wt}".format(bw=sleepDurationBeforeWater,
-                                                 wt=latestWaterTime)
+  print "calcNewOffTime BW:{bw}, WT:{wt}, Wanted:{wa}".format(bw=sleepDurationBeforeWater,
+                                                              wt=latestWaterTime,
+                                                              wa=T_wantedPumpTime)
+  print "ratio1 = {ra1}   ratio2 = {ra2}\n".format(ra1=ratio1, ra2=ratio2)
   print "=> new off time = {newOffT},".format(newOffT=t)
   print "------------------------------------------"
   
