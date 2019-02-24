@@ -306,6 +306,11 @@ def createFile(filename, contents):
   f.close()
   
   print("File: " + filename + " created!")
+  t = time.time()
+  
+  est_WakeupTime = t + datetime.timedelta(0,T_maxOffTime)
+  print("Estimated wake up time: " + est_WakeupTime)
+  
   sys.stdout.flush()
   
   return
@@ -760,14 +765,14 @@ while contRunning:
       
       
   if pumpMode == PumpMode.idle_long:
-    time.sleep(1.0)
+    time.sleep(0.5)
   else:
     if isVirginList:
       gItem = getGraphItem(dateTime, power)
       listOfGraphItems = listOfGraphItems + "\n" + gItem
       #sys.stdout.flush()
     
-    time.sleep(1.0)
+    time.sleep(0.5)
 
   prevPower = powerValue
 
