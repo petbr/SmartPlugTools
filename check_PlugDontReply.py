@@ -19,9 +19,10 @@
 # limitations under the License.
 #
 # Usage in Stora Hoga:
-# python tplink_smartplug.py -t 192.168.1.18 -c energy
+# python check_PlugDontReply.py -t 192.168.1.33 -c energy
 
 import socket
+import time
 import argparse
 from struct import pack
 
@@ -88,18 +89,146 @@ if args.command is None:
 else:
 	cmd = commands[args.command]
 
+def getSocket():
+  socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  socket_tcp.settimeout(2)
+  
+  return socket_tcp
+
+def connect(socket_tcp, ip, port):
+  try:
+    socket_tcp.connect((ip, port))
+  except socket.error, msg:
+    print "Couldnt connect with the socket-server: %s\n terminating program" % msg
+    
+  print "connect........BOTH!"
+  
+
+def tryCall():
+  dataDecr = "Failing BAD...not yet understood"
+  
+  # Send command and receive reply
+  try:
+    sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock_tcp.connect((ip, port))
+    sock_tcp.send(encrypt(cmd))
+    data = sock_tcp.recv(2048)
+    sock_tcp.close()
+
+    dataDecr = decrypt(data[4:])
+
+    print ("Sent:     ", cmd)
+    print ("Received: ", dataDecr)
+    
+  except socket.error:
+    #quit("Cound not connect to host " + ip + ":" + str(port))
+    print "Failing BAD in tryCall"
+
+  return dataDecr
+
+def tryCallSlim(socket_tcp):
+  res = False;
+  dataDecr = "Failing BAD...not yet understood"
+  
+  # Send command and receive reply
+  try:
+    socket_tcp.send(encrypt(cmd))
+    data = socket_tcp.recv(2048)
+    #socket_tcp.close()
+
+    dataDecr = decrypt(data[4:])
+
+    print ("Sent:     ", cmd)
+    print ("Received: ", dataDecr)
+    res = True
+    
+  except socket.error:
+    #quit("Cound not connect to host " + ip + ":" + str(port))
+    print "Failing BAD in tryCall"
+
+  return (res,dataDecr)
+
+print "Cmd:"
+print cmd 
+
+print "Socket bind"
+socket_tcp = getSocket()
+
+print "Connect"
+connect(socket_tcp, ip, port)
+
+print "Sleep\n"
+time.sleep(5)
+i = 1
+
+print "TryCall ", i
+i = i+1
+res = False
+
+while res == False:
+  connect(socket_tcp, ip, port)
+  (res,dataDecr) = tryCallSlim(socket_tcp)
+  print "Res: ", res
+  print "DataDecr: ", dataDecr, "\n"
 
 
-# Send command and receive reply
-try:
-	sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock_tcp.connect((ip, port))
-	sock_tcp.send(encrypt(cmd))
-	data = sock_tcp.recv(2048)
-	sock_tcp.close()
+print "Now I'm done!"
 
-	print ("Sent:     ", cmd)
-	print ("Received: ", decrypt(data[4:]))
-except socket.error:
-	quit("Cound not connect to host " + ip + ":" + str(port))
+exit(1)
+
+print "Sleep\n"
+time.sleep(5)
+print "TryCall ", i
+i = i+1
+data = tryCallSlim(socket_tcp)
+print data, "\n"
+
+print "Sleep\n"
+time.sleep(5)
+print "TryCall ", i
+i = i+1
+data = tryCallSlim(socket_tcp)
+print data, "\n"
+
+print "Sleep\n"
+time.sleep(5)
+print "TryCall ", i
+i = i+1
+data = tryCallSlim(socket_tcp)
+print data, "\n"
+
+print "Sleep\n"
+time.sleep(5)
+print "TryCall ", i
+i = i+1
+data = tryCallSlim(socket_tcp)
+print data, "\n"
+
+print "Sleep\n"
+time.sleep(5)
+print "TryCall ", i
+i = i+1
+data = tryCallSlim(socket_tcp)
+print data, "\n"
+
+print "Sleep\n"
+time.sleep(5)
+print "TryCall ", i
+i = i+1
+data = tryCallSlim(socket_tcp)
+print data, "\n"
+
+print "Sleep\n"
+time.sleep(5)
+print "TryCall ", i
+i = i+1
+data = tryCallSlim(socket_tcp)
+print data, "\n"
+
+print "Sleep\n"
+time.sleep(5)
+print "TryCall ", i
+i = i+1
+data = tryCallSlim(socket_tcp)
+print data, "\n"
 
