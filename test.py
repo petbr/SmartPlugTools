@@ -322,7 +322,7 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
     # If ration < 1 use ratio = ration^2
     # ratio #1 = 2   => ration #2 = 2          Don't change
     # ratio #1 = 0.5 => ration #2 = 0.25       Change with ^2
-    if ratio < 1.0
+    if ratio < 1.0:
       ratio = ratio * ratio
       
     t = int(sleepDurationBeforeWater * ratio)
