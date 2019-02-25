@@ -542,11 +542,11 @@ def startup():
 
   # Power tresholds
   P_idleTreshold = 20
-  P_airPumpingTreshold = 250
+  P_airPumpingTreshold = 320
   P_waterPumpingTreshold = 350
 
   # Time tresholds.
-  T_wantedPumpTime          = 9
+  T_wantedPumpTime          = 6
   T_minPumpingWater         = 4
   T_pumpingAirBeforeTurnOff = 4
   T_reportAfterOffTime      = 2
