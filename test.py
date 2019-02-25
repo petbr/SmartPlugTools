@@ -546,7 +546,7 @@ def startup():
   P_waterPumpingTreshold = 350
 
   # Time tresholds.
-  T_wantedPumpTime          = 7
+  T_wantedPumpTime          = 7.61
   T_minPumpingWater         = 2
   T_pumpingAirBeforeTurnOff = 2
   T_reportAfterOffTime      = 2
@@ -773,14 +773,14 @@ while contRunning:
       
       
   if pumpMode == PumpMode.idle_long:
-    time.sleep(0.5)
+    time.sleep(0.3)
   else:
     if isVirginList:
       gItem = getGraphItem(dateTime, power)
       listOfGraphItems = listOfGraphItems + "\n" + gItem
       #sys.stdout.flush()
     
-    time.sleep(0.5)
+    time.sleep(0.3)
 
   prevPower = powerValue
 
