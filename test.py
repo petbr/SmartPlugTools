@@ -588,6 +588,13 @@ def startup():
   printStatus("Just started ====> Turn ON and Idle short!\n", 0,
               dateTime, power, pumpMode, T_maxOffTime)
 
+
+print "*********************************************"
+print "*********************************************"
+print "!!!!!!!!!!!!!!!!!!!STARTING!!!!!!!!!!!!!!!!!!"
+print "*********************************************"
+print "*********************************************"
+
 startup()
 while contRunning:
   dateTime = getDateTime(ip)
