@@ -27,9 +27,13 @@ import argparse
 from struct import pack
 
 version = 0.2
+port = 9999
+
+print "lkjalfkjadsf"
 
 # Check if hostname is valid
 def validHostname(hostname):
+  print "validHostname!!!!!"
 	try:
 		socket.gethostbyname(hostname)
 	except socket.error:
@@ -72,22 +76,19 @@ def decrypt(string):
 		result += chr(a)
 	return result
 
-# Parse commandline arguments
-parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
-parser.add_argument("-t", "--target", metavar="<hostname>", required=True, help="Target hostname or IP address", type=validHostname)
-group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(commands), choices=commands)
-group.add_argument("-j", "--json", metavar="<JSON string>", help="Full JSON string of command to send")
-args = parser.parse_args()
+def getIpFromPrgArgs():
+  # Parse commandline arguments
+  parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
+  parser.add_argument("-t", "--target", metavar="<hostname>", required=True, help="Target hostname or IP address", type=validHostname)
 
+  #group = parser.add_mutually_exclusive_group(required=False)
+  #group.add_argument("-c", "--command", metavar="<command>", required=False, help="Preset command to send. Choices are: "+", ".join(commands),
+  #                   choices=commands)
+  #group.add_argument("-j", "--json", metavar="<JSON string>", help="Full JSON string of command to send")
+  args = parser.parse_args()
 
-# Set target IP, port and command to send
-ip = args.target
-port = 9999
-if args.command is None:
-	cmd = args.json
-else:
-	cmd = commands[args.command]
+  # Set target IP, port and command to send
+  return args.target
 
 def getSocket():
   socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -147,6 +148,11 @@ def tryCallSlim(socket_tcp):
     print "Failing BAD in tryCall"
 
   return (res,dataDecr)
+
+ip = getIpFromPrgArgs()
+
+print ip
+exit(1)
 
 print "Cmd:"
 print cmd 
