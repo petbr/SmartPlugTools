@@ -785,6 +785,7 @@ while contRunning:
   elif pumpMode == PumpMode.pumpTurnedOff:
     # When turned off and start to get close end time....have high resolution
     if (offDuration+5) > T_maxOffTime:
+      print "Getting close...  ", (T_maxOffTime-offDuration)
       time.sleep(T_highResSleep)
     else:
       time.sleep(T_lowResSleep)
