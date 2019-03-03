@@ -514,6 +514,9 @@ def startup():
   global T_defaultMaxOffTime
   global T_maxOffTime
   global T_shortIdleTime
+  global T_lowResSleep
+  global T_mediumResSleep
+  global T_highResSleep
 
   # Counter
   global C_shortIdleToPump
