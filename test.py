@@ -553,6 +553,9 @@ def startup():
   T_defaultMaxOffTime       = 200
   T_maxOffTime              = 10
   T_shortIdleTime           = 5
+  T_lowResSleep             = 2
+  T_mediumResSleep          = 1.0
+  T_highResSleep            = 0.3
 
   # Counter
   C_shortIdleToPump = 0
@@ -771,16 +774,23 @@ while contRunning:
                 dateTime, power, pumpMode, T_maxOffTime)
     pumpMode = PumpMode.idle_short
       
-      
+  # Echo mode when turned OFF....but when not getting close to end time.
+  offDuration = time.time() - switchTime      
+  # Have medium resolution when idle_long
   if pumpMode == PumpMode.idle_long:
-    time.sleep(0.3)
+    time.sleep(T_mediumResSleep)
+  elif pumpMode == PumpMode.pumpTurnedOff:
+    # When turned off and start to get close end time....have high resolution
+    if (offDuration+5) > T_maxOffTime:
+      time.sleep(T_highResSleep)
+    else:
+      time.sleep(T_lowResSleep)
   else:
     if isVirginList:
       gItem = getGraphItem(dateTime, power)
       listOfGraphItems = listOfGraphItems + "\n" + gItem
       #sys.stdout.flush()
-    
-    time.sleep(0.3)
+    time.sleep(T_highResSleep)
 
   prevPower = powerValue
 
