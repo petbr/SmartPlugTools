@@ -500,6 +500,12 @@ ip = args.target
 
 # idle -> pumpingWater -> pumpingAir/idle -> idle
 
+def switchMode(pm, dt, pow):
+  global pumpMode
+
+  pumpMode = pm
+  powVal = pow['power']
+
 def startup():
   # Power tresholds
   global P_idleTreshold
@@ -626,12 +632,12 @@ while contRunning:
       printStatus("Idle short ===> Pumping water\n", duration,
                   dateTime, power, pumpMode, T_maxOffTime)
 
-      pumpMode = PumpMode.pumpingWater
+      switchMode(PumpMode.pumpingWater, dateTime, power)
       
     elif duration > T_shortIdleTime:
       printStatus("Short idle ===> Idle long\n", duration,
                   dateTime, power, pumpMode, T_maxOffTime)
-      pumpMode = PumpMode.idle_long
+      switchMode(PumpMode.idle_long, dateTime, power)
       
   elif pumpMode is PumpMode.idle_long:
 
@@ -670,7 +676,7 @@ while contRunning:
       sleepDurationBeforeWater = changeTime - sleepTimeProspect      
       printStatus("Idle Long ===> Pumping water\n", duration,
                   dateTime, power, pumpMode, T_maxOffTime)
-      pumpMode = PumpMode.pumpingWater
+      switchMode(PumpMode.pumpingWater, dateTime, power)
 
       
   elif pumpMode is PumpMode.pumpingWater:
@@ -688,7 +694,7 @@ while contRunning:
       printStatus("Pumping water ===> Pumping air\n", duration,
                   dateTime, power, pumpMode, T_maxOffTime)
 
-      pumpMode = PumpMode.pumpingAir
+      switchMode(PumpMode.pumpingAir, dateTime, power)
     
   elif pumpMode is PumpMode.pumpingAir:
     #print ("Pumping air, P={p:5.5f}"
@@ -703,7 +709,7 @@ while contRunning:
       printStatus("Pumping Air short time ===> Idle short\n", duration,
                   dateTime, power, pumpMode, T_maxOffTime)
 
-      pumpMode = PumpMode.idle_short
+      switchMode(PumpMode.idle_short, dateTime, power)
 
     elif timePumpingAir > T_pumpingAirBeforeTurnOff:
       sleepTimeProspect = time.time()      
@@ -718,7 +724,7 @@ while contRunning:
       printStatus("Pumping Air too long time ===> Turn OFF!!!!\n", duration,
                   dateTime, power, pumpMode, T_maxOffTime)
 
-      pumpMode = PumpMode.pumpTurnedOff
+      switchMode(PumpMode.pumpTurnedOff, dateTime, power)
     
   elif pumpMode is PumpMode.pumpTurnedOff:
     #print ("Pump turned off, P={p:5.5f}"
@@ -765,7 +771,7 @@ while contRunning:
       switchTime = changeTime
       printStatus("OFF max time reached ===> Turn ON + Idle short!!!!\n", offDuration,
                   dateTime, power, pumpMode, T_maxOffTime)
-      pumpMode = PumpMode.idle_short      
+      switchMode(PumpMode.idle_short, dateTime, power)
     
   else:
     print ("Pump mode = UNKNOWN, go to Idle")
@@ -775,7 +781,7 @@ while contRunning:
     setTurnOn(ip)
     printStatus("OFF max time reached ===> Turn ON + Idle!!!!\n", duration,
                 dateTime, power, pumpMode, T_maxOffTime)
-    pumpMode = PumpMode.idle_short
+    switchMode(PumpMode.idle_short, dateTime, power)
       
   # Echo mode when turned OFF....but when not getting close to end time.
   offDuration = time.time() - switchTime      
