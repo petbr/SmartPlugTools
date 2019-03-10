@@ -1,0 +1,5 @@
+sudo mkdir     /tmp/DranpumpData
+sudo chmod 777 /tmp/DranpumpData
+sudo mkdir     /var/log/lighttpd
+sudo chmod 777 /var/log/lighttpd
+/etc/init.d/lighttpd start
