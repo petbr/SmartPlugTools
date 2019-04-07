@@ -6,6 +6,6 @@ while true; do
   echo "New FileName: "$newFileName
   
   sleep 5
-	touch /tmp/DranpumpData/$newFileName
-	python test.py -t 192.168.1.18 -c energy | tee /tmp/DranpumpData/ful_log.txt
+  touch /tmp/DranpumpData/$newFileName
+  python test.py -t 192.168.1.18 -c energy | tee /tmp/DranpumpData/ful_log.txt
 done
