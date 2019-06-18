@@ -317,6 +317,8 @@ def createFile(filename, contents):
   return
 
 def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
+  return T_defaultMaxOffTime
+
   # Typical at start the values == 0...then use default
   if (sleepDurationBeforeWater == 0) or (latestWaterTime == 0):
     t = T_defaultMaxOffTime
