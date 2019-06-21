@@ -564,9 +564,12 @@ def startup():
   T_defaultMaxOffTime       = 120
   T_maxOffTime              = 10
   T_shortIdleTime           = 5
+#  T_lowResSleep             = 2
+#  T_mediumResSleep          = 1.0
+#  T_highResSleep            = 0.3
   T_lowResSleep             = 2
-  T_mediumResSleep          = 1.0
-  T_highResSleep            = 0.3
+  T_mediumResSleep          = 0.25
+  T_highResSleep            = 0.15
 
   # Counter
   C_shortIdleToPump = 0
