@@ -53,7 +53,7 @@ import sys
 
 from struct import pack
 
-version = 0.2
+version = 0.9
 
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
