@@ -109,7 +109,7 @@ def encrypt(string):
 
 def decrypt(string):
   
-  print("decrypt::string = ", string)
+  #print("decrypt::string = ", string)
   key = 171
   result = ""
   
@@ -118,7 +118,7 @@ def decrypt(string):
     key = ord(i)
     result += chr(a)
 
-  print("decrypt::result = ", result)
+  #print("decrypt::result = ", result)
   
   return result
 
@@ -144,6 +144,7 @@ def sendAndReceiveOnSocket(ip, port, cmd):
   sendTimes = 0
   successfulSend = False
   data = "Didn't work out, will be set later"
+
   while successfulSend == False:
     try:
       # Connect socket
@@ -159,6 +160,8 @@ def sendAndReceiveOnSocket(ip, port, cmd):
       successfulSend = True
       
     except socket.error:
+      print("sendAndReceiveOnSocket::  time = " + str(time.time()))
+      
       print("Coulllllllllllld not connect to host " + ip + ":" + str(port))
       print("Try #", str(sendTimes))
       successfulSend = False
@@ -204,9 +207,9 @@ def getDateTime(ip):
   #print("getTime, ip = ", ip)
 
   timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
-  print("getDateTime::timeData = ", timeData)
+  #print("getDateTime::timeData = ", timeData)
   decryptedTimeData = decrypt(timeData[4:])
-  print("decryptedTimeData = ", decryptedTimeData)
+  #print("decryptedTimeData = ", decryptedTimeData)
   
   dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
               'month'    : int(findValueStr(decryptedTimeData,  "month")),
