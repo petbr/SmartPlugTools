@@ -108,14 +108,19 @@ def encrypt(string):
 	return result
 
 def decrypt(string):
-	key = 171
-	result = ""
-	for i in string:
-		a = key ^ ord(i)
-		key = ord(i)
-		result += chr(a)
+  
+  print("decrypt::string = ", string)
+  key = 171
+  result = ""
+  
+  for i in string:
+    a = key ^ ord(i)
+    key = ord(i)
+    result += chr(a)
 
-	return result
+  print("decrypt::result = ", result)
+  
+  return result
 
 # Ex.     inData: "{"emeter":{"get_realtime":{"current":0.036836,"voltage":233.437091,"power":3.172235,"total":5.032000,"err_code":0}}}')"
 #         field:  "power"                                                              1      ffffffffE
@@ -135,21 +140,34 @@ def findValueStr(inData, field):
 	return findValue
 
 def sendAndReceiveOnSocket(ip, port, cmd):
-	try:
-		# Connect socket
-		sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock_tcp.connect((ip, port))
 
-		sock_tcp.send(encrypt(cmd))
-		data = sock_tcp.recv(2048)
+  sendTimes = 0
+  successfulSend = False
+  data = "Didn't work out, will be set later"
+  while successfulSend == False:
+    try:
+      # Connect socket
+      sendTimes = sendTimes + 1
 
-		#Close socket connection
-		sock_tcp.close()
-
-	except socket.error:
-		quit("Cound not connect to host " + ip + ":" + str(port))
-
-	return data
+      sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      sock_tcp.connect((ip, port))
+      sock_tcp.send(encrypt(cmd))
+      data = sock_tcp.recv(2048)
+      
+      #Close socket connection
+      sock_tcp.close()
+      successfulSend = True
+      
+    except socket.error:
+      print("Coulllllllllllld not connect to host " + ip + ":" + str(port))
+      print("Try #", str(sendTimes))
+      successfulSend = False
+    
+  if sendTimes > 3:
+      print("Tried too much, #", str(sendTimes))
+      quit("BREAKING!!!!!!!")
+    
+  return data
 
 #python check_husqvarna.py -t 192.168.1.18 -c off
 #('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
@@ -186,8 +204,9 @@ def getDateTime(ip):
   #print("getTime, ip = ", ip)
 
   timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
+  print("getDateTime::timeData = ", timeData)
   decryptedTimeData = decrypt(timeData[4:])
-  #print("decryptedTimeData = ", decryptedTimeData)
+  print("decryptedTimeData = ", decryptedTimeData)
   
   dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
               'month'    : int(findValueStr(decryptedTimeData,  "month")),
@@ -197,6 +216,13 @@ def getDateTime(ip):
               'sec'      : int(findValueStr(decryptedTimeData,  "sec")),
               'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
   
+#Traceback (most recent call last):
+#  File "test.py", line 617, in <module>
+#    dateTime = getDateTime(ip)
+#  File "test.py", line 192, in getDateTime
+#    dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
+#ValueError: invalid literal for int() with base 10: ''
+
   
   #print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
       #.format(y=dateTime["year"],
@@ -559,7 +585,7 @@ def startup():
   # Time tresholds.
   T_wantedPumpTime          = 7.0
   T_minPumpingWater         = 2
-  T_pumpingAirBeforeTurnOff = 3
+  T_pumpingAirBeforeTurnOff = 6
   T_reportAfterOffTime      = 2
   T_defaultMaxOffTime       = 120
   T_maxOffTime              = 10
@@ -567,9 +593,9 @@ def startup():
 #  T_lowResSleep             = 2
 #  T_mediumResSleep          = 1.0
 #  T_highResSleep            = 0.3
-  T_lowResSleep             = 2
-  T_mediumResSleep          = 0.25
-  T_highResSleep            = 0.15
+  T_lowResSleep             = 4
+  T_mediumResSleep          = 2.0
+  T_highResSleep            = 1.0
 
   # Counter
   C_shortIdleToPump = 0
