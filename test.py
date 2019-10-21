@@ -55,6 +55,8 @@ from struct import pack
 
 version = 0.9
 
+sendAndReceiveErrorsCounter = 0
+
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
 commands = {'info'     : '{"system":{"get_sysinfo":{}}}',
@@ -140,15 +142,15 @@ def findValueStr(inData, field):
 	return findValue
 
 def sendAndReceiveOnSocket(ip, port, cmd):
+  global sendAndReceiveErrorsCounter
 
-  sendTimes = 0
+  faultyTimes = 0
   successfulSend = False
   data = "Didn't work out, will be set later"
-
+  
   while successfulSend == False:
     try:
       # Connect socket
-      sendTimes = sendTimes + 1
 
       sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       sock_tcp.connect((ip, port))
@@ -159,16 +161,21 @@ def sendAndReceiveOnSocket(ip, port, cmd):
       sock_tcp.close()
       successfulSend = True
       
-    except socket.error:
+#    except socket.error:
+    except:
+      faultyTimes = faultyTimes + 1
       print("sendAndReceiveOnSocket::  time = " + str(time.time()))
+      sys.stdout.flush()
       
       print("Coulllllllllllld not connect to host " + ip + ":" + str(port))
-      print("Try #", str(sendTimes))
+      sys.stdout.flush()
+      print("except Try #", str(faultyTimes))
+      sys.stdout.flush()
       successfulSend = False
     
-  if sendTimes > 3:
-      print("Tried too much, #", str(sendTimes))
-      quit("BREAKING!!!!!!!")
+  if faultyTimes > sendAndReceiveErrorsCounter:
+    sendAndReceiveErrorsCounter = faultyTimes
+    print("sendAndReceiveOnSocket:: Tried too much current max #", str(sendAndReceiveErrorsCounter))
     
   return data
 
@@ -330,6 +337,9 @@ def createHtmlContents(listOfGraphItems, title):
   return cnts
 
 def createFile(filename, contents):
+  global sendAndReceiveErrorsCounter
+  print("sendAndReceiveOnSocket:: Tried too much current max #", str(sendAndReceiveErrorsCounter))
+  
   f = open(filename, "w+")
   f.write(contents)
   f.close()
