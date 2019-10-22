@@ -47,6 +47,7 @@
 
 import socket
 import time
+import datetime
 import enum
 import argparse
 import sys
@@ -164,6 +165,7 @@ def sendAndReceiveOnSocket(ip, port, cmd):
 #    except socket.error:
     except:
       faultyTimes = faultyTimes + 1
+      print(datetime.datetime.now())
       print("sendAndReceiveOnSocket::  time = " + str(time.time()))
       sys.stdout.flush()
       
