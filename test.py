@@ -56,7 +56,11 @@ from struct import pack
 
 version = 0.9
 
+# Global variables
 sendAndReceiveErrorsCounter = 0
+setTurnOffErrorsCounter     = 0
+setTurnOnErrorsCounter     = 0
+getDateTimeErrorsCounter    = 0
 
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
@@ -174,6 +178,8 @@ def sendAndReceiveOnSocket(ip, port, cmd):
       print("except Try #", str(faultyTimes))
       sys.stdout.flush()
       successfulSend = False
+      time.sleep(2)
+
     
   if faultyTimes > sendAndReceiveErrorsCounter:
     sendAndReceiveErrorsCounter = faultyTimes
@@ -185,13 +191,20 @@ def sendAndReceiveOnSocket(ip, port, cmd):
 #('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
 #('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
 def setTurnOff(ip):
-  turnOffResult = sendAndReceiveOnSocket(ip, port, turnOffCmd)
-  decryptedTurnOffData = decrypt(turnOffResult[4:])
-  
-  turnOffRes = {'err_code' : int(findValueStr(decryptedTurnOffData, "err_code"))}
-  
-  print("TURN_OFF: E:{e:01d}"
-      .format(e=turnOffRes["err_code"]))
+  global setTurnOffErrorsCounter
+
+  try:
+    turnOffResult = sendAndReceiveOnSocket(ip, port, turnOffCmd)
+    decryptedTurnOffData = decrypt(turnOffResult[4:])
+    
+    turnOffRes = {'err_code' : int(findValueStr(decryptedTurnOffData, "err_code"))}
+    
+    print("TURN_OFF: E:{e:01d}"
+        .format(e=turnOffRes["err_code"]))
+
+  except:
+    setTurnOffErrorsCounter = setTurnOffErrorsCounter + 1
+    return setTurnOff(ip)
   
   return turnOffRes
 
@@ -199,51 +212,66 @@ def setTurnOff(ip):
 #('Sent:     ', '{"system":{"set_relay_state":{"state":1}}}')
 #('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
 def setTurnOn(ip):
-  turnOnResult = sendAndReceiveOnSocket(ip, port, turnOnCmd)
-  decryptedTimeData = decrypt(turnOnResult[4:])
+  global setTurnOnErrorsCounter
+
+  try:
+    turnOnResult = sendAndReceiveOnSocket(ip, port, turnOnCmd)
+    decryptedTimeData = decrypt(turnOnResult[4:])
+    
+    turnOnRes = {'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
+    
+    print("TURN_ON: E:{e:01d}"
+        .format(e=turnOnRes["err_code"]))
   
-  turnOnRes = {'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
-  
-  print("TURN_ON: E:{e:01d}"
-      .format(e=turnOnRes["err_code"]))
-  
+  except:
+    setTurnOnErrorsCounter = setTurnOnErrorsCounter + 1
+    return setTurnOn(ip)
+
   return turnOnRes
 
 #python check_husqvarna.py -t 192.168.1.18 -c time
 #('Sent:     ', '{"time":{"get_time":{}}}')
 #('Received: ', '{"time":{"get_time":{"err_code":0,"year":2019,"month":1,"mday":21,"wday":1,"hour":19,"min":33,"sec":47}}}')
 def getDateTime(ip):
+  global getDateTimeErrorsCounter
+  
   #print("getTime, ip = ", ip)
 
-  timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
-  #print("getDateTime::timeData = ", timeData)
-  decryptedTimeData = decrypt(timeData[4:])
-  #print("decryptedTimeData = ", decryptedTimeData)
-  
-  dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
-              'month'    : int(findValueStr(decryptedTimeData,  "month")),
-              'mday'     : int(findValueStr(decryptedTimeData,  "mday")),
-              'hour'     : int(findValueStr(decryptedTimeData,  "hour")),
-              'min'      : int(findValueStr(decryptedTimeData,  "min")),
-              'sec'      : int(findValueStr(decryptedTimeData,  "sec")),
-              'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
-  
-#Traceback (most recent call last):
-#  File "test.py", line 617, in <module>
-#    dateTime = getDateTime(ip)
-#  File "test.py", line 192, in getDateTime
-#    dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
-#ValueError: invalid literal for int() with base 10: ''
+  try:
+    timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
+    #print("getDateTime::timeData = ", timeData)
+    decryptedTimeData = decrypt(timeData[4:])
+    #print("decryptedTimeData = ", decryptedTimeData)
+    
+    dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
+                'month'    : int(findValueStr(decryptedTimeData,  "month")),
+                'mday'     : int(findValueStr(decryptedTimeData,  "mday")),
+                'hour'     : int(findValueStr(decryptedTimeData,  "hour")),
+                'min'      : int(findValueStr(decryptedTimeData,  "min")),
+                'sec'      : int(findValueStr(decryptedTimeData,  "sec")),
+                'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
+  except:
+    getDateTimeErrorsCounter = getDateTimeErrorsCounter + 1
+    return getDateTime(ip)
+    
+  #Traceback (most recent call last):
+  #  File "test.py", line 617, in <module>
+  #    dateTime = getDateTime(ip)
+  #  File "test.py", line 192, in getDateTime
+  #    dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
+  #ValueError: invalid literal for int() with base 10: ''
 
-  
-  #print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
-      #.format(y=dateTime["year"],
-              #m=dateTime["month"],
-              #d=dateTime["mday"],
-              #hr=dateTime["hour"],
-              #min=dateTime["min"],
-              #sec=dateTime["sec"],
-              #e=dateTime["err_code"]))
+    
+    #print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+        #.format(y=dateTime["year"],
+                #m=dateTime["month"],
+                #d=dateTime["mday"],
+                #hr=dateTime["hour"],
+                #min=dateTime["min"],
+                #sec=dateTime["sec"],
+                #e=dateTime["err_code"]))
+
+                    
   
   return dateTime
 
@@ -340,7 +368,10 @@ def createHtmlContents(listOfGraphItems, title):
 
 def createFile(filename, contents):
   global sendAndReceiveErrorsCounter
-  print("sendAndReceiveOnSocket:: Tried too much current max #", str(sendAndReceiveErrorsCounter))
+  print("sendAndReceiveOnSocket:: Transmission error max #", str(sendAndReceiveErrorsCounter))
+  print("sendAndReceiveOnSocket:: setTurnOff   error max #", str(setTurnOffErrorsCounter))
+  print("sendAndReceiveOnSocket:: setTurnOn    error max #", str(setTurnOnErrorsCounter))
+  print("sendAndReceiveOnSocket:: getDateTime  error max #", str(getDateTimeErrorsCounter))
   
   f = open(filename, "w+")
   f.write(contents)
