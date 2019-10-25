@@ -59,8 +59,9 @@ version = 0.9
 # Global variables
 sendAndReceiveErrorsCounter = 0
 setTurnOffErrorsCounter     = 0
-setTurnOnErrorsCounter     = 0
+setTurnOnErrorsCounter      = 0
 getDateTimeErrorsCounter    = 0
+getPowerErrorsCounter       = 0
 
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
@@ -279,23 +280,30 @@ def getDateTime(ip):
 #('Sent:     ', '{"emeter":{"get_realtime":{}}}')
 #('Received: ', '{"emeter":{"get_realtime":{"current":0.012866,"voltage":234.916847,"power":0.333881,"total":1.291000,"err_code":0}}}')
 def getPower(ip):
+  global getPowerErrorsCounter
+
   #print("getPower, ip = ", ip)
 
-  powerData = sendAndReceiveOnSocket(ip, port, powerCmd)
-  decryptedPowerData = decrypt(powerData[4:])
+  try:
+    powerData = sendAndReceiveOnSocket(ip, port, powerCmd)
+    decryptedPowerData = decrypt(powerData[4:])
 
-  power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
-           'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
-           'power'    : float(findValueStr(decryptedPowerData, "power")),
-           'total'    : float(findValueStr(decryptedPowerData, "total")),
-           'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
-  
-  #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
-        #.format(i=power['current'],
-                #u=power['voltage'],
-                #p=power['power'],
-                #t=power['total'],
-                #e=power['err_code']))
+    power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
+            'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
+            'power'    : float(findValueStr(decryptedPowerData, "power")),
+            'total'    : float(findValueStr(decryptedPowerData, "total")),
+            'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
+    
+    #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
+          #.format(i=power['current'],
+                  #u=power['voltage'],
+                  #p=power['power'],
+                  #t=power['total'],
+                  #e=power['err_code']))
+
+  except:
+    getPowerErrorsCounter = getPowerErrorsCounter + 1
+    return getPower(ip)
   
   return power
 
@@ -372,6 +380,7 @@ def createFile(filename, contents):
   print("sendAndReceiveOnSocket:: setTurnOff   error max #", str(setTurnOffErrorsCounter))
   print("sendAndReceiveOnSocket:: setTurnOn    error max #", str(setTurnOnErrorsCounter))
   print("sendAndReceiveOnSocket:: getDateTime  error max #", str(getDateTimeErrorsCounter))
+  print("sendAndReceiveOnSocket:: getPower     error max #", str(getPowerErrorsCounter))
   
   f = open(filename, "w+")
   f.write(contents)
