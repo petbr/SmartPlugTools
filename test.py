@@ -693,6 +693,10 @@ print "!!!!!!!!!!!!!!!!!!!STARTING!!!!!!!!!!!!!!!!!!"
 print "*********************************************"
 print "*********************************************"
 print "************** sudo ifconfig wlan0 up & sudo ifconfig wlan0 down ***********************"
+#POWER I=0.01294 U=235.88 P=0.00000 Tot=0.00300 E:0
+#Pump mode = idle_short
+#Short idle ===> Idle long
+
 
 startup()
 while contRunning:
