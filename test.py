@@ -648,9 +648,9 @@ def startup():
 #  T_lowResSleep             = 2
 #  T_mediumResSleep          = 1.0
 #  T_highResSleep            = 0.3
-  T_lowResSleep             = 0.5
-  T_mediumResSleep          = 0.2
-  T_highResSleep            = 0.1
+  T_lowResSleep             = 5.0
+  T_mediumResSleep          = 2.0
+  T_highResSleep            = 1.0
 
   # Counter
   C_shortIdleToPump = 0
