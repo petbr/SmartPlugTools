@@ -150,7 +150,6 @@ def findValueStr(inData, field):
 def sendAndReceiveOnSocket(ip, port, cmd):
   global sendAndReceiveErrorsCounter
 
-  faultyTimes = 0
   successfulSend = False
   data = "Didn't work out, will be set later"
   
@@ -169,23 +168,18 @@ def sendAndReceiveOnSocket(ip, port, cmd):
       
 #    except socket.error:
     except:
-      faultyTimes = faultyTimes + 1
+      sendAndReceiveErrorsCounter = sendAndReceiveErrorsCounter + 1
       print(datetime.datetime.now())
       print("sendAndReceiveOnSocket::  time = " + str(time.time()))
       sys.stdout.flush()
       
       print("Coulllllllllllld not connect to host " + ip + ":" + str(port))
       sys.stdout.flush()
-      print("except Try #", str(faultyTimes))
+      print("except Try #", str(sendAndReceiveErrorsCounter))
       sys.stdout.flush()
       successfulSend = False
       time.sleep(2)
 
-    
-  if faultyTimes > sendAndReceiveErrorsCounter:
-    sendAndReceiveErrorsCounter = faultyTimes
-    print("sendAndReceiveOnSocket:: Tried too much current max #", str(sendAndReceiveErrorsCounter))
-    
   return data
 
 #python check_husqvarna.py -t 192.168.1.18 -c off
