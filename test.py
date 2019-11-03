@@ -56,6 +56,8 @@ from struct import pack
 
 version = 0.9
 
+fileLocations = "/var/log/DranpumpData"
+
 # Global variables
 sendAndReceiveErrorsCounter = 0
 setTurnOffErrorsCounter     = 0
@@ -307,7 +309,7 @@ def getGraphListFileName(dateTime,
                          tShortIdleTime,
                          waterTime, sleepDurationBeforeWater, isOffByItself):
   
-  filename = "/tmp/DranpumpData/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_AirBOff:{t1:02d}_tMaxOff:{t2:03d}_tShortIdle:{t3:02d}_BW:{bw:4.2f}_WT:{wt:2.2f}".format(y=dateTime["year"],
+  filename = fileLocations+"/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_AirBOff:{t1:02d}_tMaxOff:{t2:03d}_tShortIdle:{t3:02d}_BW:{bw:4.2f}_WT:{wt:2.2f}".format(y=dateTime["year"],
               m=dateTime["month"],
               d=dateTime["mday"],
               hr=dateTime["hour"],
