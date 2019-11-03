@@ -1,3 +1,5 @@
+# Where IS Document ROOT directory:
+# sudo leafpad /etc/lighttpd/lighttpd.conf
 sudo mkdir     /var/log/DranpumpData
 sudo chown pi  /var/log/DranpumpData
 sudo chmod 777 /var/log/DranpumpData
