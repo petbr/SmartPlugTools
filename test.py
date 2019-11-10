@@ -59,7 +59,9 @@ version = 0.9
 fileLocations = "/var/log/DranpumpData"
 
 # Global variables
+
 sendAndReceiveErrorsCounter = 0
+sendAndReceiveSumCounter    = 0
 setTurnOffErrorsCounter     = 0
 setTurnOnErrorsCounter      = 0
 getDateTimeErrorsCounter    = 0
@@ -151,8 +153,10 @@ def findValueStr(inData, field):
 
 def sendAndReceiveOnSocket(ip, port, cmd):
   global sendAndReceiveErrorsCounter
+  global sendAndReceiveSumCounter
 
   successfulSend = False
+  sendAndReceiveSumCounter = sendAndReceiveSumCounter + 1
   data = "Didn't work out, will be set later"
   
   while successfulSend == False:
@@ -371,8 +375,8 @@ def createHtmlContents(listOfGraphItems, title):
   return cnts
 
 def createFile(filename, contents):
-  global sendAndReceiveErrorsCounter
   print("sendAndReceiveOnSocket:: Transmission error max #", str(sendAndReceiveErrorsCounter))
+  print("sendAndReceiveOnSocket:: Transmissions          #", str(sendAndReceiveSumCounter))
   print("sendAndReceiveOnSocket:: setTurnOff   error max #", str(setTurnOffErrorsCounter))
   print("sendAndReceiveOnSocket:: setTurnOn    error max #", str(setTurnOnErrorsCounter))
   print("sendAndReceiveOnSocket:: getDateTime  error max #", str(getDateTimeErrorsCounter))
