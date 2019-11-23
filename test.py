@@ -58,8 +58,10 @@ version = 0.9
 
 fileLocations = "/var/log/DranpumpData"
 
-# Global variables
 
+# Global variables
+listOfGraphItems_Power      = ""
+listOfGraphItems_SleepTime  = ""
 sendAndReceiveErrorsCounter = 0
 sendAndReceiveSumCounter    = 0
 setTurnOffErrorsCounter     = 0
@@ -330,11 +332,18 @@ def getGraphListFileName(dateTime,
   return filename
   
 
-def getGraphItem(dateTime, power):
+def createGraphItem_Power(dateTime, power):
   s = "['{hr:02d}:{min:02d}:{sec:02d}', {p}],".format(hr=dateTime['hour'],
                                                    min=dateTime['min'],
                                                    sec=dateTime['sec'],
                                                    p=power['power'])
+  return s
+
+def createGraphItem_SleepTime(dateTime, sleepTime):
+  s = "['{hr:02d}:{min:02d}:{sec:02d}', {s}],".format(hr=dateTime['hour'],
+                                                   min=dateTime['min'],
+                                                   sec=dateTime['sec'],
+                                                   s=sleepTime)
   return s
 
 def createHtmlContents(listOfGraphItems, title):
@@ -627,7 +636,7 @@ def startup():
   global dateTime
   global power
   global isVirginList
-  global listOfGraphItems
+  global listOfGraphItems_Power
   global latestWaterTime
   global sleepTimeProspect
   global sleepDurationBeforeWater
@@ -677,7 +686,7 @@ def startup():
   dateTime = getDateTime(ip)
   power    = getPower(ip)
   isVirginList = True
-  listOfGraphItems = ""
+  listOfGraphItems_Power = ""
   latestWaterTime = 0
   sleepTimeProspect = time.time()
   sleepDurationBeforeWater = 0
@@ -739,7 +748,7 @@ while contRunning:
       title += "waterTime={waterTime:2.2f}'"
       title = title.format(t_off=T_maxOffTime, waterTime=latestWaterTime)
       print title
-      contents = createHtmlContents(listOfGraphItems, title)
+      contents = createHtmlContents(listOfGraphItems_Power, title)
       filename = getGraphListFileName(dateTime,
                                       T_pumpingAirBeforeTurnOff,
                                       T_maxOffTime,
@@ -750,12 +759,11 @@ while contRunning:
       print "Filename: " + filename + "\n"
       print "Contents: " + contents + "\n"
       createFile(filename, contents)
-      listOfGraphItems = ""
       sys.stdout.flush()
     
       # A new one must be started
       isVirginList = False
-      listOfGraphItems = ""
+      listOfGraphItems_Power = ""
 
 #
     duration = changeTime-switchTime
@@ -834,7 +842,7 @@ while contRunning:
         title += "  waterTime={wt:4.2f}'"
         title = title.format(t_Off=T_maxOffTime, wt=latestWaterTime)
         print title
-        contents = createHtmlContents(listOfGraphItems, title)
+        contents = createHtmlContents(listOfGraphItems_Power, title)
         
         
         filename = getGraphListFileName(dateTime,
@@ -847,12 +855,12 @@ while contRunning:
         print "Filename: " + filename + "\n"
         print "Contents: " + contents + "\n"
         createFile(filename, contents)
-        listOfGraphItems = ""
+        listOfGraphItems_Power = ""
         sys.stdout.flush()
       
         # A new one must be started
         isVirginList = False
-        listOfGraphItems = ""
+        listOfGraphItems_Power = ""
 
     if offDuration > T_maxOffTime:
       changeTime = time.time()      
@@ -888,8 +896,8 @@ while contRunning:
       time.sleep(T_lowResSleep)
   else:
     if isVirginList:
-      gItem = getGraphItem(dateTime, power)
-      listOfGraphItems = listOfGraphItems + "\n" + gItem
+      gItem = createGraphItem_Power(dateTime, power)
+      listOfGraphItems_Power = listOfGraphItems_Power + "\n" + gItem
       #sys.stdout.flush()
     time.sleep(T_highResSleep)
 
