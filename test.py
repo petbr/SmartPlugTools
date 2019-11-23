@@ -60,14 +60,14 @@ fileLocations = "/var/log/DranpumpData"
 
 
 # Global variables
-listOfGraphItems_Power      = ""
-listOfGraphItems_SleepTime  = ""
-sendAndReceiveErrorsCounter = 0
-sendAndReceiveSumCounter    = 0
-setTurnOffErrorsCounter     = 0
-setTurnOnErrorsCounter      = 0
-getDateTimeErrorsCounter    = 0
-getPowerErrorsCounter       = 0
+listOfGraphItems_Power        = ""
+listOfGraphItems_BeforeWater  = ""
+sendAndReceiveErrorsCounter   = 0
+sendAndReceiveSumCounter      = 0
+setTurnOffErrorsCounter       = 0
+setTurnOnErrorsCounter        = 0
+getDateTimeErrorsCounter      = 0
+getPowerErrorsCounter         = 0
 
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
@@ -313,7 +313,9 @@ def getGraphListFileName(dateTime,
                          tPumpAirBeforeTurnOff,
                          tMaxOffTime,
                          tShortIdleTime,
-                         waterTime, sleepDurationBeforeWater, isOffByItself):
+                         waterTime,
+                         sleepDurationBeforeWater,
+                         isOffByItself):
   
   filename = fileLocations+"/{y:04d}-{m:02d}-{d:02d}_{hr:02d}m{min:02d}_AirBOff:{t1:02d}_tMaxOff:{t2:03d}_tShortIdle:{t3:02d}_BW:{bw:4.2f}_WT:{wt:2.2f}".format(y=dateTime["year"],
               m=dateTime["month"],
@@ -334,19 +336,19 @@ def getGraphListFileName(dateTime,
 
 def createGraphItem_Power(dateTime, power):
   s = "['{hr:02d}:{min:02d}:{sec:02d}', {p}],".format(hr=dateTime['hour'],
-                                                   min=dateTime['min'],
-                                                   sec=dateTime['sec'],
-                                                   p=power['power'])
+                                             min=dateTime['min'],
+                                             sec=dateTime['sec'],
+                                             p=power['power'])
   return s
 
-def createGraphItem_SleepTime(dateTime, sleepTime):
-  s = "['{hr:02d}:{min:02d}:{sec:02d}', {s}],".format(hr=dateTime['hour'],
-                                                   min=dateTime['min'],
-                                                   sec=dateTime['sec'],
-                                                   s=sleepTime)
+def createGraphItem_BeforeWater(dateTime, bwTime):
+  s = "['{hr:02d}:{min:02d}:{sec:02d}', {bw}],".format(hr=dateTime['hour'],
+                                              min=dateTime['min'],
+                                              sec=dateTime['sec'],
+                                              bw=bwTime)
   return s
 
-def createHtmlContents(listOfGraphItems, title):
+def createHtmlContents(listOfGraphItems, title, Y_name):
   print title
   #title = "title: 'Dranpump (W)'"
   cnts =        "<html>\n"
@@ -358,7 +360,7 @@ def createHtmlContents(listOfGraphItems, title):
   cnts = cnts + "\n"
   cnts = cnts + "      function drawChart() {\n"
   cnts = cnts + "        var data = google.visualization.arrayToDataTable([\n"
-  cnts = cnts + "                    ['Tid',  'Effekt'],\n"
+  cnts = cnts + "                    ['Tid',  '" + Y_name + "'],\n"
   cnts = cnts + listOfGraphItems + "\n"
   cnts = cnts + "        ]);\n"
   cnts = cnts + "\n"
@@ -637,6 +639,7 @@ def startup():
   global power
   global isVirginList
   global listOfGraphItems_Power
+  global listOfGraphItems_BeforeWater
   global latestWaterTime
   global sleepTimeProspect
   global sleepDurationBeforeWater
@@ -687,6 +690,7 @@ def startup():
   power    = getPower(ip)
   isVirginList = True
   listOfGraphItems_Power = ""
+  listOfGraphItems_BeforeWater = ""
   latestWaterTime = 0
   sleepTimeProspect = time.time()
   sleepDurationBeforeWater = 0
@@ -748,7 +752,7 @@ while contRunning:
       title += "waterTime={waterTime:2.2f}'"
       title = title.format(t_off=T_maxOffTime, waterTime=latestWaterTime)
       print title
-      contents = createHtmlContents(listOfGraphItems_Power, title)
+      contents = createHtmlContents(listOfGraphItems_Power, title, "Effekt")
       filename = getGraphListFileName(dateTime,
                                       T_pumpingAirBeforeTurnOff,
                                       T_maxOffTime,
@@ -759,6 +763,15 @@ while contRunning:
       print "Filename: " + filename + "\n"
       print "Contents: " + contents + "\n"
       createFile(filename, contents)
+      
+      bwItem = createGraphItem_BeforeWater(dateTime, sleepDurationBeforeWater)
+      listOfGraphItems_BeforeWater = listOfGraphItems_BeforeWater + "\n" + bwItem
+      bwContents = createHtmlContents(listOfGraphItems_BeforeWater, title, "Tid sedan senast")
+      bwFilename = fileLocations+"/BeforeWater.html"
+      createFile(bwFilename, bwContents)
+      print "BW Contents: " + bwContents + "\n"
+      print "BW Filename: " + bwFilename + "\n"
+      
       sys.stdout.flush()
     
       # A new one must be started
@@ -840,9 +853,9 @@ while contRunning:
         # Report the current list of graph items and start a new one
         title  = "          title: 'Dranpump (W) tOffTime={t_Off:4d}"
         title += "  waterTime={wt:4.2f}'"
-        title = title.format(t_Off=T_maxOffTime, wt=latestWaterTime)
+        title = title.format(t_Off=offDuration, wt=latestWaterTime)
         print title
-        contents = createHtmlContents(listOfGraphItems_Power, title)
+        contents = createHtmlContents(listOfGraphItems_Power, title, "Effekt")
         
         
         filename = getGraphListFileName(dateTime,
@@ -855,6 +868,15 @@ while contRunning:
         print "Filename: " + filename + "\n"
         print "Contents: " + contents + "\n"
         createFile(filename, contents)
+        
+        bwItem = createGraphItem_BeforeWater(dateTime, sleepDurationBeforeWater)
+        listOfGraphItems_BeforeWater = listOfGraphItems_BeforeWater + "\n" + bwItem
+        bwContents = createHtmlContents(listOfGraphItems_BeforeWater, title, "Tid sedan senast")
+        bwFilename = fileLocations+"/BeforeWater.html"
+        createFile(bwFilename, bwContents)
+        print "BW Contents: " + contents + "\n"
+        print "BW Filename: " + bwFilename + "\n"
+        
         listOfGraphItems_Power = ""
         sys.stdout.flush()
       
