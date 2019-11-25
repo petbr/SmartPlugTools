@@ -54,6 +54,54 @@ class PlugDevice(object):
     self.name     = name
     self.hostName = hostName
 
+  #python check_husqvarna.py -t 192.168.1.18 -c time
+  #('Sent:     ', '{"time":{"get_time":{}}}')
+  #('Received: ', '{"time":{"get_time":{"err_code":0,"year":2019,"month":1,"mday":21,"wday":1,"hour":19,"min":33,"sec":47}}}')
+  def getDateTime(ip):
+    #print("getTime, ip = ", ip)
+
+    timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
+    decryptedTimeData = decrypt(timeData[4:])
+    #print("decryptedTimeData = ", decryptedTimeData)
+    
+    dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
+                'month'    : int(findValueStr(decryptedTimeData,  "month")),
+                'mday'     : int(findValueStr(decryptedTimeData,  "mday")),
+                'hour'     : int(findValueStr(decryptedTimeData,  "hour")),
+                'min'      : int(findValueStr(decryptedTimeData,  "min")),
+                'sec'      : int(findValueStr(decryptedTimeData,  "sec")),
+                'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
+    
+    
+    #print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+        #.format(y=dateTime["year"],
+                #m=dateTime["month"],
+                #d=dateTime["mday"],
+                #hr=dateTime["hour"],
+                #min=dateTime["min"],
+                #sec=dateTime["sec"],
+                #e=dateTime["err_code"]))
+    
+    return dateTime
+
+  def sendAndReceiveOnSocket(ip, port, cmd):
+    try:
+      # Connect socket
+      sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      sock_tcp.connect((ip, port))
+
+      sock_tcp.send(encrypt(cmd))
+      data = sock_tcp.recv(2048)
+
+      #Close socket connection
+      sock_tcp.close()
+
+    except socket.error:
+      quit("Cound not connect to host " + ip + ":" + str(port))
+
+    return data
+
+
 ##### class PlugDevice(object):
 
 # Check if hostname is valid
@@ -102,22 +150,6 @@ def findValueStr(inData, field):
 
 	return findValue
 
-def sendAndReceiveOnSocket(ip, port, cmd):
-	try:
-		# Connect socket
-		sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock_tcp.connect((ip, port))
-
-		sock_tcp.send(encrypt(cmd))
-		data = sock_tcp.recv(2048)
-
-		#Close socket connection
-		sock_tcp.close()
-
-	except socket.error:
-		quit("Cound not connect to host " + ip + ":" + str(port))
-
-	return data
 
 #python check_husqvarna.py -t 192.168.1.18 -c off
 #('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
@@ -147,35 +179,6 @@ def setTurnOn(ip):
   
   return turnOnRes
 
-#python check_husqvarna.py -t 192.168.1.18 -c time
-#('Sent:     ', '{"time":{"get_time":{}}}')
-#('Received: ', '{"time":{"get_time":{"err_code":0,"year":2019,"month":1,"mday":21,"wday":1,"hour":19,"min":33,"sec":47}}}')
-def getDateTime(ip):
-  #print("getTime, ip = ", ip)
-
-  timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
-  decryptedTimeData = decrypt(timeData[4:])
-  #print("decryptedTimeData = ", decryptedTimeData)
-  
-  dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
-              'month'    : int(findValueStr(decryptedTimeData,  "month")),
-              'mday'     : int(findValueStr(decryptedTimeData,  "mday")),
-              'hour'     : int(findValueStr(decryptedTimeData,  "hour")),
-              'min'      : int(findValueStr(decryptedTimeData,  "min")),
-              'sec'      : int(findValueStr(decryptedTimeData,  "sec")),
-              'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
-  
-  
-  #print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
-      #.format(y=dateTime["year"],
-              #m=dateTime["month"],
-              #d=dateTime["mday"],
-              #hr=dateTime["hour"],
-              #min=dateTime["min"],
-              #sec=dateTime["sec"],
-              #e=dateTime["err_code"]))
-  
-  return dateTime
 
 #python check_husqvarna.py -t 192.168.1.18 -c energy
 #('Sent:     ', '{"emeter":{"get_realtime":{}}}')
@@ -232,7 +235,7 @@ def getGraphItem(dateTime, power):
   return s
 
 def createHtmlContents(listOfGraphItems, title):
-  print title
+  print(title)
   #title = "title: 'Dranpump (W)'"
   cnts =        "<html>\n"
   cnts = cnts + "  <head>\n"
@@ -310,13 +313,13 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
   ##########################
   #t = T_defaultMaxOffTime
 
-  print "------------------------------------------"
-  print "calcNewOffTime BW:{bw}, WT:{wt}, Wanted:{wa}".format(bw=sleepDurationBeforeWater,
+  print("------------------------------------------")
+  print("calcNewOffTime BW:{bw}, WT:{wt}, Wanted:{wa}".format(bw=sleepDurationBeforeWater,
                                                               wt=latestWaterTime,
-                                                              wa=T_wantedPumpTime)
-  print "ratio1 = {ra1}   ratio2 = {ra2}\n".format(ra1=ratio1, ra2=ratio2)
-  print "=> new off time = {newOffT},".format(newOffT=t)
-  print "------------------------------------------"
+                                                              wa=T_wantedPumpTime))
+  print("ratio1 = {ra1}   ratio2 = {ra2}\n".format(ra1=ratio1, ra2=ratio2))
+  print("=> new off time = {newOffT},".format(newOffT=t))
+  print("------------------------------------------")
   
   return t
 

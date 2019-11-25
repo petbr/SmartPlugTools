@@ -6,8 +6,10 @@ from PlugDevice import PlugDevice
 
 print("Starting tester!")
 
-plug1 = PlugDevice("Plug #1", "192.168.1.31")
-plug3 = PlugDevice("Plug #3", "192.168.1.33")
+plugDrainpump = PlugDevice("Plug #Drainpump", "192.168.1.18")
+plug1         = PlugDevice("Plug #1",         "192.168.1.31")
+plug2         = PlugDevice("Plug #2",         "192.168.1.32")
+plug3         = PlugDevice("Plug #3",         "192.168.1.33")
 
 # Class variables
 print("Access port_C:  {ap}"    .format(ap=PlugDevice.accessPort_C))
