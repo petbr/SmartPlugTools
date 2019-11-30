@@ -19,6 +19,12 @@ print("powerCmd_C:     {pwrC}"  .format(pwrC=PlugDevice.powerCmd_C))
 print("turnOnCmd_C:    {tOnC}"  .format(tOnC=PlugDevice.turnOnCmd_C))
 print("turnOffCmd_C:   {tOffC}" .format(tOffC=PlugDevice.turnOffCmd_C))
 
+
+# Instance variables Drainpump
+print("Name:           {name}"    .format(name     = plugDrainpump.name))
+print("HostName:       {hostName}".format(hostName = plugDrainpump.hostName))
+print("Power:          {power}"   .format(power    = plugDrainpump.getPower()))
+
 # Instance variables plug1
 print("Name:           {name}"  .format(name=plug1.name))
 print("HostName:       {hostName}" .format(hostName=plug1.hostName))

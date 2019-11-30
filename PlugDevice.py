@@ -45,6 +45,7 @@ class PlugDevice(object):
                 'reset'    : '{"system":{"reset":{"delay":1}}}',
                 'energy'   : '{"emeter":{"get_realtime":{}}}'}
 
+  port_C = 9999
   timeCmd_C    = commands_C["time"]
   powerCmd_C   = commands_C["energy"]
   turnOnCmd_C  = commands_C["on"]
@@ -84,13 +85,13 @@ class PlugDevice(object):
     
     return dateTime
 
-  def sendAndReceiveOnSocket(ip, port, cmd):
+  def sendAndReceiveOnSocket(self, ip, port, cmd):
     try:
       # Connect socket
       sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       sock_tcp.connect((ip, port))
 
-      sock_tcp.send(encrypt(cmd))
+      sock_tcp.send( cmd.encode('utf-8') )
       data = sock_tcp.recv(2048)
 
       #Close socket connection
@@ -100,6 +101,30 @@ class PlugDevice(object):
       quit("Cound not connect to host " + ip + ":" + str(port))
 
     return data
+
+  #python check_husqvarna.py -t 192.168.1.18 -c energy
+  #('Sent:     ', '{"emeter":{"get_realtime":{}}}')
+  #('Received: ', '{"emeter":{"get_realtime":{"current":0.012866,"voltage":234.916847,"power":0.333881,"total":1.291000,"err_code":0}}}')
+  def getPower(self):
+    #print("getPower, ip = ", ip)
+
+    powerData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.powerCmd_C)
+    decryptedPowerData = decrypt(powerData[4:])
+
+    power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
+            'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
+            'power'    : float(findValueStr(decryptedPowerData, "power")),
+            'total'    : float(findValueStr(decryptedPowerData, "total")),
+            'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
+    
+    #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
+          #.format(i=power['current'],
+                  #u=power['voltage'],
+                  #p=power['power'],
+                  #t=power['total'],
+                  #e=power['err_code']))
+    
+    return power
 
 
 ##### class PlugDevice(object):
@@ -114,24 +139,28 @@ def validHostname(hostname):
 
 # Encryption and Decryption of TP-Link Smart Home Protocol
 # XOR Autokey Cipher with starting key = 171
-def encrypt(string):
-	key = 171
-	result = pack('>I', len(string))
-	for i in string:
-		a = key ^ ord(i)
-		key = a
-		result += chr(a)
-	return result
+def encrypt(strData):
+  key = 171
+  result = str( pack('>I', len(strData)) )
+  print("encrypt string = ", str(strData))
+  for i in str(strData):
+    a = key ^ ord(i)
+    key = a
+    result += chr(a)
+    
+  return result
 
 def decrypt(string):
-	key = 171
-	result = ""
-	for i in string:
-		a = key ^ ord(i)
-		key = ord(i)
-		result += chr(a)
+  key = 171
+  result = str('')
+  print("decrypt string = ", string)
+  for i in string:
+    print("decrypt i = ", i)
+    a = key ^ ord(i)
+    key = ord(i)
+    result += chr(a)
 
-	return result
+  return result
 
 # Ex.     inData: "{"emeter":{"get_realtime":{"current":0.036836,"voltage":233.437091,"power":3.172235,"total":5.032000,"err_code":0}}}')"
 #         field:  "power"                                                              1      ffffffffE
@@ -180,29 +209,6 @@ def setTurnOn(ip):
   return turnOnRes
 
 
-#python check_husqvarna.py -t 192.168.1.18 -c energy
-#('Sent:     ', '{"emeter":{"get_realtime":{}}}')
-#('Received: ', '{"emeter":{"get_realtime":{"current":0.012866,"voltage":234.916847,"power":0.333881,"total":1.291000,"err_code":0}}}')
-def getPower(ip):
-  #print("getPower, ip = ", ip)
-
-  powerData = sendAndReceiveOnSocket(ip, port, powerCmd)
-  decryptedPowerData = decrypt(powerData[4:])
-
-  power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
-           'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
-           'power'    : float(findValueStr(decryptedPowerData, "power")),
-           'total'    : float(findValueStr(decryptedPowerData, "total")),
-           'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
-  
-  #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
-        #.format(i=power['current'],
-                #u=power['voltage'],
-                #p=power['power'],
-                #t=power['total'],
-                #e=power['err_code']))
-  
-  return power
 
 def getGraphListFileName(dateTime,
                          tPumpAirBeforeTurnOff,
