@@ -85,14 +85,33 @@ class PlugDevice(object):
     
     return dateTime
 
+# The opposite method of bytes.decode() is str.encode(),
+# which returns a bytes representation of the Unicode string,
+# encoded in the requested encoding.
   def sendAndReceiveOnSocket(self, ip, port, cmd):
+    print("sendAndReceiveOnSocket")
+    print("ip          =", ip)
+    print("port        =", port)
+    print("cmd         =", cmd)
+    print("cmd(utf-8)  =", cmd.encode('utf-8'))
+    
     try:
       # Connect socket
       sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       sock_tcp.connect((ip, port))
-
-      sock_tcp.send( cmd.encode('utf-8') )
-      data = sock_tcp.recv(2048)
+      print("SEND")
+      print("cmd          =", cmd)
+      encrCmd      = encrypt(cmd)
+      print("encrCmd      =", encrCmd)
+      bytesEncrCmd = encrCmd.decode('stf-8')
+      print("bytesEncrCmd =", bytesEncrCmd)
+      
+      sock_tcp.send( encrCmd )
+      print("RECV")
+      bytesData = sock_tcp.recv(2048)
+      strData = bytesData.decode('utf-8')
+      print("sendAndReceiveOnSocket bytesData =", bytesData)
+      print("sendAndReceiveOnSocket strData   =", strData)
 
       #Close socket connection
       sock_tcp.close()
@@ -100,7 +119,7 @@ class PlugDevice(object):
     except socket.error:
       quit("Cound not connect to host " + ip + ":" + str(port))
 
-    return data
+    return strData
 
   #python check_husqvarna.py -t 192.168.1.18 -c energy
   #('Sent:     ', '{"emeter":{"get_realtime":{}}}')
@@ -108,6 +127,7 @@ class PlugDevice(object):
   def getPower(self):
     #print("getPower, ip = ", ip)
 
+    print("getPower powerCmd_C = ", self.powerCmd_C)
     powerData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.powerCmd_C)
     decryptedPowerData = decrypt(powerData[4:])
 
@@ -139,27 +159,29 @@ def validHostname(hostname):
 
 # Encryption and Decryption of TP-Link Smart Home Protocol
 # XOR Autokey Cipher with starting key = 171
-def encrypt(strData):
+def encrypt(string):
   key = 171
-  result = str( pack('>I', len(strData)) )
-  print("encrypt string = ", str(strData))
-  for i in str(strData):
+  result = str(pack('>I', len(string)))
+  for i in string:
     a = key ^ ord(i)
     key = a
     result += chr(a)
-    
-  return result
+    print("result = ", result)
+    return result
 
 def decrypt(string):
+  
+  #print("decrypt::string = ", string)
   key = 171
-  result = str('')
-  print("decrypt string = ", string)
+  result = ""
+  
   for i in string:
-    print("decrypt i = ", i)
     a = key ^ ord(i)
     key = ord(i)
     result += chr(a)
 
+  #print("decrypt::result = ", result)
+  
   return result
 
 # Ex.     inData: "{"emeter":{"get_realtime":{"current":0.036836,"voltage":233.437091,"power":3.172235,"total":5.032000,"err_code":0}}}')"
