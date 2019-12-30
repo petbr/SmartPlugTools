@@ -55,36 +55,6 @@ class PlugDevice(object):
     self.name     = name
     self.hostName = hostName
 
-  #python check_husqvarna.py -t 192.168.1.18 -c time
-  #('Sent:     ', '{"time":{"get_time":{}}}')
-  #('Received: ', '{"time":{"get_time":{"err_code":0,"year":2019,"month":1,"mday":21,"wday":1,"hour":19,"min":33,"sec":47}}}')
-  def getDateTime(ip):
-    #print("getTime, ip = ", ip)
-
-    timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
-    decryptedTimeData = decrypt(timeData[4:])
-    #print("decryptedTimeData = ", decryptedTimeData)
-    
-    dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
-                'month'    : int(findValueStr(decryptedTimeData,  "month")),
-                'mday'     : int(findValueStr(decryptedTimeData,  "mday")),
-                'hour'     : int(findValueStr(decryptedTimeData,  "hour")),
-                'min'      : int(findValueStr(decryptedTimeData,  "min")),
-                'sec'      : int(findValueStr(decryptedTimeData,  "sec")),
-                'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
-    
-    
-    #print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
-        #.format(y=dateTime["year"],
-                #m=dateTime["month"],
-                #d=dateTime["mday"],
-                #hr=dateTime["hour"],
-                #min=dateTime["min"],
-                #sec=dateTime["sec"],
-                #e=dateTime["err_code"]))
-    
-    return dateTime
-
 # The opposite method of bytes.decode() is str.encode(),
 # which returns a bytes representation of the Unicode string,
 # encoded in the requested encoding.
@@ -118,9 +88,44 @@ class PlugDevice(object):
 
     return bytesData
 
+  # python check_husqvarna.py -t 192.168.1.18 -c time
+  # ('Sent:     ', '{"time":{"get_time":{}}}')
+  # ('Received: ', '{"time":{"get_time":{"err_code":0,"year":2019,"month":1,"mday":21,"wday":1,"hour":19,"min":33,"sec":47}}}')
+  def getDateTime(self):
+      # print("getTime, ip = ", ip)
+
+      timeData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.timeCmd_C)
+      decryptedTimeData = decrypt(timeData[4:])
+      # print("decryptedTimeData = ", decryptedTimeData)
+
+      dateTime = {'year': int(findValueStr(decryptedTimeData, "year")),
+                  'month': int(findValueStr(decryptedTimeData, "month")),
+                  'mday': int(findValueStr(decryptedTimeData, "mday")),
+                  'hour': int(findValueStr(decryptedTimeData, "hour")),
+                  'min': int(findValueStr(decryptedTimeData, "min")),
+                  'sec': int(findValueStr(decryptedTimeData, "sec")),
+                  'err_code': int(findValueStr(decryptedTimeData, "err_code"))}
+
+      # print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+      # .format(y=dateTime["year"],
+      # m=dateTime["month"],
+      # d=dateTime["mday"],
+      # hr=dateTime["hour"],
+      # min=dateTime["min"],
+      # sec=dateTime["sec"],
+      # e=dateTime["err_code"]))
+
+      return dateTime
+
   #python check_husqvarna.py -t 192.168.1.18 -c energy
   #('Sent:     ', '{"emeter":{"get_realtime":{}}}')
   #('Received: ', '{"emeter":{"get_realtime":{"current":0.012866,"voltage":234.916847,"power":0.333881,"total":1.291000,"err_code":0}}}')
+
+  #Ex. 1
+  #getPower decryptedPowerData = {"emeter": {"get_realtime": {"current": 0.012711, "voltage": 237.028499, "power": 0, "total": 4.685000, "err_code": 0}}}
+
+  #Ex. 2
+  #getPower decryptedPowerData =  {"emeter":{"get_realtime":{"voltage_mv":233160,"current_ma":38,"power_mw":3739,"total_wh":1397,"err_code":0}}}
   def getPower(self):
     #print("getPower, ip = ", ip)
 
