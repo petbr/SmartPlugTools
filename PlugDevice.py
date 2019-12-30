@@ -99,12 +99,8 @@ class PlugDevice(object):
       # Connect socket
       sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       sock_tcp.connect((ip, port))
-      print("SEND")
-      print("cmd          =", cmd)
       bEncrCmd      = encrypt_str2b(cmd)
       print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
-      print("sendAndReceiveOnSocket() SEND type(bEncrCmd)         =", type(bEncrCmd))
-      print("sendAndReceiveOnSocket() SEND size                   =", sys.getsizeof(bEncrCmd))
       #bEncrCmd_encUtf8 = bEncrCmd.encode('utf-8')
 #      bEncrCmd_encUtf8 = bEncrCmd
       sock_tcp.send( bEncrCmd )
@@ -168,31 +164,24 @@ def dbgBytes(byteVal):
 # Encryption and Decryption of TP-Link Smart Home Protocol
 # XOR Autokey Cipher with starting key = 171
 def encrypt_str2b(strVal):
-  print("encrypt_str2b() str = ", strVal, "      len = ", len(strVal))
+#  print("encrypt_str2b() str = ", strVal, "      len = ", len(strVal))
   key = 171
 #  result = str(pack('>I', len(strVal)))
   result = len(strVal).to_bytes(4, byteorder='big')
-  print("encrypt_str2b() #1 result       = ", result)
-  print("encrypt_str2b() #1 type(result) = ", type(result))
+#  print("encrypt_str2b() #1 result       = ", result)
+#  print("encrypt_str2b() #1 type(result) = ", type(result))
   i = 0
   for c in strVal:
     a = key ^ ord(c)
-    print("a = ", a, "   c = ", c, "     i = ", i)
+#    print("a = ", a, "   c = ", c, "     i = ", i)
     key = a
     result += a.to_bytes(1, byteorder='big')
-    print("In loop result = ", result)
-    print("In loop size   = ", sys.getsizeof(result))
+#    print("In loop result = ", result)
+#    print("In loop size   = ", sys.getsizeof(result))
     i = i + 1
 
-  print("----------------------------------------")
-  print("----------------------------------------")
-  print("----------------------------------------")
-  print("encrypt_str2b() #2 result       = ", result)
-  print("encrypt_str2b() #2 type(result) = ", type(result))
-  print("----------------------------------------")
 #  bResult = bytes(result, 'utf-8')
 
-  dbgBytes(result)
   return result
 
 def decrypt(bytesData):
@@ -203,12 +192,12 @@ def decrypt(bytesData):
 
   i = 0
   for b in bytesData:
-    print("decrypt b = ", b, "     bytesData = ", bytesData)
+  #  print("decrypt b = ", b, "     bytesData = ", bytesData)
     a = key ^ b
-    print("decrypt a = ", a, "   i = ", i)
+  #  print("decrypt a = ", a, "   i = ", i)
     key = b
     result += chr(a)
-    print("decrypt result = ", result)
+  #  print("decrypt result = ", result)
     i = i + 1
 
   #print("decrypt::result = ", result)

@@ -19,16 +19,21 @@ print("powerCmd_C:     {pwrC}"  .format(pwrC=PlugDevice.powerCmd_C))
 print("turnOnCmd_C:    {tOnC}"  .format(tOnC=PlugDevice.turnOnCmd_C))
 print("turnOffCmd_C:   {tOffC}" .format(tOffC=PlugDevice.turnOffCmd_C))
 
-
-# Instance variables Drainpump
-print("Name:           {name}"    .format(name     = plugDrainpump.name))
-print("HostName:       {hostName}".format(hostName = plugDrainpump.hostName))
-print("Power:          {power}"   .format(power    = plugDrainpump.getPower()))
+# Instance variables plug1
+print("Name     #1:    {name}"  .format(name=plug1.name))
+print("HostName #1:    {hostName}" .format(hostName=plug1.hostName))
 
 # Instance variables plug1
-print("Name:           {name}"  .format(name=plug1.name))
-print("HostName:       {hostName}" .format(hostName=plug1.hostName))
+print("Name     #2:    {name}"  .format(name=plug2.name))
+print("HostName #2:    {hostName}" .format(hostName=plug2.hostName))
 
-# Instance variables plug3
-print("Name:           {name}"  .format(name=plug3.name))
-print("HostName:       {hostName}" .format(hostName=plug3.hostName))
+# Instance variables plug1
+print("Name     #3:    {name}"  .format(name=plug3.name))
+print("HostName #3:    {hostName}" .format(hostName=plug3.hostName))
+
+
+
+# Instance variables Drainpump
+print("Name       DrainPump:  {name}"    .format(name     = plugDrainpump.name))
+print("HostName   DrainPump:  {hostName}".format(hostName = plugDrainpump.hostName))
+print("Call Power DrainPump:  {power}"   .format(power    = plugDrainpump.getPower()))
