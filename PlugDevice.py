@@ -101,17 +101,18 @@ class PlugDevice(object):
       sock_tcp.connect((ip, port))
       print("SEND")
       print("cmd          =", cmd)
-      encrCmd      = encrypt(cmd)
-      print("encrCmd      =", encrCmd)
-      bytesEncrCmd = encrCmd.decode('stf-8')
-      print("bytesEncrCmd =", bytesEncrCmd)
-      
-      sock_tcp.send( encrCmd )
+      bEncrCmd      = encrypt_str2b(cmd)
+      print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
+      print("sendAndReceiveOnSocket() SEND type(bEncrCmd)         =", type(bEncrCmd))
+      print("sendAndReceiveOnSocket() SEND size                   =", sys.getsizeof(bEncrCmd))
+      #bEncrCmd_encUtf8 = bEncrCmd.encode('utf-8')
+#      bEncrCmd_encUtf8 = bEncrCmd
+      sock_tcp.send( bEncrCmd )
       print("RECV")
       bytesData = sock_tcp.recv(2048)
-      strData = bytesData.decode('utf-8')
-      print("sendAndReceiveOnSocket bytesData =", bytesData)
-      print("sendAndReceiveOnSocket strData   =", strData)
+      print("sendAndReceiveOnSocket RECV bytesData                =", bytesData)
+#      strData = bytesData.decode('utf-8')
+#      print("sendAndReceiveOnSocket RECV strData                  =", strData)
 
       #Close socket connection
       sock_tcp.close()
@@ -119,7 +120,7 @@ class PlugDevice(object):
     except socket.error:
       quit("Cound not connect to host " + ip + ":" + str(port))
 
-    return strData
+    return bytesData
 
   #python check_husqvarna.py -t 192.168.1.18 -c energy
   #('Sent:     ', '{"emeter":{"get_realtime":{}}}')
@@ -130,6 +131,7 @@ class PlugDevice(object):
     print("getPower powerCmd_C = ", self.powerCmd_C)
     powerData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.powerCmd_C)
     decryptedPowerData = decrypt(powerData[4:])
+    print("getPower decryptedPowerData = ", decryptedPowerData)
 
     power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
             'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
@@ -157,28 +159,57 @@ def validHostname(hostname):
 		parser.error("Invalid hostname.")
 	return hostname
 
+def dbgBytes(byteVal):
+    i = 0
+    for b in byteVal:
+        print(i, " = ", chr(b), b)
+        i = i + 1
+
 # Encryption and Decryption of TP-Link Smart Home Protocol
 # XOR Autokey Cipher with starting key = 171
-def encrypt(string):
+def encrypt_str2b(strVal):
+  print("encrypt_str2b() str = ", strVal, "      len = ", len(strVal))
   key = 171
-  result = str(pack('>I', len(string)))
-  for i in string:
-    a = key ^ ord(i)
+#  result = str(pack('>I', len(strVal)))
+  result = len(strVal).to_bytes(4, byteorder='big')
+  print("encrypt_str2b() #1 result       = ", result)
+  print("encrypt_str2b() #1 type(result) = ", type(result))
+  i = 0
+  for c in strVal:
+    a = key ^ ord(c)
+    print("a = ", a, "   c = ", c, "     i = ", i)
     key = a
-    result += chr(a)
-    print("result = ", result)
-    return result
+    result += a.to_bytes(1, byteorder='big')
+    print("In loop result = ", result)
+    print("In loop size   = ", sys.getsizeof(result))
+    i = i + 1
 
-def decrypt(string):
+  print("----------------------------------------")
+  print("----------------------------------------")
+  print("----------------------------------------")
+  print("encrypt_str2b() #2 result       = ", result)
+  print("encrypt_str2b() #2 type(result) = ", type(result))
+  print("----------------------------------------")
+#  bResult = bytes(result, 'utf-8')
+
+  dbgBytes(result)
+  return result
+
+def decrypt(bytesData):
   
   #print("decrypt::string = ", string)
   key = 171
   result = ""
-  
-  for i in string:
-    a = key ^ ord(i)
-    key = ord(i)
+
+  i = 0
+  for b in bytesData:
+    print("decrypt b = ", b, "     bytesData = ", bytesData)
+    a = key ^ b
+    print("decrypt a = ", a, "   i = ", i)
+    key = b
     result += chr(a)
+    print("decrypt result = ", result)
+    i = i + 1
 
   #print("decrypt::result = ", result)
   
