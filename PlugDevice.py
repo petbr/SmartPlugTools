@@ -117,6 +117,19 @@ class PlugDevice(object):
 
       return dateTime
 
+
+  def retrievePower(jsp_PowerData):
+
+    power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
+            'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
+            'power'    : float(findValueStr(decryptedPowerData, "power")),
+            'total'    : float(findValueStr(decryptedPowerData, "total")),
+            'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
+
+
+
+
+
   #python check_husqvarna.py -t 192.168.1.18 -c energy
   #('Sent:     ', '{"emeter":{"get_realtime":{}}}')
   #('Received: ', '{"emeter":{"get_realtime":{"current":0.012866,"voltage":234.916847,"power":0.333881,"total":1.291000,"err_code":0}}}')
@@ -126,20 +139,24 @@ class PlugDevice(object):
 
   #Ex. 2
   #getPower decryptedPowerData =  {"emeter":{"get_realtime":{"voltage_mv":233160,"current_ma":38,"power_mw":3739,"total_wh":1397,"err_code":0}}}
+  # current         => A
+  # current_ma      => mA
+
+  # voltage         => V
+  # voltage_mv      => mV
+
+  # total           => kWh
+  # total_wh        => Wh
   def getPower(self):
     #print("getPower, ip = ", ip)
 
     print("getPower powerCmd_C = ", self.powerCmd_C)
     powerData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.powerCmd_C)
-    decryptedPowerData = decrypt(powerData[4:])
+    jsp_decryptedPowerData = decrypt(powerData[4:])
     print("getPower decryptedPowerData = ", decryptedPowerData)
 
-    power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
-            'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
-            'power'    : float(findValueStr(decryptedPowerData, "power")),
-            'total'    : float(findValueStr(decryptedPowerData, "total")),
-            'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
-    
+    powerData = retrievePower(jsp_decryptedPowerData)
+
     #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
           #.format(i=power['current'],
                   #u=power['voltage'],
@@ -147,7 +164,7 @@ class PlugDevice(object):
                   #t=power['total'],
                   #e=power['err_code']))
     
-    return power
+    return powerData
 
 
 ##### class PlugDevice(object):
