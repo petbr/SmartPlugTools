@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 #
+import time
 from PlugDevice import PlugDevice
+
 
 
 
@@ -19,27 +21,45 @@ print("powerCmd_C:     {pwrC}"  .format(pwrC=PlugDevice.powerCmd_C))
 print("turnOnCmd_C:    {tOnC}"  .format(tOnC=PlugDevice.turnOnCmd_C))
 print("turnOffCmd_C:   {tOffC}" .format(tOffC=PlugDevice.turnOffCmd_C))
 
+# Instance variables plug1
+print("------------------------------------------------------------------------------------")
+print("------------------------------------------------------------------------------------")
+print("Name     #1:            {name}"    .format(name     = plug1.name))
+print("HostName #1:            {hostName}".format(hostName = plug1.hostName))
+print("Call Power Plug1:       {power}"   .format(power    = plug1.getPower()))
+print("Call GetDateTime Plug1: {dt}"      .format(dt       = plug1.getDateTime()))
+t1 = time.time()
+# Instance variables plug2
+print("------------------------------------------------------------------------------------")
+print("------------------------------------------------------------------------------------")
+print("Name     #2:             {name}"    .format(name     = plug2.name))
+print("HostName #2:             {hostName}".format(hostName = plug2.hostName))
+print("Call Power Plug2:        {power}"   .format( power   = plug2.getPower()))
+print("Call GetDateTime Plug2:  {dt}"      .format(dt       = plug2.getDateTime()))
+t2 = time.time()
+
+# Instance variables plug3
+print("------------------------------------------------------------------------------------")
+print("------------------------------------------------------------------------------------")
+print("Name     #3:             {name}"    .format(name     = plug3.name))
+print("HostName #3:             {hostName}".format(hostName = plug3.hostName))
+print("Call Power Plug3:        {power}"   .format( power   = plug3.getPower()))
+print("Call GetDateTime Plug3:  {dt}"      .format(dt       = plug3.getDateTime()))
+t3 = time.time()
+
 # Instance variables Drainpump
+print("------------------------------------------------------------------------------------")
+print("------------------------------------------------------------------------------------")
 print("Name             DrainPump:  {name}"    .format(name     = plugDrainpump.name))
 print("HostName         DrainPump:  {hostName}".format(hostName = plugDrainpump.hostName))
 print("Call Power       DrainPump:  {power}"   .format(power    = plugDrainpump.getPower()))
 print("Call GetDateTime DrainPump:  {dt}"      .format(dt       = plugDrainpump.getDateTime()))
+t_dp = time.time()
 
-# Instance variables plug1
-print("Name     #1:      {name}"  .format(name=plug1.name))
-print("HostName #1:      {hostName}" .format(hostName=plug1.hostName))
-print("Call Power Plug1: {power}"   .format(power    = plug1.getPower()))
-
-# Instance variables plug3
-print("Name     #3:    {name}"  .format(name=plug3.name))
-print("HostName #3:    {hostName}" .format(hostName=plug3.hostName))
-print("Call Power Plug3: {power}"   .format( power=plug3.getPower()))
-
-# Instance variables plug2
-print("Name     #2:      {name}"  .format(name=plug2.name))
-print("HostName #2:      {hostName}" .format(hostName=plug2.hostName))
-print("Call Power Plug2: {power}"   .format( power=plug2.getPower()))
-
+print("t1   = ", t1)
+print("t2   = ", t2)
+print("t3   = ", t3)
+print("t_dp = ", t_dp)
 
 
 

@@ -5,6 +5,7 @@ import time
 import enum
 import argparse
 import sys
+import json
 
 from struct import pack
 
@@ -13,17 +14,49 @@ version = 0.2
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
 
-class PowerDirection(enum.Enum): 
-    powerStable      = 1
-    powerIncreasingt = 2
-    powerDecreasing  = 3
 
-class PumpMode(enum.Enum): 
-    idle_short    = 1
-    idle_long     = 2
-    pumpingAir    = 3
-    pumpTurnedOff = 4
-    pumpingWater  = 5
+# Encryption and Decryption of TP-Link Smart Home Protocol
+# XOR Autokey Cipher with starting key = 171
+def encrypt_str2b(strVal):
+  #  print("encrypt_str2b() str = ", strVal, "      len = ", len(strVal))
+  key = 171
+  #  result = str(pack('>I', len(strVal)))
+  result = len(strVal).to_bytes(4, byteorder='big')
+  #  print("encrypt_str2b() #1 result       = ", result)
+  #  print("encrypt_str2b() #1 type(result) = ", type(result))
+  i = 0
+  for c in strVal:
+    a = key ^ ord(c)
+    #    print("a = ", a, "   c = ", c, "     i = ", i)
+    key = a
+    result += a.to_bytes(1, byteorder='big')
+    #    print("In loop result = ", result)
+    #    print("In loop size   = ", sys.getsizeof(result))
+    i = i + 1
+
+  #  bResult = bytes(result, 'utf-8')
+
+  return result
+
+
+def decrypt(bytesData):
+  # print("decrypt::string = ", string)
+  key = 171
+  result = ""
+
+  i = 0
+  for b in bytesData:
+    #  print("decrypt b = ", b, "     bytesData = ", bytesData)
+    a = key ^ b
+    #  print("decrypt a = ", a, "   i = ", i)
+    key = b
+    result += chr(a)
+    #  print("decrypt result = ", result)
+    i = i + 1
+
+  # print("decrypt::result = ", result)
+
+  return result
 
 
 ####################################
@@ -96,7 +129,7 @@ class PlugDevice(object):
 
       timeData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.timeCmd_C)
       decryptedTimeData = decrypt(timeData[4:])
-      # print("decryptedTimeData = ", decryptedTimeData)
+      print("decryptedTimeData = ", decryptedTimeData)
 
       dateTime = {'year': int(findValueStr(decryptedTimeData, "year")),
                   'month': int(findValueStr(decryptedTimeData, "month")),
@@ -118,17 +151,57 @@ class PlugDevice(object):
       return dateTime
 
 
-  def retrievePower(jsp_PowerData):
+  def retrievePower(self, jsp_PowerData):
 
-    power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
-            'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
-            'power'    : float(findValueStr(decryptedPowerData, "power")),
-            'total'    : float(findValueStr(decryptedPowerData, "total")),
-            'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
+    print('retrievePower jsp_PowerData  = ', jsp_PowerData)
 
+    dict_PowerData = json.loads(jsp_PowerData)
+    print('retrievePower dict_PowerData  = ', dict_PowerData)
 
+    pd1 = dict_PowerData.get("emeter")
+    print('retrievePower pd1            = ', pd1)
 
+    pd2 = dict_PowerData['emeter']['get_realtime']
+    print('retrievePower pd2            = ', pd2)
 
+    # {'voltage_mv': 233196, 'current_ma': 38, 'power_mw': 3849, 'total_wh': 1755, 'err_code': 0}
+    if 'voltage_mv' in pd2.keys():
+      voltage_item = pd2['voltage_mv'] / 1000
+    else:
+      voltage_item = pd2['voltage']
+
+    if 'current_ma' in pd2.keys():
+      current_item = pd2['current_ma'] / 1000
+    else:
+      current_item = pd2['current']
+
+    if 'total_wh' in pd2.keys():
+      total_item = pd2['total_wh']
+    else:
+      total_item = pd2['total'] * 1000
+
+    if 'power_mw' in pd2.keys():
+      power_item = pd2['power_mw'] / 1000
+    else:
+      power_item = pd2['power']
+
+    err_code_item = pd2['err_code']
+
+    print("voltage = ", voltage_item)
+    print("current = ", current_item)
+    print("power   = ", power_item)
+    print("total   = ", total_item)
+    print("ErrC    = ", err_code_item)
+
+    power = {'current'  : current_item,
+             'voltage'  : voltage_item,
+             'power'    : power_item,
+             'total'    : total_item,
+             'err_code' : err_code_item}
+
+    print("power = ", power)
+
+    return power
 
   #python check_husqvarna.py -t 192.168.1.18 -c energy
   #('Sent:     ', '{"emeter":{"get_realtime":{}}}')
@@ -152,10 +225,11 @@ class PlugDevice(object):
 
     print("getPower powerCmd_C = ", self.powerCmd_C)
     powerData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.powerCmd_C)
+    print("getPower powerData = ", powerData)
     jsp_decryptedPowerData = decrypt(powerData[4:])
-    print("getPower decryptedPowerData = ", decryptedPowerData)
+    print("getPower jsp_decryptedPowerData = ", jsp_decryptedPowerData)
 
-    powerData = retrievePower(jsp_decryptedPowerData)
+    powerData = self.retrievePower(jsp_decryptedPowerData)
 
     #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
           #.format(i=power['current'],
@@ -183,48 +257,6 @@ def dbgBytes(byteVal):
         print(i, " = ", chr(b), b)
         i = i + 1
 
-# Encryption and Decryption of TP-Link Smart Home Protocol
-# XOR Autokey Cipher with starting key = 171
-def encrypt_str2b(strVal):
-#  print("encrypt_str2b() str = ", strVal, "      len = ", len(strVal))
-  key = 171
-#  result = str(pack('>I', len(strVal)))
-  result = len(strVal).to_bytes(4, byteorder='big')
-#  print("encrypt_str2b() #1 result       = ", result)
-#  print("encrypt_str2b() #1 type(result) = ", type(result))
-  i = 0
-  for c in strVal:
-    a = key ^ ord(c)
-#    print("a = ", a, "   c = ", c, "     i = ", i)
-    key = a
-    result += a.to_bytes(1, byteorder='big')
-#    print("In loop result = ", result)
-#    print("In loop size   = ", sys.getsizeof(result))
-    i = i + 1
-
-#  bResult = bytes(result, 'utf-8')
-
-  return result
-
-def decrypt(bytesData):
-  
-  #print("decrypt::string = ", string)
-  key = 171
-  result = ""
-
-  i = 0
-  for b in bytesData:
-  #  print("decrypt b = ", b, "     bytesData = ", bytesData)
-    a = key ^ b
-  #  print("decrypt a = ", a, "   i = ", i)
-    key = b
-    result += chr(a)
-  #  print("decrypt result = ", result)
-    i = i + 1
-
-  #print("decrypt::result = ", result)
-  
-  return result
 
 # Ex.     inData: "{"emeter":{"get_realtime":{"current":0.036836,"voltage":233.437091,"power":3.172235,"total":5.032000,"err_code":0}}}')"
 #         field:  "power"                                                              1      ffffffffE
