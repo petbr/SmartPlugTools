@@ -92,26 +92,26 @@ class PlugDevice(object):
 # which returns a bytes representation of the Unicode string,
 # encoded in the requested encoding.
   def sendAndReceiveOnSocket(self, ip, port, cmd):
-    print("sendAndReceiveOnSocket")
-    print("ip          =", ip)
-    print("port        =", port)
-    print("cmd         =", cmd)
-    print("cmd(utf-8)  =", cmd.encode('utf-8'))
+    #print("sendAndReceiveOnSocket")
+    #print("ip          =", ip)
+    #print("port        =", port)
+    #print("cmd         =", cmd)
+    #print("cmd(utf-8)  =", cmd.encode('utf-8'))
     
     try:
       # Connect socket
       sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       sock_tcp.connect((ip, port))
       bEncrCmd      = encrypt_str2b(cmd)
-      print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
+      #print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
       #bEncrCmd_encUtf8 = bEncrCmd.encode('utf-8')
 #      bEncrCmd_encUtf8 = bEncrCmd
       sock_tcp.send( bEncrCmd )
-      print("RECV")
+      #print("RECV")
       bytesData = sock_tcp.recv(2048)
-      print("sendAndReceiveOnSocket RECV bytesData                =", bytesData)
+      #print("sendAndReceiveOnSocket RECV bytesData                =", bytesData)
 #      strData = bytesData.decode('utf-8')
-#      print("sendAndReceiveOnSocket RECV strData                  =", strData)
+#      #print("sendAndReceiveOnSocket RECV strData                  =", strData)
 
       #Close socket connection
       sock_tcp.close()
@@ -129,7 +129,7 @@ class PlugDevice(object):
 
       timeData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.timeCmd_C)
       decryptedTimeData = decrypt(timeData[4:])
-      print("decryptedTimeData = ", decryptedTimeData)
+      #print("decryptedTimeData = ", decryptedTimeData)
 
       dateTime = {'year': int(findValueStr(decryptedTimeData, "year")),
                   'month': int(findValueStr(decryptedTimeData, "month")),
@@ -153,16 +153,16 @@ class PlugDevice(object):
 
   def retrievePower(self, jsp_PowerData):
 
-    print('retrievePower jsp_PowerData  = ', jsp_PowerData)
+    #print('retrievePower jsp_PowerData  = ', jsp_PowerData)
 
     dict_PowerData = json.loads(jsp_PowerData)
-    print('retrievePower dict_PowerData  = ', dict_PowerData)
+    #print('retrievePower dict_PowerData  = ', dict_PowerData)
 
     pd1 = dict_PowerData.get("emeter")
-    print('retrievePower pd1            = ', pd1)
+    #print('retrievePower pd1            = ', pd1)
 
     pd2 = dict_PowerData['emeter']['get_realtime']
-    print('retrievePower pd2            = ', pd2)
+    #print('retrievePower pd2            = ', pd2)
 
     # {'voltage_mv': 233196, 'current_ma': 38, 'power_mw': 3849, 'total_wh': 1755, 'err_code': 0}
     if 'voltage_mv' in pd2.keys():
@@ -187,11 +187,11 @@ class PlugDevice(object):
 
     err_code_item = pd2['err_code']
 
-    print("voltage = ", voltage_item)
-    print("current = ", current_item)
-    print("power   = ", power_item)
-    print("total   = ", total_item)
-    print("ErrC    = ", err_code_item)
+    #print("voltage = ", voltage_item)
+    #print("current = ", current_item)
+    #print("power   = ", power_item)
+    #print("total   = ", total_item)
+    #print("ErrC    = ", err_code_item)
 
     power = {'current'  : current_item,
              'voltage'  : voltage_item,
@@ -199,7 +199,7 @@ class PlugDevice(object):
              'total'    : total_item,
              'err_code' : err_code_item}
 
-    print("power = ", power)
+    #print("power = ", power)
 
     return power
 
@@ -223,11 +223,11 @@ class PlugDevice(object):
   def getPower(self):
     #print("getPower, ip = ", ip)
 
-    print("getPower powerCmd_C = ", self.powerCmd_C)
+    #print("getPower powerCmd_C = ", self.powerCmd_C)
     powerData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.powerCmd_C)
-    print("getPower powerData = ", powerData)
+    #print("getPower powerData = ", powerData)
     jsp_decryptedPowerData = decrypt(powerData[4:])
-    print("getPower jsp_decryptedPowerData = ", jsp_decryptedPowerData)
+    #print("getPower jsp_decryptedPowerData = ", jsp_decryptedPowerData)
 
     powerData = self.retrievePower(jsp_decryptedPowerData)
 
@@ -285,8 +285,8 @@ def setTurnOff(ip):
   
   turnOffRes = {'err_code' : int(findValueStr(decryptedTurnOffData, "err_code"))}
   
-  print("TURN_OFF: E:{e:01d}"
-      .format(e=turnOffRes["err_code"]))
+  #print("TURN_OFF: E:{e:01d}"
+  #    .format(e=turnOffRes["err_code"]))
   
   return turnOffRes
 
@@ -299,8 +299,8 @@ def setTurnOn(ip):
   
   turnOnRes = {'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
   
-  print("TURN_ON: E:{e:01d}"
-      .format(e=turnOnRes["err_code"]))
+  #print("TURN_ON: E:{e:01d}"
+  #    .format(e=turnOnRes["err_code"]))
   
   return turnOnRes
 

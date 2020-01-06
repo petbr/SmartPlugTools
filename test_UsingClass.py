@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 #
 import time
+from datetime import datetime
 from PlugDevice import PlugDevice
 
 
@@ -60,6 +61,16 @@ print("t1   = ", t1)
 print("t2   = ", t2)
 print("t3   = ", t3)
 print("t_dp = ", t_dp)
+
+dt1   = datetime.fromtimestamp(t1)
+dt2   = datetime.fromtimestamp(t2)
+dt3   = datetime.fromtimestamp(t3)
+dt_dp = datetime.fromtimestamp(t_dp)
+
+print("dt1   = ", dt1)
+print("dt2   = ", dt2)
+print("dt3   = ", dt3)
+print("dt_dp = ", dt_dp)
 
 
 
