@@ -76,4 +76,89 @@ print("dtMeasure = ", dtMeasure)
 
 
 
+t1 = time.time()
+energy1       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy1   = {'Time': 1578508233.0543613, 'Energy' : energy1}
+
+energy2       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy2   = {'Time': 1578508234.0543613, 'Energy' : energy2}
+
+energy3       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy3   = {'Time': 1578508234.0543613, 'Energy' : energy3}
+
+timeEnergy_arr = []
+timeEnergy_arr.append(timeEnergy1)
+timeEnergy_arr.append(timeEnergy2)
+timeEnergy_arr.append(timeEnergy3)
+
+
+
+
+energy1       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy1   = {'Time': 1578508233.0543613, 'Energy' : energy1}
+
+energy2       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy2   = {'Time': 1578508234.0543613, 'Energy' : energy2}
+
+energy3       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy3   = {'Time': 1578508234.0543613, 'Energy' : energy3}
+
+timeEnergy_arr = []
+timeEnergy_arr.append(timeEnergy1)
+timeEnergy_arr.append(timeEnergy2)
+timeEnergy_arr.append(timeEnergy3)
+
+
+
+energy1       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy1   = {'Time': 1578508233.0543613, 'Energy' : energy1}
+
+energy2       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy2   = {'Time': 1578508234.0543613, 'Energy' : energy2}
+
+energy3       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy3   = {'Time': 1578508234.0543613, 'Energy' : energy3}
+
+timeEnergy_arr = []
+timeEnergy_arr.append(timeEnergy1)
+timeEnergy_arr.append(timeEnergy2)
+timeEnergy_arr.append(timeEnergy3)
+
+
+
+energy1       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy1   = {'Time': 1578508233.0543613, 'Energy' : energy1}
+
+energy2       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy2   = {'Time': 1578508234.0543613, 'Energy' : energy2}
+
+energy3       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy3   = {'Time': 1578508234.0543613, 'Energy' : energy3}
+
+timeEnergy_arr = []
+timeEnergy_arr.append(timeEnergy1)
+timeEnergy_arr.append(timeEnergy2)
+timeEnergy_arr.append(timeEnergy3)
+
+
+
+
+
+energy1       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy1   = {'Time': 1578508233.0543613, 'Energy' : energy1}
+
+energy2       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy2   = {'Time': 1578508234.0543613, 'Energy' : energy2}
+
+energy3       = {'Current': 0.028, 'Voltage': 234.962, 'Power': 1.965, 'Total': 10545, 'ErrCode': 0}
+timeEnergy3   = {'Time': 1578508234.0543613, 'Energy' : energy3}
+
+timeEnergy_arr = []
+timeEnergy_arr.append(timeEnergy1)
+timeEnergy_arr.append(timeEnergy2)
+timeEnergy_arr.append(timeEnergy3)
+
+t2 = time.time()
+
+print("Time to create 5*timeEnergy_arr = ", t2-t1)
 
