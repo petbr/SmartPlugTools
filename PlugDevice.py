@@ -162,7 +162,7 @@ class PlugDevice(object):
     #print('retrievePower pd1            = ', pd1)
 
     pd2 = dict_PowerData['emeter']['get_realtime']
-    #print('retrievePower pd2            = ', pd2)
+    print('retrievePower pd2            = ', pd2)
 
     # {'voltage_mv': 233196, 'current_ma': 38, 'power_mw': 3849, 'total_wh': 1755, 'err_code': 0}
     if 'voltage_mv' in pd2.keys():
@@ -193,11 +193,11 @@ class PlugDevice(object):
     #print("total   = ", total_item)
     #print("ErrC    = ", err_code_item)
 
-    power = {'current'  : current_item,
-             'voltage'  : voltage_item,
-             'power'    : power_item,
-             'total'    : total_item,
-             'err_code' : err_code_item}
+    power = {'Current' : current_item,
+             'Voltage' : voltage_item,
+             'Power'   : power_item,
+             'Total'   : total_item,
+             'ErrCode' : err_code_item}
 
     #print("power = ", power)
 
