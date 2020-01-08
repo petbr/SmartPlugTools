@@ -162,3 +162,28 @@ t2 = time.time()
 
 print("Time to create 5*timeEnergy_arr = ", t2-t1)
 
+te_arr = []
+zeroPower_reported = False
+nrMeasurements = 0
+while True:
+  tMeasure    = time.time()
+  ePlugDp = plugDrainpump.getPower()
+  nrMeasurements = nrMeasurements + 1
+
+  # Report non zero power or if zero hasn't been observed since before
+  if (ePlugDp['Power'] > 0) or (zeroPower_reported == False):
+    if (ePlugDp['Power'] == 0):
+      zeroPower_reported = True
+    else:
+      zeroPower_reported = False
+
+    te = {'Time' : tMeasure, 'Energy' : ePlugDp}
+    te_arr.append(te)
+    print("--------------------", nrMeasurements, "-----------------------")
+    print("tMeasure       = ", tMeasure)
+    print("ePlugDp        = ", ePlugDp)
+    print("te             = ", te)
+    print("size of te_arr = ", len(te_arr))
+    print("te_arr         = ", te_arr)
+
+  time.sleep(5)

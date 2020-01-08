@@ -162,7 +162,7 @@ class PlugDevice(object):
     #print('retrievePower pd1            = ', pd1)
 
     pd2 = dict_PowerData['emeter']['get_realtime']
-    print('retrievePower pd2            = ', pd2)
+    #print('retrievePower pd2            = ', pd2)
 
     # {'voltage_mv': 233196, 'current_ma': 38, 'power_mw': 3849, 'total_wh': 1755, 'err_code': 0}
     if 'voltage_mv' in pd2.keys():
