@@ -7,7 +7,16 @@ from datetime import datetime
 from PlugDevice import PlugDevice
 
 
+def saveData(filename, data):
+  with open(filename, 'w') as outfile:
+    data_json = json.dumps(data)
+    json.dump(data_json, outfile)
 
+def loadData(filename):
+  with open(filename) as json_file:
+    data_json = json.load(json_file)
+    data = json.loads(data_json)
+    return data
 
 print("Starting tester!")
 
@@ -163,9 +172,21 @@ t2 = time.time()
 
 print("Time to create 5*timeEnergy_arr = ", t2-t1)
 
-te_arr = []
 zeroPower_reported = False
 nrMeasurements = 0
+
+filename = '/home/peter/repo/SmartPlugTools/te_arr_json2'
+
+te_arr = []
+te_arr = loadData(filename)
+
+print('----------------------------')
+print('----------------------------')
+print('----------------------------')
+print('te_arr = ', te_arr)
+print('----------------------------')
+print('----------------------------')
+print('----------------------------')
 while True:
   tMeasure    = time.time()
   ePlugDp = plugDrainpump.getPower()
@@ -176,6 +197,8 @@ while True:
     if (ePlugDp['Power'] == 0):
       zeroPower_reported = True
       sleepTime = 2.0
+
+      saveData(filename, te_arr)
     else:
       zeroPower_reported = False
       sleepTime = 0.5
@@ -190,4 +213,4 @@ while True:
     print("Size of te_arr   = ", sys.getsizeof(te_arr))
     print("te_arr           = ", te_arr)
 
-  time.sleep(2)
+  time.sleep(sleepTime)
