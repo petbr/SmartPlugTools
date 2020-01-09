@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 #
 import time
+import sys
 import json
 from datetime import datetime
 from PlugDevice import PlugDevice
@@ -174,16 +175,19 @@ while True:
   if (ePlugDp['Power'] > 0) or (zeroPower_reported == False):
     if (ePlugDp['Power'] == 0):
       zeroPower_reported = True
+      sleepTime = 2.0
     else:
       zeroPower_reported = False
+      sleepTime = 0.5
 
     te = {'Time' : tMeasure, 'Energy' : ePlugDp}
     te_arr.append(te)
     print("--------------------", nrMeasurements, "-----------------------")
-    print("tMeasure       = ", tMeasure)
-    print("ePlugDp        = ", ePlugDp)
-    print("te             = ", te)
-    print("size of te_arr = ", len(te_arr))
-    print("te_arr         = ", te_arr)
+    print("tMeasure         = ", tMeasure)
+    print("ePlugDp          = ", ePlugDp)
+    print("te               = ", te)
+    print("Length of te_arr = ", len(te_arr))
+    print("Size of te_arr   = ", sys.getsizeof(te_arr))
+    print("te_arr           = ", te_arr)
 
-  time.sleep(5)
+  time.sleep(2)
