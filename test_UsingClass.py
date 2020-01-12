@@ -6,6 +6,27 @@ import json
 from datetime import datetime
 from PlugDevice import PlugDevice
 
+def printArr(arr):
+  for e in arr:
+    t = e['Time']
+    dt = datetime.fromtimestamp(t)
+    p  = e['Energy']['Power']
+    tot = e['Energy']['Total']
+    print('T=', t, '(', dt, ')', 'P=', p, 'Total=', tot)
+
+def printArrPower(arr):
+  for e in arr:
+    t = e['Time']
+    dt = datetime.fromtimestamp(t)
+    p  = e['Energy']['Power']
+    print('T=', t, '(', dt, ')', 'P=', p)
+
+def printArrTotal(arr):
+  for e in arr:
+    t = e['Time']
+    dt  = datetime.fromtimestamp(t)
+    tot = e['Energy']['Total']
+    print('T=', t, '(', dt, ')', 'Total=', tot)
 
 def saveData(filename, data):
   with open(filename, 'w') as outfile:
@@ -180,6 +201,8 @@ filename = '/home/peter/repo/SmartPlugTools/te_arr_json2'
 te_arr = []
 te_arr = loadData(filename)
 
+# Retrieve the previous measurement
+tMeasurePrev = te_arr[-1]['Time']
 print('----------------------------')
 print('----------------------------')
 print('----------------------------')
@@ -187,6 +210,18 @@ print('te_arr = ', te_arr)
 print('----------------------------')
 print('----------------------------')
 print('----------------------------')
+
+# 0
+# m1      Previous   #1
+# m2
+# 0       Report
+# 0
+# m1      Previous   #2
+# m2
+# m3
+# m4
+# 0       Report
+# 0
 while True:
   tMeasure    = time.time()
   ePlugDp = plugDrainpump.getPower()
@@ -196,21 +231,30 @@ while True:
   if (ePlugDp['Power'] > 0) or (zeroPower_reported == False):
     if (ePlugDp['Power'] == 0):
       zeroPower_reported = True
-      sleepTime = 2.0
+      sleepTime = 0.5
 
+      tSleep = tMeasure - tMeasurePrev
+      te = {'Time': tMeasure, 'TimeSleep': tSleep, 'Energy': ePlugDp}
+      te_arr.append(te)
       saveData(filename, te_arr)
+
+      tMeasurePrev = tMeasure
     else:
+      te = {'Time': tMeasure, 'Energy': ePlugDp}
+      te_arr.append(te)
       zeroPower_reported = False
       sleepTime = 0.5
 
-    te = {'Time' : tMeasure, 'Energy' : ePlugDp}
-    te_arr.append(te)
+    print("--------------------", nrMeasurements, "-----------------------")
+    print("--------------------", nrMeasurements, "-----------------------")
+    print("--------------------", nrMeasurements, "-----------------------")
+    print("--------------------", nrMeasurements, "-----------------------")
     print("--------------------", nrMeasurements, "-----------------------")
     print("tMeasure         = ", tMeasure)
     print("ePlugDp          = ", ePlugDp)
     print("te               = ", te)
     print("Length of te_arr = ", len(te_arr))
     print("Size of te_arr   = ", sys.getsizeof(te_arr))
-    print("te_arr           = ", te_arr)
+    print("te_arr           = ", te)
 
   time.sleep(sleepTime)
