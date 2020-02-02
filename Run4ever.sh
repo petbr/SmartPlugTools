@@ -5,7 +5,7 @@ while true; do
   newFileName=RestartIndicator_$curTime.txt
   echo "New FileName: "$newFileName
   
-  sleep 5
+  sleep 20
   touch /tmp/DranpumpData/$newFileName
   python test.py -t 192.168.1.18 -c energy | tee /tmp/DranpumpData/ful_log_$curTime.txt
 done
