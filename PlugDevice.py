@@ -9,7 +9,7 @@ import json
 
 from struct import pack
 
-version = 0.2
+version = 0.3
 
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
@@ -635,7 +635,7 @@ def startup():
   shortestPumpWaterDuration = 1000000/3.0
   longestPumpWaterDuration  = 1/3.0
   shortestPumpAirDuration   = 1000000/3.0
-  longestPumpAirDuration    = 1/3.0
+  longestPumpAirDuration    = 1/3.0Su
   switchTime = time.time()
   dateTime = getDateTime(ip)
   power    = getPower(ip)

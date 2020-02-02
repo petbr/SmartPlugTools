@@ -206,7 +206,7 @@ tMeasurePrev = te_arr[-1]['Time']
 print('----------------------------')
 print('----------------------------')
 print('----------------------------')
-print('te_arr = ', te_arr)
+print('Most recent measure = ', te_arr[-1])
 print('----------------------------')
 print('----------------------------')
 print('----------------------------')
@@ -222,6 +222,40 @@ print('----------------------------')
 # m4
 # 0       Report
 # 0
+
+def convertFile(filename, arr):
+  print("Convert ", filename)
+
+  tMeasureFirst = arr[0]['Time']
+  tMeasurePrev = tMeasureFirst - 200
+  dtFirst = datetime.fromtimestamp(tMeasureFirst)
+  convArr = []
+  for e in arr:
+    tMeasure = e['Time']
+    dt = datetime.fromtimestamp(tMeasure)
+    print("item = ", e, "tMeasure = ", tMeasure,  "   dt =  ", dt)
+    eToAdd = e
+    if e['Energy']['Power'] == 0:
+      tSleep = tMeasure - tMeasurePrev
+      tMeasurePrev = tMeasure
+      if e.get('TimeSleep') == None:
+        print("TimeSleep is missing, ADD IT")
+        eToAdd['TimeSleep'] = tSleep
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+    print("eToAdd  = ", eToAdd)
+
+    convArr.append(eToAdd)
+
+  saveData(filename, convArr)
+
+
+#convertFile(filename, te_arr)
+
+#exit(0)
+
+
+
 while True:
   tMeasure    = time.time()
   ePlugDp = plugDrainpump.getPower()
@@ -245,16 +279,17 @@ while True:
       zeroPower_reported = False
       sleepTime = 0.5
 
+    dt = datetime.fromtimestamp(tMeasure)
     print("--------------------", nrMeasurements, "-----------------------")
     print("--------------------", nrMeasurements, "-----------------------")
     print("--------------------", nrMeasurements, "-----------------------")
     print("--------------------", nrMeasurements, "-----------------------")
     print("--------------------", nrMeasurements, "-----------------------")
-    print("tMeasure         = ", tMeasure)
+    print("tMeasure         = ", tMeasure, "      ", dt)
     print("ePlugDp          = ", ePlugDp)
     print("te               = ", te)
     print("Length of te_arr = ", len(te_arr))
     print("Size of te_arr   = ", sys.getsizeof(te_arr))
-    print("te_arr           = ", te)
 
   time.sleep(sleepTime)
+    
