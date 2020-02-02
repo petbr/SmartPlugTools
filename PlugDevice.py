@@ -5,25 +5,58 @@ import time
 import enum
 import argparse
 import sys
+import json
 
 from struct import pack
 
-version = 0.2
+version = 0.3
 
 # Predefined Smart Plug Commands
 # For a full list of commands, consult tplink_commands.txt
 
-class PowerDirection(enum.Enum): 
-    powerStable      = 1
-    powerIncreasingt = 2
-    powerDecreasing  = 3
 
-class PumpMode(enum.Enum): 
-    idle_short    = 1
-    idle_long     = 2
-    pumpingAir    = 3
-    pumpTurnedOff = 4
-    pumpingWater  = 5
+# Encryption and Decryption of TP-Link Smart Home Protocol
+# XOR Autokey Cipher with starting key = 171
+def encrypt_str2b(strVal):
+  #  print("encrypt_str2b() str = ", strVal, "      len = ", len(strVal))
+  key = 171
+  #  result = str(pack('>I', len(strVal)))
+  result = len(strVal).to_bytes(4, byteorder='big')
+  #  print("encrypt_str2b() #1 result       = ", result)
+  #  print("encrypt_str2b() #1 type(result) = ", type(result))
+  i = 0
+  for c in strVal:
+    a = key ^ ord(c)
+    #    print("a = ", a, "   c = ", c, "     i = ", i)
+    key = a
+    result += a.to_bytes(1, byteorder='big')
+    #    print("In loop result = ", result)
+    #    print("In loop size   = ", sys.getsizeof(result))
+    i = i + 1
+
+  #  bResult = bytes(result, 'utf-8')
+
+  return result
+
+
+def decrypt(bytesData):
+  # print("decrypt::string = ", string)
+  key = 171
+  result = ""
+
+  i = 0
+  for b in bytesData:
+    #  print("decrypt b = ", b, "     bytesData = ", bytesData)
+    a = key ^ b
+    #  print("decrypt a = ", a, "   i = ", i)
+    key = b
+    result += chr(a)
+    #  print("decrypt result = ", result)
+    i = i + 1
+
+  # print("decrypt::result = ", result)
+
+  return result
 
 
 ####################################
@@ -45,6 +78,7 @@ class PlugDevice(object):
                 'reset'    : '{"system":{"reset":{"delay":1}}}',
                 'energy'   : '{"emeter":{"get_realtime":{}}}'}
 
+  port_C = 9999
   timeCmd_C    = commands_C["time"]
   powerCmd_C   = commands_C["energy"]
   turnOnCmd_C  = commands_C["on"]
@@ -53,6 +87,159 @@ class PlugDevice(object):
   def __init__(self, name, hostName):
     self.name     = name
     self.hostName = hostName
+
+# The opposite method of bytes.decode() is str.encode(),
+# which returns a bytes representation of the Unicode string,
+# encoded in the requested encoding.
+  def sendAndReceiveOnSocket(self, ip, port, cmd):
+    #print("sendAndReceiveOnSocket")
+    #print("ip          =", ip)
+    #print("port        =", port)
+    #print("cmd         =", cmd)
+    #print("cmd(utf-8)  =", cmd.encode('utf-8'))
+    
+    try:
+      # Connect socket
+      sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      sock_tcp.connect((ip, port))
+      bEncrCmd      = encrypt_str2b(cmd)
+      #print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
+      #bEncrCmd_encUtf8 = bEncrCmd.encode('utf-8')
+#      bEncrCmd_encUtf8 = bEncrCmd
+      sock_tcp.send( bEncrCmd )
+      #print("RECV")
+      bytesData = sock_tcp.recv(2048)
+      #print("sendAndReceiveOnSocket RECV bytesData                =", bytesData)
+#      strData = bytesData.decode('utf-8')
+#      #print("sendAndReceiveOnSocket RECV strData                  =", strData)
+
+      #Close socket connection
+      sock_tcp.close()
+
+    except socket.error:
+      quit("Cound not connect to host " + ip + ":" + str(port))
+
+    return bytesData
+
+  # python check_husqvarna.py -t 192.168.1.18 -c time
+  # ('Sent:     ', '{"time":{"get_time":{}}}')
+  # ('Received: ', '{"time":{"get_time":{"err_code":0,"year":2019,"month":1,"mday":21,"wday":1,"hour":19,"min":33,"sec":47}}}')
+  def getDateTime(self):
+      # print("getTime, ip = ", ip)
+
+      timeData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.timeCmd_C)
+      decryptedTimeData = decrypt(timeData[4:])
+      #print("decryptedTimeData = ", decryptedTimeData)
+
+      dateTime = {'year': int(findValueStr(decryptedTimeData, "year")),
+                  'month': int(findValueStr(decryptedTimeData, "month")),
+                  'mday': int(findValueStr(decryptedTimeData, "mday")),
+                  'hour': int(findValueStr(decryptedTimeData, "hour")),
+                  'min': int(findValueStr(decryptedTimeData, "min")),
+                  'sec': int(findValueStr(decryptedTimeData, "sec")),
+                  'err_code': int(findValueStr(decryptedTimeData, "err_code"))}
+
+      # print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
+      # .format(y=dateTime["year"],
+      # m=dateTime["month"],
+      # d=dateTime["mday"],
+      # hr=dateTime["hour"],
+      # min=dateTime["min"],
+      # sec=dateTime["sec"],
+      # e=dateTime["err_code"]))
+
+      return dateTime
+
+
+  def retrievePower(self, jsp_PowerData):
+
+    #print('retrievePower jsp_PowerData  = ', jsp_PowerData)
+
+    dict_PowerData = json.loads(jsp_PowerData)
+    #print('retrievePower dict_PowerData  = ', dict_PowerData)
+
+    pd1 = dict_PowerData.get("emeter")
+    #print('retrievePower pd1            = ', pd1)
+
+    pd2 = dict_PowerData['emeter']['get_realtime']
+    #print('retrievePower pd2            = ', pd2)
+
+    # {'voltage_mv': 233196, 'current_ma': 38, 'power_mw': 3849, 'total_wh': 1755, 'err_code': 0}
+    if 'voltage_mv' in pd2.keys():
+      voltage_item = pd2['voltage_mv'] / 1000
+    else:
+      voltage_item = pd2['voltage']
+
+    if 'current_ma' in pd2.keys():
+      current_item = pd2['current_ma'] / 1000
+    else:
+      current_item = pd2['current']
+
+    if 'total_wh' in pd2.keys():
+      total_item = pd2['total_wh']
+    else:
+      total_item = pd2['total'] * 1000
+
+    if 'power_mw' in pd2.keys():
+      power_item = pd2['power_mw'] / 1000
+    else:
+      power_item = pd2['power']
+
+    err_code_item = pd2['err_code']
+
+    #print("voltage = ", voltage_item)
+    #print("current = ", current_item)
+    #print("power   = ", power_item)
+    #print("total   = ", total_item)
+    #print("ErrC    = ", err_code_item)
+
+    power = {'Current' : current_item,
+             'Voltage' : voltage_item,
+             'Power'   : power_item,
+             'Total'   : total_item,
+             'ErrCode' : err_code_item}
+
+    #print("power = ", power)
+
+    return power
+
+  #python check_husqvarna.py -t 192.168.1.18 -c energy
+  #('Sent:     ', '{"emeter":{"get_realtime":{}}}')
+  #('Received: ', '{"emeter":{"get_realtime":{"current":0.012866,"voltage":234.916847,"power":0.333881,"total":1.291000,"err_code":0}}}')
+
+  #Ex. 1
+  #getPower decryptedPowerData = {"emeter": {"get_realtime": {"current": 0.012711, "voltage": 237.028499, "power": 0, "total": 4.685000, "err_code": 0}}}
+
+  #Ex. 2
+  #getPower decryptedPowerData =  {"emeter":{"get_realtime":{"voltage_mv":233160,"current_ma":38,"power_mw":3739,"total_wh":1397,"err_code":0}}}
+  # current         => A
+  # current_ma      => mA
+
+  # voltage         => V
+  # voltage_mv      => mV
+
+  # total           => kWh
+  # total_wh        => Wh
+  def getPower(self):
+    #print("getPower, ip = ", ip)
+
+    #print("getPower powerCmd_C = ", self.powerCmd_C)
+    powerData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.powerCmd_C)
+    #print("getPower powerData = ", powerData)
+    jsp_decryptedPowerData = decrypt(powerData[4:])
+    #print("getPower jsp_decryptedPowerData = ", jsp_decryptedPowerData)
+
+    powerData = self.retrievePower(jsp_decryptedPowerData)
+
+    #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
+          #.format(i=power['current'],
+                  #u=power['voltage'],
+                  #p=power['power'],
+                  #t=power['total'],
+                  #e=power['err_code']))
+    
+    return powerData
+
 
 ##### class PlugDevice(object):
 
@@ -64,26 +251,12 @@ def validHostname(hostname):
 		parser.error("Invalid hostname.")
 	return hostname
 
-# Encryption and Decryption of TP-Link Smart Home Protocol
-# XOR Autokey Cipher with starting key = 171
-def encrypt(string):
-	key = 171
-	result = pack('>I', len(string))
-	for i in string:
-		a = key ^ ord(i)
-		key = a
-		result += chr(a)
-	return result
+def dbgBytes(byteVal):
+    i = 0
+    for b in byteVal:
+        print(i, " = ", chr(b), b)
+        i = i + 1
 
-def decrypt(string):
-	key = 171
-	result = ""
-	for i in string:
-		a = key ^ ord(i)
-		key = ord(i)
-		result += chr(a)
-
-	return result
 
 # Ex.     inData: "{"emeter":{"get_realtime":{"current":0.036836,"voltage":233.437091,"power":3.172235,"total":5.032000,"err_code":0}}}')"
 #         field:  "power"                                                              1      ffffffffE
@@ -102,22 +275,6 @@ def findValueStr(inData, field):
 
 	return findValue
 
-def sendAndReceiveOnSocket(ip, port, cmd):
-	try:
-		# Connect socket
-		sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock_tcp.connect((ip, port))
-
-		sock_tcp.send(encrypt(cmd))
-		data = sock_tcp.recv(2048)
-
-		#Close socket connection
-		sock_tcp.close()
-
-	except socket.error:
-		quit("Cound not connect to host " + ip + ":" + str(port))
-
-	return data
 
 #python check_husqvarna.py -t 192.168.1.18 -c off
 #('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
@@ -128,8 +285,8 @@ def setTurnOff(ip):
   
   turnOffRes = {'err_code' : int(findValueStr(decryptedTurnOffData, "err_code"))}
   
-  print("TURN_OFF: E:{e:01d}"
-      .format(e=turnOffRes["err_code"]))
+  #print("TURN_OFF: E:{e:01d}"
+  #    .format(e=turnOffRes["err_code"]))
   
   return turnOffRes
 
@@ -142,64 +299,12 @@ def setTurnOn(ip):
   
   turnOnRes = {'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
   
-  print("TURN_ON: E:{e:01d}"
-      .format(e=turnOnRes["err_code"]))
+  #print("TURN_ON: E:{e:01d}"
+  #    .format(e=turnOnRes["err_code"]))
   
   return turnOnRes
 
-#python check_husqvarna.py -t 192.168.1.18 -c time
-#('Sent:     ', '{"time":{"get_time":{}}}')
-#('Received: ', '{"time":{"get_time":{"err_code":0,"year":2019,"month":1,"mday":21,"wday":1,"hour":19,"min":33,"sec":47}}}')
-def getDateTime(ip):
-  #print("getTime, ip = ", ip)
 
-  timeData   = sendAndReceiveOnSocket(ip, port, timeCmd)
-  decryptedTimeData = decrypt(timeData[4:])
-  #print("decryptedTimeData = ", decryptedTimeData)
-  
-  dateTime = {'year'     : int(findValueStr(decryptedTimeData,  "year")),
-              'month'    : int(findValueStr(decryptedTimeData,  "month")),
-              'mday'     : int(findValueStr(decryptedTimeData,  "mday")),
-              'hour'     : int(findValueStr(decryptedTimeData,  "hour")),
-              'min'      : int(findValueStr(decryptedTimeData,  "min")),
-              'sec'      : int(findValueStr(decryptedTimeData,  "sec")),
-              'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
-  
-  
-  #print("TIME: {y:4d}-{m:02d}-{d:02d} {hr:02d}:{min:02d}:{sec:02d} E:{e:01d}"
-      #.format(y=dateTime["year"],
-              #m=dateTime["month"],
-              #d=dateTime["mday"],
-              #hr=dateTime["hour"],
-              #min=dateTime["min"],
-              #sec=dateTime["sec"],
-              #e=dateTime["err_code"]))
-  
-  return dateTime
-
-#python check_husqvarna.py -t 192.168.1.18 -c energy
-#('Sent:     ', '{"emeter":{"get_realtime":{}}}')
-#('Received: ', '{"emeter":{"get_realtime":{"current":0.012866,"voltage":234.916847,"power":0.333881,"total":1.291000,"err_code":0}}}')
-def getPower(ip):
-  #print("getPower, ip = ", ip)
-
-  powerData = sendAndReceiveOnSocket(ip, port, powerCmd)
-  decryptedPowerData = decrypt(powerData[4:])
-
-  power = {'current'  : float(findValueStr(decryptedPowerData, "current")),
-           'voltage'  : float(findValueStr(decryptedPowerData, "voltage")),
-           'power'    : float(findValueStr(decryptedPowerData, "power")),
-           'total'    : float(findValueStr(decryptedPowerData, "total")),
-           'err_code' : int(findValueStr(decryptedPowerData, "err_code"))}
-  
-  #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
-        #.format(i=power['current'],
-                #u=power['voltage'],
-                #p=power['power'],
-                #t=power['total'],
-                #e=power['err_code']))
-  
-  return power
 
 def getGraphListFileName(dateTime,
                          tPumpAirBeforeTurnOff,
@@ -232,7 +337,7 @@ def getGraphItem(dateTime, power):
   return s
 
 def createHtmlContents(listOfGraphItems, title):
-  print title
+  print(title)
   #title = "title: 'Dranpump (W)'"
   cnts =        "<html>\n"
   cnts = cnts + "  <head>\n"
@@ -310,13 +415,13 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
   ##########################
   #t = T_defaultMaxOffTime
 
-  print "------------------------------------------"
-  print "calcNewOffTime BW:{bw}, WT:{wt}, Wanted:{wa}".format(bw=sleepDurationBeforeWater,
+  print("------------------------------------------")
+  print("calcNewOffTime BW:{bw}, WT:{wt}, Wanted:{wa}".format(bw=sleepDurationBeforeWater,
                                                               wt=latestWaterTime,
-                                                              wa=T_wantedPumpTime)
-  print "ratio1 = {ra1}   ratio2 = {ra2}\n".format(ra1=ratio1, ra2=ratio2)
-  print "=> new off time = {newOffT},".format(newOffT=t)
-  print "------------------------------------------"
+                                                              wa=T_wantedPumpTime))
+  print("ratio1 = {ra1}   ratio2 = {ra2}\n".format(ra1=ratio1, ra2=ratio2))
+  print("=> new off time = {newOffT},".format(newOffT=t))
+  print("------------------------------------------")
   
   return t
 
@@ -530,7 +635,7 @@ def startup():
   shortestPumpWaterDuration = 1000000/3.0
   longestPumpWaterDuration  = 1/3.0
   shortestPumpAirDuration   = 1000000/3.0
-  longestPumpAirDuration    = 1/3.0
+  longestPumpAirDuration    = 1/3.0Su
   switchTime = time.time()
   dateTime = getDateTime(ip)
   power    = getPower(ip)
