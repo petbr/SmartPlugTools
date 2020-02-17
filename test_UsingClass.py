@@ -50,9 +50,19 @@ plug3         = PlugDevice("Plug #3",         "192.168.1.33")
 print("Access port_C:  {ap}"    .format(ap=PlugDevice.accessPort_C))
 print("Commands_C:     {cmds}"  .format(cmds=PlugDevice.commands_C))
 print("timeCmd_C:      {timeC}" .format(timeC=PlugDevice.timeCmd_C))
+print("infoCmd_C:      {infoC}" .format(infoC=PlugDevice.infoCmd_C))
 print("powerCmd_C:     {pwrC}"  .format(pwrC=PlugDevice.powerCmd_C))
 print("turnOnCmd_C:    {tOnC}"  .format(tOnC=PlugDevice.turnOnCmd_C))
 print("turnOffCmd_C:   {tOffC}" .format(tOffC=PlugDevice.turnOffCmd_C))
+
+
+plug1Info = plug1.getInfo()["relay_state"]
+print("plug1.getInfo = ", plug1Info)
+
+#plug1.setPowerOff()
+time.sleep(3.0)
+#plug1.setPowerOn()
+
 
 
 # Instance variables plug1
@@ -193,7 +203,7 @@ t2 = time.time()
 
 print("Time to create 5*timeEnergy_arr = ", t2-t1)
 
-zeroPower_reported = False
+waitForZero = False
 nrMeasurements = 0
 
 filename = '/home/peter/repo/SmartPlugTools/te_arr_json2'
@@ -254,17 +264,27 @@ def convertFile(filename, arr):
 
 #exit(0)
 
+def invertPlug1():
+  plug1Info_Relay_state = plug1.getInfo()["relay_state"]
+  if plug1Info_Relay_state == 0:
+    plug1.setPowerOn()
+  else:
+    plug1.setPowerOff()
 
-
+sleepTime = 0.5
 while True:
   tMeasure    = time.time()
   ePlugDp = plugDrainpump.getPower()
   nrMeasurements = nrMeasurements + 1
 
   # Report non zero power or if zero hasn't been observed since before
-  if (ePlugDp['Power'] > 0) or (zeroPower_reported == False):
+  if (ePlugDp['Power'] > 0) or (waitForZero == True):
     if (ePlugDp['Power'] == 0):
-      zeroPower_reported = True
+
+      if waitForZero == True:
+        invertPlug1()
+
+      waitForZero = False
       sleepTime = 0.5
 
       tSleep = tMeasure - tMeasurePrev
@@ -273,10 +293,14 @@ while True:
       saveData(filename, te_arr)
 
       tMeasurePrev = tMeasure
+
     else:
+      if waitForZero == False:
+        invertPlug1()
+
       te = {'Time': tMeasure, 'Energy': ePlugDp}
       te_arr.append(te)
-      zeroPower_reported = False
+      waitForZero = True
       sleepTime = 0.5
 
     dt = datetime.fromtimestamp(tMeasure)

@@ -4,7 +4,7 @@ import socket
 import time
 import enum
 import argparse
-import sys
+#import sysset
 import json
 
 from struct import pack
@@ -79,6 +79,7 @@ class PlugDevice(object):
                 'energy'   : '{"emeter":{"get_realtime":{}}}'}
 
   port_C = 9999
+  infoCmd_C    = commands_C["info"]
   timeCmd_C    = commands_C["time"]
   powerCmd_C   = commands_C["energy"]
   turnOnCmd_C  = commands_C["on"]
@@ -91,17 +92,17 @@ class PlugDevice(object):
 # The opposite method of bytes.decode() is str.encode(),
 # which returns a bytes representation of the Unicode string,
 # encoded in the requested encoding.
-  def sendAndReceiveOnSocket(self, ip, port, cmd):
+  def sendAndReceiveOnSocket(self, cmd):
     #print("sendAndReceiveOnSocket")
-    #print("ip          =", ip)
-    #print("port        =", port)
+    #print("hostname    =", hostname)
+    #print("port        =", port_C)
     #print("cmd         =", cmd)
     #print("cmd(utf-8)  =", cmd.encode('utf-8'))
     
     try:
       # Connect socket
       sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      sock_tcp.connect((ip, port))
+      sock_tcp.connect((self.hostName, self.port_C))
       bEncrCmd      = encrypt_str2b(cmd)
       #print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
       #bEncrCmd_encUtf8 = bEncrCmd.encode('utf-8')
@@ -117,7 +118,7 @@ class PlugDevice(object):
       sock_tcp.close()
 
     except socket.error:
-      quit("Cound not connect to host " + ip + ":" + str(port))
+      quit("Cound not connect to host " + hostName + ":" + str(port_C))
 
     return bytesData
 
@@ -127,7 +128,7 @@ class PlugDevice(object):
   def getDateTime(self):
       # print("getTime, ip = ", ip)
 
-      timeData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.timeCmd_C)
+      timeData = self.sendAndReceiveOnSocket(self.timeCmd_C)
       decryptedTimeData = decrypt(timeData[4:])
       #print("decryptedTimeData = ", decryptedTimeData)
 
@@ -224,7 +225,7 @@ class PlugDevice(object):
     #print("getPower, ip = ", ip)
 
     #print("getPower powerCmd_C = ", self.powerCmd_C)
-    powerData = self.sendAndReceiveOnSocket(self.hostName, self.port_C, self.powerCmd_C)
+    powerData = self.sendAndReceiveOnSocket(self.powerCmd_C)
     #print("getPower powerData = ", powerData)
     jsp_decryptedPowerData = decrypt(powerData[4:])
     #print("getPower jsp_decryptedPowerData = ", jsp_decryptedPowerData)
@@ -239,6 +240,54 @@ class PlugDevice(object):
                   #e=power['err_code']))
     
     return powerData
+
+
+#python check_husqvarna.py -t 192.168.1.18 -c off
+#('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
+#('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
+  def setPowerOn(self):
+    turnOnResult = powerData = self.sendAndReceiveOnSocket(self.turnOnCmd_C)
+    decryptedTimeData = decrypt(turnOnResult[4:])
+  
+    turnOnRes = {'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
+  
+    #print("TURN_ON: E:{e:01d}"
+    #    .format(e=turnOnRes["err_code"]))
+  
+    return turnOnRes
+
+#python check_husqvarna.py -t 192.168.1.18 -c off
+#('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
+#('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
+  def setPowerOff(self):
+    turnOffResult = self.sendAndReceiveOnSocket(self.turnOffCmd_C)
+    decryptedTurnOffData = decrypt(turnOffResult[4:])
+  
+    turnOffRes = {'err_code' : int(findValueStr(decryptedTurnOffData, "err_code"))}
+  
+    #print("TURN_OFF: E:{e:01d}"
+    #    .format(e=turnOffRes["err_code"]))
+  
+    return turnOffRes
+
+
+  #python check_husqvarna.py -t 192.168.1.31 -c info
+  #('Sent:     ', '{"system":{"get_sysinfo":{}}}')
+  #('Received: ', '{"system":{"get_sysinfo":{"sw_ver":"1.5.4 Build 180815 Rel.121440","hw_ver":"2.0","type":"IOT.SMARTPLUGSWITCH","model":"HS110
+  #(EU)","mac":"B0:BE:76:D0:08:98","dev_name":"Smart WiFi Plug With Energy Monitoring",
+  #"alias":"1.Jack","relay_state":1,"on_time":5,"active_mode":"none","feature":"TIM:ENE","updating":0,
+  #"icon_hash":"","rssi":-28,"led_off":0,"longitude_i":118308,"latitude_i":580209,"hwId":"044A516EE63C875F9458DA25C2CCC5A0",
+  #"fwId":"00000000000000000000000000000000","deviceId":"8006C6B14A0E01651AAD1EDD2EDA8A901ADFEA15","oemId":"1998A14DAA86E4E001FD7CAF42868B5E",
+  #"next_action":{"type":-1},"err_code":0}}}')
+  def getInfo(self):
+    infoResult = self.sendAndReceiveOnSocket(self.infoCmd_C)
+    decryptedInfoData = decrypt(infoResult[4:])
+
+    print("decryptedInfoData = ", decryptedInfoData)
+    infoRes = {'relay_state' : int(findValueStr(decryptedInfoData, "relay_state"))}
+    print("infoRes = ", infoRes)
+  
+    return infoRes
 
 
 ##### class PlugDevice(object):
@@ -274,35 +323,6 @@ def findValueStr(inData, field):
 	findValue = findAndRest[len(field)+2 : nextValueEndPos] #f
 
 	return findValue
-
-
-#python check_husqvarna.py -t 192.168.1.18 -c off
-#('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
-#('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
-def setTurnOff(ip):
-  turnOffResult = sendAndReceiveOnSocket(ip, port, turnOffCmd)
-  decryptedTurnOffData = decrypt(turnOffResult[4:])
-  
-  turnOffRes = {'err_code' : int(findValueStr(decryptedTurnOffData, "err_code"))}
-  
-  #print("TURN_OFF: E:{e:01d}"
-  #    .format(e=turnOffRes["err_code"]))
-  
-  return turnOffRes
-
-#python check_husqvarna.py -t 192.168.1.18 -c on
-#('Sent:     ', '{"system":{"set_relay_state":{"state":1}}}')
-#('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
-def setTurnOn(ip):
-  turnOnResult = sendAndReceiveOnSocket(ip, port, turnOnCmd)
-  decryptedTimeData = decrypt(turnOnResult[4:])
-  
-  turnOnRes = {'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
-  
-  #print("TURN_ON: E:{e:01d}"
-  #    .format(e=turnOnRes["err_code"]))
-  
-  return turnOnRes
 
 
 
@@ -635,7 +655,7 @@ def startup():
   shortestPumpWaterDuration = 1000000/3.0
   longestPumpWaterDuration  = 1/3.0
   shortestPumpAirDuration   = 1000000/3.0
-  longestPumpAirDuration    = 1/3.0Su
+  longestPumpAirDuration    = 1/3.0
   switchTime = time.time()
   dateTime = getDateTime(ip)
   power    = getPower(ip)
