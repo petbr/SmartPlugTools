@@ -271,7 +271,11 @@ def invertPlug1():
   else:
     plug1.setPowerOff()
 
-sleepTime = 0.5
+invertPlug1()
+time.sleep(0.05)
+invertPlug1()
+
+sleepTime = 2
 while True:
   tMeasure    = time.time()
   ePlugDp = plugDrainpump.getPower()
@@ -279,13 +283,12 @@ while True:
 
   # Report non zero power or if zero hasn't been observed since before
   if (ePlugDp['Power'] > 0) or (waitForZero == True):
+    sleepTime = 0.5
     if (ePlugDp['Power'] == 0):
-
-      if waitForZero == True:
-        invertPlug1()
+#      if waitForZero == True:
+#        invertPlug1()
 
       waitForZero = False
-      sleepTime = 0.5
 
       tSleep = tMeasure - tMeasurePrev
       te = {'Time': tMeasure, 'TimeSleep': tSleep, 'Energy': ePlugDp}
@@ -297,11 +300,14 @@ while True:
     else:
       if waitForZero == False:
         invertPlug1()
+        time.sleep(0.05)
+        invertPlug1()
+
 
       te = {'Time': tMeasure, 'Energy': ePlugDp}
       te_arr.append(te)
       waitForZero = True
-      sleepTime = 0.5
+      sleepTime = 5
 
     dt = datetime.fromtimestamp(tMeasure)
     print("--------------------", nrMeasurements, "-----------------------")

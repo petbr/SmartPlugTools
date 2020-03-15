@@ -6,8 +6,10 @@ import enum
 import argparse
 #import sysset
 import json
+import sys
 
 from struct import pack
+from datetime import datetime
 
 version = 0.3
 
@@ -64,6 +66,7 @@ class PlugDevice(object):
   
   # Class variables
   accessPort_C = 9999
+  sendAndReceiveSumCounter = 0
 
   commands_C = {'info'     : '{"system":{"get_sysinfo":{}}}',
                 'on'       : '{"system":{"set_relay_state":{"state":1}}}',
@@ -92,34 +95,61 @@ class PlugDevice(object):
 # The opposite method of bytes.decode() is str.encode(),
 # which returns a bytes representation of the Unicode string,
 # encoded in the requested encoding.
+
   def sendAndReceiveOnSocket(self, cmd):
-    #print("sendAndReceiveOnSocket")
-    #print("hostname    =", hostname)
-    #print("port        =", port_C)
-    #print("cmd         =", cmd)
-    #print("cmd(utf-8)  =", cmd.encode('utf-8'))
-    
-    try:
-      # Connect socket
-      sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      sock_tcp.connect((self.hostName, self.port_C))
-      bEncrCmd      = encrypt_str2b(cmd)
-      #print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
-      #bEncrCmd_encUtf8 = bEncrCmd.encode('utf-8')
-#      bEncrCmd_encUtf8 = bEncrCmd
-      sock_tcp.send( bEncrCmd )
-      #print("RECV")
-      bytesData = sock_tcp.recv(2048)
-      #print("sendAndReceiveOnSocket RECV bytesData                =", bytesData)
-#      strData = bytesData.decode('utf-8')
-#      #print("sendAndReceiveOnSocket RECV strData                  =", strData)
+    print("sendAndReceiveOnSocket")
+    print("hostname    =", self.hostName)
+    print("port        =", self.port_C
 
-      #Close socket connection
-      sock_tcp.close()
 
-    except socket.error:
-      quit("Cound not connect to host " + hostName + ":" + str(port_C))
 
+
+
+
+          )
+    print("cmd         =", cmd)
+    print("cmd(utf-8)  =", cmd.encode('utf-8'))
+
+    successfulSend = False
+    self.sendAndReceiveSumCounter = self.sendAndReceiveSumCounter + 1
+    data = "Didn't work out, will be set later"
+
+    while successfulSend == False:
+      try:
+        print("\nTry this....... connect to host " + self.hostName + ":" + str(self.port_C))
+        print("NOW: ", datetime.now())
+        # Connect socket
+        sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock_tcp.connect((self.hostName, self.port_C))
+        bEncrCmd      = encrypt_str2b(cmd)
+        print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
+        #bEncrCmd_encUtf8 = bEncrCmd.encode('utf-8')
+  #      bEncrCmd_encUtf8 = bEncrCmd
+        sock_tcp.send( bEncrCmd )
+        #print("RECV")
+        bytesData = sock_tcp.recv(2048)
+        print("sendAndReceiveOnSocket RECV bytesData                =", bytesData)
+  #      strData = bytesData.decode('utf-8')
+  #      #print("sendAndReceiveOnSocket RECV strData                  =", strData)
+
+        #Close socket connection
+        sock_tcp.close()
+        successfulSend = True
+
+      except socket.error:
+        self.sendAndReceiveSumCounter = self.sendAndReceiveSumCounter + 1
+
+        print("sendAndReceiveOnSocket::  time = " + str(time.time()))
+        sys.stdout.flush()
+
+        print("Coulllllllllllld not connect to host " + self.hostName + ":" + str(self.port_C))
+        sys.stdout.flush()
+        print("except Try #", str(self.sendAndReceiveSumCounter))
+        sys.stdout.flush()
+        successfulSend = False
+        time.sleep(2.0)
+
+    print("Try....... and finished " + self.hostName + ":" + str(self.port_C))
     return bytesData
 
   # python check_husqvarna.py -t 192.168.1.18 -c time
@@ -226,18 +256,19 @@ class PlugDevice(object):
 
     #print("getPower powerCmd_C = ", self.powerCmd_C)
     powerData = self.sendAndReceiveOnSocket(self.powerCmd_C)
-    #print("getPower powerData = ", powerData)
+    print("getPower powerData = ", powerData)
     jsp_decryptedPowerData = decrypt(powerData[4:])
-    #print("getPower jsp_decryptedPowerData = ", jsp_decryptedPowerData)
+    print("getPower jsp_decryptedPowerData = ", jsp_decryptedPowerData)
 
     powerData = self.retrievePower(jsp_decryptedPowerData)
+    print("getPower powerData = ", powerData)
 
-    #print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
-          #.format(i=power['current'],
-                  #u=power['voltage'],
-                  #p=power['power'],
-                  #t=power['total'],
-                  #e=power['err_code']))
+    print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
+          .format(i=powerData['Current'],
+                  u=powerData['Voltage'],
+                  p=powerData['Power'],
+                  t=powerData['Total'],
+                  e=powerData['ErrCode']))
     
     return powerData
 
