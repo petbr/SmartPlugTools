@@ -368,7 +368,7 @@ def createHtmlContents(listOfGraphItems, title, Y_name):
   cnts = cnts + title + ",\n"   
   cnts = cnts + "          curveType: 'function',\n"
   cnts = cnts + "          lineWidth: 5,\n"
-  cnts = cnts + "          legend: { position: 'bottom' }\n"
+  cnts = cnts + "          legend: { position: 'bottom' },\n"
   cnts = cnts + "          series: { \n"
   cnts = cnts + "             0: { color: '#008f1e'}, \n"
   cnts = cnts + "          }, \n"
