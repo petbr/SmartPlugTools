@@ -1,5 +1,7 @@
 lst = []
-times = 1*1000*1000
+
+times = int(input("Enter a number: "))
+
 print("Times: ", times)
 for i in range(times):
     lst.append('x')
