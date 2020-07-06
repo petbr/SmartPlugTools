@@ -576,17 +576,23 @@ def printStatus(directive, duration,
 # Parse commandline arguments
 parser = argparse.ArgumentParser(description="TP-Link Wi-Fi Smart Plug Client v" + str(version))
 parser.add_argument("-t", "--target", metavar="<hostname>", required=True, help="Target hostname or IP address", type=validHostname)
+parser.add_argument("-f", "--createDebugFiles", metavar="<createDebugFiles>", help="Create debug files")
 
 group = parser.add_mutually_exclusive_group(required=True)
-group.add_argument("-c", "--command", metavar="<command>", help="Preset command to send. Choices are: "+", ".join(commands), choices=commands)
+group.add_argument("-c", "--command",          metavar="<command>",             help="Preset command to send. Choices are: "+", ".join(commands), choices=commands)
 
 group.add_argument("-j", "--json", metavar="<JSON string>", help="Full JSON string of command to send")
+
 
 args = parser.parse_args()
 
 # Set target IP, port and command to send
 ip = args.target
 
+print "target = ", args.target
+print "command = ", args.command
+print "json = ", args.json
+print "createDebugFiles = ", args.createDebugFiles
 
 #class PowerDirection(enum.Enum): 
     #powerStable      = 1
@@ -765,7 +771,8 @@ while contRunning:
                                       True)
       print "Filename: " + filename + "\n"
       print "Contents: " + contents + "\n"
-      createFile(filename, contents)
+      if args.createDebugFiles == "Yes":
+        createFile(filename, contents)
       
       bwItem = createGraphItem_BeforeWater(dateTime, sleepDurationBeforeWater)
       listOfGraphItems_BeforeWater = listOfGraphItems_BeforeWater + "\n" + bwItem
@@ -870,7 +877,8 @@ while contRunning:
                                         False)
         print "Filename: " + filename + "\n"
         print "Contents: " + contents + "\n"
-        createFile(filename, contents)
+        if args.createDebugFiles == "Yes":
+          createFile(filename, contents)
         
         bwItem = createGraphItem_BeforeWater(dateTime, sleepDurationBeforeWater)
         listOfGraphItems_BeforeWater = listOfGraphItems_BeforeWater + "\n" + bwItem
