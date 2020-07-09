@@ -8,5 +8,12 @@ print("Finished, times: ", times)
 print("Lengt a = ", len(a))
 print("argv = ", times)
 
-    
-    
+aL = list(a)
+fromN = 0
+toN = int(len(a)/2)
+
+print("fromN = ", fromN)
+print("toN = ", toN)
+
+for i in range (fromN, toN-1):
+    aL[i] = aL[toN+i]
