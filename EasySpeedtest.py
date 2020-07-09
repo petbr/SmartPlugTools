@@ -10,14 +10,16 @@ print("Lengt a = ", len(a))
 print("argv = ", times)
 
 aL = list(a)
+bL = aL
 fromN = 0
 toN = int(len(a)/2)
 
 print("fromN = ", fromN)
 print("toN = ", toN)
 
-for i in range (fromN, toN-1):
-    aL[i] = aL[toN+i]
+for i in range (0, toN-1):
+    bL[i] = aL[i]
 
 print("size of a  = ", getsizeof(a)/1e6)
 print("size of aL = ", getsizeof(aL)/1e6)
+print("size of bL = ", getsizeof(bL)/1e6)
