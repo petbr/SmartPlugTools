@@ -661,7 +661,7 @@ def startup():
   # Time tresholds.
   T_wantedPumpTime          = 5.0
   T_minPumpingWater         = 2
-  T_pumpingAirBeforeTurnOff = 50
+  T_pumpingAirBeforeTurnOff = 10
   T_reportAfterOffTime      = 2
   T_defaultMaxOffTime       = 120
   T_maxOffTime              = 10
@@ -861,9 +861,13 @@ while contRunning:
 
       if isVirginList:
         # Report the current list of graph items and start a new one
-        title  = "          title: 'Dranpump (W) tOffTime={t_Off:4d}"
+        title  = "          title: 'Dranpump (W) tOffTime={t_Off:4.2f}"
         title += "  waterTime={wt:4.2f}'"
+        print "title           #1 = ", title
+        print "offDuration     #1 = ", offDuration
+        print "latestWaterTime #1 = ", latestWaterTime
         title = title.format(t_Off=offDuration, wt=latestWaterTime)
+        print "title #2 = ", title
         print title
         contents = createHtmlContents(listOfGraphItems_Power, title, "Effekt")
         
