@@ -412,8 +412,6 @@ def createFile(filename, contents):
   return
 
 def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
-  return T_defaultMaxOffTime
-
   # Typical at start the values == 0...then use default
   if (sleepDurationBeforeWater == 0) or (latestWaterTime == 0):
     t = T_defaultMaxOffTime
@@ -664,7 +662,7 @@ def startup():
   T_pumpingAirBeforeTurnOff = 10
   T_reportAfterOffTime      = 2
   T_defaultMaxOffTime       = 120
-  T_maxOffTime              = 10
+  T_maxOffTime              = 7200
   T_shortIdleTime           = 5
 #  T_lowResSleep             = 2
 #  T_mediumResSleep          = 1.0
