@@ -411,7 +411,7 @@ def createFile(filename, contents):
   
   return
 
-def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
+def calcNewOffTime(prev_T_maxOffTime, sleepDurationBeforeWater, latestWaterTime):
   # Typical at start the values == 0...then use default
   if (sleepDurationBeforeWater == 0) or (latestWaterTime == 0):
     t = T_defaultMaxOffTime
@@ -432,6 +432,9 @@ def calcNewOffTime(sleepDurationBeforeWater, latestWaterTime):
     if t < T_defaultMaxOffTime :
       t = T_defaultMaxOffTime
 
+    # Don increase with more than x2
+    if t > prev_T_maxOffTime:
+      t = min(t, prev_T_maxOffTime*2)
   ##########################
   # NO! Always use default!
   ##########################
@@ -837,7 +840,8 @@ while contRunning:
       shortestPumpAirDuration = min(duration, shortestPumpAirDuration)
       longestPumpAirDuration  = max(duration, longestPumpAirDuration)
       
-      T_maxOffTime = calcNewOffTime(sleepDurationBeforeWater,
+      T_maxOffTime = calcNewOffTime(T_maxOffTime,
+                                    sleepDurationBeforeWater,
                                     latestWaterTime)
       setTurnOff(ip)    
       switchTime = sleepTimeProspect      
