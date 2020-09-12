@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html>
+<head>
+<title>Petras smart home</title>
+</head>
 <body>
 
-Peter was here!
+<h1>Petras smarta hus</h1>
+<p>Dräneringspumpsdiagram</p>
+<canvas id="myCanvas" width="1000" height="600" style="border:1px solid #000000;"></canvas>
+<p>Temperaturer</p>
 
-<div style="text-align:center">
-<canvas id="myCanvas" width="1500" height="800" style="border:3px solid #d3d3d3;">
-Your browser does not support the HTML canvas tag.</canvas>
-</div>
 
-Niklas here!
 <script>	
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 
-var XPixels = 1400;
+var XPixels = 800;
 var YPixels = 700;	
 var xStart = 50;
 var yStart = 650;
@@ -38,21 +39,32 @@ var measurements = [
 var Ypos = 400;
 var xFactor = XPixels / Xwidth(measurements);
 
-var x, y, n;
+var x1, y1, x2, y2, n;
 ctx.moveTo(xStart, yStart);
-
-for(n=0; n<measurements.length; n++)
+x1 = xStart + Math.round(measurements[0].x * xFactor);
+y1 = yStart - measurements[0].y;
+for(n=1; n<measurements.length; n++)
 {
-  x = xStart + Math.round(measurements[n].x * xFactor);
-  y = yStart - measurements[n].y;
-  
-  ctx.lineTo(x, y);
+  ctx.beginPath();
+  ctx.moveTo(x1,yStart);
+  ctx.lineTo(x1,y1);
+  x2 = xStart + Math.round(measurements[n].x * xFactor);
+  y2 = yStart - measurements[n].y;
+  if (measurements[n].Sleep == true) {
+    ctx.fillStyle = "red";
+  } else {
+    ctx.fillStyle = "blue";
+  }  
+  ctx.lineStyle = "black";
+  ctx.lineTo(x2, y2);
+  ctx.lineTo(x2, yStart);  
+  ctx.lineTo(x1, yStart);  
+  ctx.fill();
+  ctx.stroke();
+
+  x1 = x2;
+  y1 = y2;
 }
-ctx.lineTo(x, yStart);
-ctx.lineTo(xStart, yStart);
-
-ctx.stroke();
 </script>
-
 </body>
 </html>
