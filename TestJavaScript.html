@@ -7,14 +7,29 @@
 
 <h1>Petras smarta hus</h1>
 <p>Dräneringspumpsdiagram</p>
-<canvas id="myCanvas" width="1000" height="600" style="border:1px solid #000000;"></canvas>
+<p>Längsta tid pumpning av vatten</p>
+<p>Dräneringspumpsdiagram</p>
+<canvas id="myCanvas1" width="1500" height="700" style="border:1px solid #000000;"></canvas>
+<canvas id="myCanvas2" width="800" height="1500" style="border:1px solid #000000;"></canvas>
 <p>Temperaturer</p>
 
 
 <script>	
-var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
+var canvasArr = [document.getElementById("myCanvas1"), document.getElementById("myCanvas2")];
+var ctxArr = [canvasArr[0].getContext("2d"), canvasArr[1].getContext("2d")];
 
+ctx = ctxArr[0];
+
+ctx.canvas.width  = window.innerWidth;
+ctx.canvas.height = window.innerHeight;
+
+ctx.fillText("XWidthMeas: " + XWidthMeas, 50, 50); 
+ctx.fillText("YMinMeas:   " + YMinMeas,   50, 70); 
+ctx.fillText("YMaxMeas:   " + YMaxMeas,   50, 90); 
+ctx.fillText("Window.innerHeight:   " + window.innerHeight, 50, 110); 
+ctx.fillText("Window.innerWidth:   " + window.innerWidth, 50, 130); 
+
+  
 var XPixels = 800;
 var YPixels = 700;	
 var xStart = 50;
@@ -26,6 +41,42 @@ function Xwidth(measurements) {
 	return measurements[len-1].x - measurements[0].x;
 }
 
+function Ymax(measurements) {
+	var len = measurements.length;
+	var yMax = measurements[0].y;
+	for(n=1; n<measurements.length; n++)
+	{
+		if (measurements[n].y > yMax) {
+			yMax = measurements[n].y;
+		}
+	}
+		
+	return yMax;
+}
+
+function Ymin(measurements) {
+	var len = measurements.length;
+	var yMin = measurements[0].y;
+	for(n=1; n<measurements.length; n++)
+	{
+		if (measurements[n].y < yMin) {
+			yMin = measurements[n].y;
+		}
+	}
+		
+	return yMin;
+}
+
+function RemakeXinMeasurements(measurements)
+{
+	for (n=0; n<measurements.length; n++)
+	{
+		measurements[n].x = n*5;
+	}
+}
+
+
+
 var measurements = [
 {x:0,  y:100, Sleep:true},
 {x:10, y:200, Sleep:true},
@@ -34,7 +85,27 @@ var measurements = [
 {x:40, y:220, Sleep:true},
 {x:70, y:225, Sleep:false},
 {x:75, y:230, Sleep:false},
+{x:100,  y:100, Sleep:true},
+{x:110, y:200, Sleep:true},
+{x:120, y:300, Sleep:true},
+{x:130, y:250, Sleep:false},
+{x:140, y:220, Sleep:true},
+{x:170, y:225, Sleep:false},
+{x:175, y:230, Sleep:false},
+{x:200,  y:100, Sleep:true},
+{x:210, y:200, Sleep:true},
+{x:220, y:300, Sleep:true},
+{x:230, y:250, Sleep:false},
+{x:240, y:220, Sleep:true},
+{x:270, y:225, Sleep:false},
+{x:275, y:230, Sleep:false}
 ];
+
+RemakeXinMeasurements(measurements);
+
+var YMinMeas   = Ymin(measurements);
+var YMaxMeas   = Ymax(measurements);
+var XWidthMeas = Xwidth(measurements);
 
 var Ypos = 400;
 var xFactor = XPixels / Xwidth(measurements);
@@ -56,12 +127,13 @@ for(n=1; n<measurements.length; n++)
     ctx.fillStyle = "blue";
   }  
   ctx.lineStyle = "black";
+  
   ctx.lineTo(x2, y2);
   ctx.lineTo(x2, yStart);  
   ctx.lineTo(x1, yStart);  
   ctx.fill();
   ctx.stroke();
-
+  
   x1 = x2;
   y1 = y2;
 }
