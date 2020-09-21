@@ -5,56 +5,32 @@
 </head>
 <body>
 
-<h1>Petras smarta hus</h1>
+<h1>Petras smarta hus ver 0.2</h1>
 <p>Dräneringspumpsdiagram</p>
 <p>Längsta tid pumpning av vatten</p>
-<p>Dräneringspumpsdiagram</p>
-<canvas id="myCanvas1" width="1500" height="700" style="border:1px solid #000000;"></canvas>
-<canvas id="myCanvas2" width="800" height="1500" style="border:1px solid #000000;"></canvas>
-<p>Temperaturer</p>
+<canvas id="myCanvas1" width="500" height="200" style="border:2px solid #ff0000;"></canvas>
+<p>-------</p>
+<canvas id="myCanvas2" width="200" height="500" style="border:2px solid #00ff00;"></canvas>
+<p>Temperaturer också</p>
 
 
 <script>	
-var canvasArr = [document.getElementById("myCanvas1"), document.getElementById("myCanvas2")];
-var ctxArr = [canvasArr[0].getContext("2d"), canvasArr[1].getContext("2d")];
 
-ctx = ctxArr[0];
+function FcnRemakeXinMeasurements(measurements)
+{
+	for (n=0; n<measurements.length; n++)
+	{
+		measurements[n].x = n*5;
+	}
+}
 
-ctx.canvas.width  = window.innerWidth;
-ctx.canvas.height = window.innerHeight;
-
-ctx.fillText("XWidthMeas: " + XWidthMeas, 50, 50); 
-ctx.fillText("YMinMeas:   " + YMinMeas,   50, 70); 
-ctx.fillText("YMaxMeas:   " + YMaxMeas,   50, 90); 
-ctx.fillText("Window.innerHeight:   " + window.innerHeight, 50, 110); 
-ctx.fillText("Window.innerWidth:   " + window.innerWidth, 50, 130); 
-
-  
-var XPixels = 800;
-var YPixels = 700;	
-var xStart = 50;
-var yStart = 650;
-
-function Xwidth(measurements) {
+function FcnXwidth(measurements) {
 	len = measurements.length;
 	
 	return measurements[len-1].x - measurements[0].x;
 }
 
-function Ymax(measurements) {
-	var len = measurements.length;
-	var yMax = measurements[0].y;
-	for(n=1; n<measurements.length; n++)
-	{
-		if (measurements[n].y > yMax) {
-			yMax = measurements[n].y;
-		}
-	}
-		
-	return yMax;
-}
-
-function Ymin(measurements) {
+function FcnYmin(measurements) {
 	var len = measurements.length;
 	var yMin = measurements[0].y;
 	for(n=1; n<measurements.length; n++)
@@ -67,14 +43,103 @@ function Ymin(measurements) {
 	return yMin;
 }
 
-function RemakeXinMeasurements(measurements)
-{
-	for (n=0; n<measurements.length; n++)
+function FcnYmax(measurements) {
+	var len = measurements.length;
+	var yMax = measurements[0].y;
+	for(n=1; n<measurements.length; n++)
 	{
-		measurements[n].x = n*5;
+		if (measurements[n].y > yMax) {
+			yMax = measurements[n].y;
+		}
 	}
+		
+	return yMax;
 }
 
+var xText = 50;
+var yText = 50;
+
+function FcnFillText(ctx, str) {
+	ctx.fillText(str, xText, yText);
+	yText = yText + 20;
+}
+
+function FcnDrawCanvas(ctx, measurements) {
+  var XwidthMeas = FcnXwidth(measurements);
+  var YminMeas   = FcnYmin(measurements);
+  var YmaxMeas   = FcnYmax(measurements);
+
+  var Xwidth = ctx.canvas.width-80;
+  var Yheight = ctx.canvas.height-140;
+  var Xstart = 10;
+  var Ystart = ctx.canvas.height-10;
+
+  FcnFillText(ctx, "Peter #1")
+  FcnFillText(ctx, "Peter #2")
+  FcnFillText(ctx, "Peter #3")
+  
+  FcnFillText(ctx, "Xwidth: " + Xwidth); 
+  FcnFillText(ctx, "XwidthMeas:   " + XwidthMeas); 
+  FcnFillText(ctx, "YmaxMeas:   " + YmaxMeas); 
+  FcnFillText(ctx, "Draw width:   " + Xwidth); 
+  FcnFillText(ctx, "Draw height:   " + Yheight); 
+
+
+  var XstartPos = 10;
+  var YstartPos = ctx.canvas.height-10;
+  var xFactor = Xwidth / XwidthMeas;
+  var yFactor = (ctx.canvas.height - 120) / YmaxMeas;
+
+  var x1, y1, x2, y2, n;
+  ctx.moveTo(Xstart, Ystart);
+  x1 = XstartPos + Math.round(measurements[0].x * xFactor);
+  y1 = YstartPos - measurements[0].y * yFactor;
+  for(n=1; n<measurements.length; n++)
+  {
+	FcnFillText(ctx, "Inside for loop #1 x1="+x1); 
+    ctx.beginPath();
+	FcnFillText(ctx, "#2"); 
+    ctx.moveTo(x1,YstartPos);
+	FcnFillText(ctx, "#3"); 
+    ctx.lineTo(x1,y1);
+	FcnFillText(ctx, "#4"); 
+    x2 = XstartPos + Math.round(measurements[n].x * xFactor);
+    y2 = YstartPos - measurements[n].y * yFactor;
+	FcnFillText(ctx, "#5"); 
+    if (measurements[n].Sleep == true) {
+      ctx.fillStyle = "red";
+    } else {
+      ctx.fillStyle = "blue";
+    }  
+	FcnFillText(ctx, "#6"); 
+    ctx.lineStyle = "black";
+	FcnFillText(ctx, "#7"); 
+  
+    ctx.lineTo(x2, y2);
+	FcnFillText(ctx, "#8"); 
+    ctx.lineTo(x2, YstartPos);  
+	FcnFillText(ctx, "#9"); 
+    ctx.lineTo(x1, YstartPos);  
+	FcnFillText(ctx, "#10"); 
+    ctx.fill();
+    ctx.stroke();
+  
+    x1 = x2;
+    y1 = y2;
+  }
+}
+
+var canvas = document.getElementById("myCanvas1");
+var ctx = canvas.getContext("2d");
+
+
+var canvasArr = [document.getElementById("myCanvas1"),
+                 document.getElementById("myCanvas2")];
+canvasArr[0].width  = window.innerWidth  - 50;
+canvasArr[0].height = window.innerHeight - 50;
+
+var ctxArr = [canvasArr[0].getContext("2d"),
+              canvasArr[1].getContext("2d")];
 
 
 var measurements = [
@@ -84,59 +149,20 @@ var measurements = [
 {x:30, y:250, Sleep:false},
 {x:40, y:220, Sleep:true},
 {x:70, y:225, Sleep:false},
-{x:75, y:230, Sleep:false},
-{x:100,  y:100, Sleep:true},
-{x:110, y:200, Sleep:true},
-{x:120, y:300, Sleep:true},
-{x:130, y:250, Sleep:false},
-{x:140, y:220, Sleep:true},
-{x:170, y:225, Sleep:false},
-{x:175, y:230, Sleep:false},
-{x:200,  y:100, Sleep:true},
-{x:210, y:200, Sleep:true},
-{x:220, y:300, Sleep:true},
-{x:230, y:250, Sleep:false},
-{x:240, y:220, Sleep:true},
-{x:270, y:225, Sleep:false},
-{x:275, y:230, Sleep:false}
+{x:75, y:230, Sleep:false}
 ];
 
-RemakeXinMeasurements(measurements);
+measurements.concat(measurements);
+measurements.concat(measurements);
+measurements.concat(measurements);
+measurements.concat(measurements);
+measurements.concat(measurements);
+measurements.concat(measurements);
+FcnRemakeXinMeasurements(measurements);
 
-var YMinMeas   = Ymin(measurements);
-var YMaxMeas   = Ymax(measurements);
-var XWidthMeas = Xwidth(measurements);
+FcnDrawCanvas(ctxArr[0], measurements);
+FcnDrawCanvas(ctxArr[1], measurements);
 
-var Ypos = 400;
-var xFactor = XPixels / Xwidth(measurements);
-
-var x1, y1, x2, y2, n;
-ctx.moveTo(xStart, yStart);
-x1 = xStart + Math.round(measurements[0].x * xFactor);
-y1 = yStart - measurements[0].y;
-for(n=1; n<measurements.length; n++)
-{
-  ctx.beginPath();
-  ctx.moveTo(x1,yStart);
-  ctx.lineTo(x1,y1);
-  x2 = xStart + Math.round(measurements[n].x * xFactor);
-  y2 = yStart - measurements[n].y;
-  if (measurements[n].Sleep == true) {
-    ctx.fillStyle = "red";
-  } else {
-    ctx.fillStyle = "blue";
-  }  
-  ctx.lineStyle = "black";
-  
-  ctx.lineTo(x2, y2);
-  ctx.lineTo(x2, yStart);  
-  ctx.lineTo(x1, yStart);  
-  ctx.fill();
-  ctx.stroke();
-  
-  x1 = x2;
-  y1 = y2;
-}
 </script>
 </body>
 </html>
