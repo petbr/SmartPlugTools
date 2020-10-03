@@ -1,10 +1,7 @@
-# sphinx_gallery_thumbnail_number = 3
-import matplotlib.pyplot as plt
-import numpy as np
+import turtle
 
-def main():
-  pass
-
-
-if __name__ == '__main__':
-  main()
+star = turtle.Turtle()
+for i in range(100):
+  star.forward(100)
+  star.right(144)
+  turtle.done()
