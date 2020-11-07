@@ -4,7 +4,7 @@ import socket
 import time
 import enum
 import argparse
-#import sysset
+# import sysset
 import json
 import sys
 
@@ -97,18 +97,11 @@ class PlugDevice(object):
 # encoded in the requested encoding.
 
   def sendAndReceiveOnSocket(self, cmd):
-    print("sendAndReceiveOnSocket")
-    print("hostname    =", self.hostName)
-    print("port        =", self.port_C
-
-
-
-
-
-
-          )
-    print("cmd         =", cmd)
-    print("cmd(utf-8)  =", cmd.encode('utf-8'))
+#      print("sendAndReceiveOnSocket")
+#      print("hostname    =", self.hostName)
+#      print("port        =", self.port_C)
+#    print("cmd         =", cmd)
+#    print("cmd(utf-8)  =", cmd.encode('utf-8'))
 
     successfulSend = False
     self.sendAndReceiveSumCounter = self.sendAndReceiveSumCounter + 1
@@ -116,19 +109,19 @@ class PlugDevice(object):
 
     while successfulSend == False:
       try:
-        print("\nTry this....... connect to host " + self.hostName + ":" + str(self.port_C))
-        print("NOW: ", datetime.now())
+#        print("\nTry this....... connect to host " + self.hostName + ":" + str(self.port_C))
+#        print("NOW: ", datetime.now())
         # Connect socket
         sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock_tcp.connect((self.hostName, self.port_C))
         bEncrCmd      = encrypt_str2b(cmd)
-        print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
+#        print("sendAndReceiveOnSocket() SEND bEncrCmd               =", bEncrCmd)
         #bEncrCmd_encUtf8 = bEncrCmd.encode('utf-8')
   #      bEncrCmd_encUtf8 = bEncrCmd
         sock_tcp.send( bEncrCmd )
         #print("RECV")
         bytesData = sock_tcp.recv(2048)
-        print("sendAndReceiveOnSocket RECV bytesData                =", bytesData)
+#        print("sendAndReceiveOnSocket RECV bytesData                =", bytesData)
   #      strData = bytesData.decode('utf-8')
   #      #print("sendAndReceiveOnSocket RECV strData                  =", strData)
 
@@ -139,17 +132,17 @@ class PlugDevice(object):
       except socket.error:
         self.sendAndReceiveSumCounter = self.sendAndReceiveSumCounter + 1
 
-        print("sendAndReceiveOnSocket::  time = " + str(time.time()))
+#        print("sendAndReceiveOnSocket::  time = " + str(time.time()))
         sys.stdout.flush()
 
-        print("Coulllllllllllld not connect to host " + self.hostName + ":" + str(self.port_C))
+#        print("Coulllllllllllld not connect to host " + self.hostName + ":" + str(self.port_C))
         sys.stdout.flush()
-        print("except Try #", str(self.sendAndReceiveSumCounter))
+#       print("except Try #", str(self.sendAndReceiveSumCounter))
         sys.stdout.flush()
         successfulSend = False
         time.sleep(2.0)
 
-    print("Try....... and finished " + self.hostName + ":" + str(self.port_C))
+#    print("Try....... and finished " + self.hostName + ":" + str(self.port_C))
     return bytesData
 
   # python check_husqvarna.py -t 192.168.1.18 -c time
@@ -256,12 +249,12 @@ class PlugDevice(object):
 
     #print("getPower powerCmd_C = ", self.powerCmd_C)
     powerData = self.sendAndReceiveOnSocket(self.powerCmd_C)
-    print("getPower powerData = ", powerData)
+    # print("getPower powerData = ", powerData)
     jsp_decryptedPowerData = decrypt(powerData[4:])
-    print("getPower jsp_decryptedPowerData = ", jsp_decryptedPowerData)
+    # print("getPower jsp_decryptedPowerData = ", jsp_decryptedPowerData)
 
     powerData = self.retrievePower(jsp_decryptedPowerData)
-    print("getPower powerData = ", powerData)
+    # print("getPower powerData = ", powerData)
 
     print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
           .format(i=powerData['Current'],
@@ -276,7 +269,7 @@ class PlugDevice(object):
 #python check_husqvarna.py -t 192.168.1.18 -c off
 #('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
 #('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
-  def setPowerOn(self):
+  def setPowerOn(self, security):
     turnOnResult = powerData = self.sendAndReceiveOnSocket(self.turnOnCmd_C)
     decryptedTimeData = decrypt(turnOnResult[4:])
   
@@ -290,7 +283,7 @@ class PlugDevice(object):
 #python check_husqvarna.py -t 192.168.1.18 -c off
 #('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
 #('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
-  def setPowerOff(self):
+  def setPowerOff(self, security):
     turnOffResult = self.sendAndReceiveOnSocket(self.turnOffCmd_C)
     decryptedTurnOffData = decrypt(turnOffResult[4:])
   

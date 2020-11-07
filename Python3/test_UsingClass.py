@@ -62,11 +62,13 @@ print("turnOffCmd_C:   {tOffC}" .format(tOffC=PlugDevice.turnOffCmd_C))
 plug1Info = plug1.getInfo()["relay_state"]
 print("plug1.getInfo = ", plug1Info)
 
-#plug1.setPowerOff()
-time.sleep(3.0)
-#plug1.setPowerOn()
+# plug1.setPowerOff()
+#plug1.setPowerOn(True)
+#time.sleep(3.0)
+#plug1.setPowerOff(True)
 
-
+print("Petra was here!")
+quit()
 
 # Instance variables plug1
 print("------------------------------------------------------------------------------------")
