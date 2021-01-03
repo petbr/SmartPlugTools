@@ -1,0 +1,41 @@
+#!/bin/bash
+
+DEFRAG_DIR=$1
+STOP_FILE=$2
+ITERATE_TIMES=$3
+VERBOSE=$4
+
+walk_dir () {
+    for pathname in "$1"/*; do
+        echo "########################################################################"
+        echo "ITERATE of directory $DEFRAG_DIR, Stop file: $STOP_FILE Time: #$c($ITERATE_TIMES)"
+        if test -f $STOP_FILE; then
+            exit
+        fi
+        if [ -d "$pathname" ]; then
+            walk_dir "$pathname"
+        else            echo $pathname is a file
+            ls -alh "$pathname"
+            e4defrag -v -c "$pathname"
+            date
+            #sleep 4
+        fi
+        echo ""
+        echo ""
+    done
+}
+
+for ((c=1; c<=$ITERATE_TIMES; c++))
+do
+    echo "########################################################################"
+    echo "########################################################################"
+    echo "########################################################################"
+    echo "ITERATE of directory $DEFRAG_DIR, Stop file: $STOP_FILE Time: #$c"
+    walk_dir $DEFRAG_DIR
+    echo "########################################################################"
+    echo "ITERATE of directory $DEFRAG_DIR, Stop file: $STOP_FILE Time: #$c"
+    echo "########################################################################"
+    echo "########################################################################"
+    echo "########################################################################"
+done
+
