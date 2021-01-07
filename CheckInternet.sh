@@ -32,6 +32,8 @@ then
 		echo WiFi all bad, restarting the PI on ${BASHDATE} at: ${BASHTIME}
 		sleep 5
 		echo sudo reboot will NOT happen!!!!
+        else
+		echo WiFi good after restarting it on ${BASHDATE} at: ${BASHTIME}
 	fi
 
 else
