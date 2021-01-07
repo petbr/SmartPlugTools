@@ -15,7 +15,8 @@ ping -c1 192.168.1.1 > /dev/null
 if [ $? != 0 ] 
 then
 #	WiFi is down so going into the next phase of this file to check, reset and reboot too if necessary
-	echo WiFi all bad, restarting it on ${BASHDATE} at: ${BASHTIME} >> /home/pi/DomCode/WiFi_bad.txt
+#	echo WiFi all bad, restarting it on ${BASHDATE} at: ${BASHTIME} >> /home/pi/DomCode/WiFi_bad.txt
+	echo WiFi all bad, restarting it on ${BASHDATE} at: ${BASHTIME}
 	sudo ifconfig wlan0 down
 	sleep 5
 #	Restarting WIFI if needed
@@ -27,9 +28,10 @@ then
 #	If Ping fails the PI will restart
 	if [ $? != 0 ]
 	then
-		echo WiFi all bad, restarting the PI on ${BASHDATE} at: ${BASHTIME} >> /home/pi/DomCode/WiFi_bad_reboot.txt
+#		echo WiFi all bad, restarting the PI on ${BASHDATE} at: ${BASHTIME} >> /home/pi/DomCode/WiFi_bad_reboot.txt
+		echo WiFi all bad, restarting the PI on ${BASHDATE} at: ${BASHTIME}
 		sleep 5
-		echo sudo reboot
+		echo sudo reboot will NOT happen!!!!
 	fi
 
 else
