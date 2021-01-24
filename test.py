@@ -662,10 +662,10 @@ def startup():
   # Time tresholds.
   T_wantedPumpTime          = 13.0
   T_minPumpingWater         = 2
-  T_pumpingAirBeforeTurnOff = 8
+  T_pumpingAirBeforeTurnOff = 12
   T_reportAfterOffTime      = 2
   T_defaultMaxOffTime       = 40
-  T_maxOffTime              = 3600
+  T_maxOffTime              = 300
   T_shortIdleTime           = 5
 #  T_lowResSleep             = 2
 #  T_mediumResSleep          = 1.0
@@ -749,12 +749,11 @@ while contRunning:
       switchMode(PumpMode.pumpingWater, dateTime, power)
       
     elif duration > T_shortIdleTime:
-      printStatus("Short idle ===> Idle long\n", duration,
+      printStatus("Short idle ===> Idle long, let's sleep a looong time until pump is engaged!\n", duration,
                   dateTime, power, pumpMode, T_maxOffTime)
       switchMode(PumpMode.idle_long, dateTime, power)
       
   elif pumpMode is PumpMode.idle_long:
-
     changeTime = time.time()
     if isVirginList:
       # Report the current list of graph items and start a new one     

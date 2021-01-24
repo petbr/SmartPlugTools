@@ -11,7 +11,7 @@ do
 BASHDATE=`date +"%b %d, %Y"`
 BASHTIME=`date +" %T"`
 # Start of code
-ping -c1 192.168.1.1 > /dev/null
+ping -c1 192.168.1.18 > /dev/null
 if [ $? != 0 ] 
 then
 #	WiFi is down so going into the next phase of this file to check, reset and reboot too if necessary
@@ -24,14 +24,16 @@ then
 	sleep 18
 	sleep 2
 #	Re-pinging after wifi re-start	
-	ping -c1 10.3.1.1 > /dev/null
+	ping -c1 192.168.1.18 > /dev/null
 #	If Ping fails the PI will restart
 	if [ $? != 0 ]
 	then
 #		echo WiFi all bad, restarting the PI on ${BASHDATE} at: ${BASHTIME} >> /home/pi/DomCode/WiFi_bad_reboot.txt
-		echo WiFi all bad, restarting the PI on ${BASHDATE} at: ${BASHTIME}
+		echo WiFi all bad, restarting the PI on ${BASHDATE} at: ${BASHTIME} >> CheckInternet.log
 		sleep 5
-		echo sudo reboot will NOT happen!!!!
+		cp /var/log/syslog CheckInternet.syslog
+		tail /var/log/syslog CheckInternet.syslog
+		#sudo reboot
         else
 		echo WiFi good after restarting it on ${BASHDATE} at: ${BASHTIME}
 	fi
@@ -42,5 +44,5 @@ else
 	echo WiFi all good on ${BASHDATE} at:  ${BASHTIME}
 fi
 
-sleep 20
+sleep 1800
 done
