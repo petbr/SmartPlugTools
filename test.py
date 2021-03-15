@@ -438,7 +438,7 @@ def calcNewOffTime(prev_T_maxOffTime, sleepDurationBeforeWater, latestWaterTime)
   ##########################
   # NO! Always use default!
   ##########################
-  #t = T_defaultMaxOffTime
+  t = T_defaultMaxOffTime
 
   print "------------------------------------------"
   print "calcNewOffTime BW:{bw}, WT:{wt}, Wanted:{wa}".format(bw=sleepDurationBeforeWater,
@@ -662,7 +662,7 @@ def startup():
   # Time tresholds.
   T_wantedPumpTime          = 13.0
   T_minPumpingWater         = 2
-  T_pumpingAirBeforeTurnOff = 12
+  T_pumpingAirBeforeTurnOff = 5
   T_reportAfterOffTime      = 2
   T_defaultMaxOffTime       = 40
   T_maxOffTime              = 300

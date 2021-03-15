@@ -1,1 +1,4 @@
 python test.py -t 192.168.1.18 -c energy | tee /var/log/DranpumpData/ful_log.txt
+
+
+watch -n 30 'echo ; echo ; date ; ls -al /var/log ; echo ;  df -h '
