@@ -11,25 +11,20 @@ print("User=", user)
 print("Password", password)
 
 session = ftplib.FTP(ftpSite, user, password)
-print("#1")
+print("--")
 session.dir()
-session.mkd("Test")
-print("#2")
-session.dir()
-session.rmd("Test")
-print("#3, dir")
-session.dir()
-print("#3, file open")
+print("--")
 file = open('/var/log/DranpumpData/BeforeWater.html','rb')
-print("#5, session storbinary")
-
 ftpCommand = "STOR BeforeWater_ftpd.html";
+print("Session storbinary")
 ftpResponseMessage = session.storbinary(ftpCommand, file)
-print("ftpCommand Response: ", ftpResponseMessage);
-
-print("#6, file close:")
+print("FtpCommand Response: ", ftpResponseMessage);
+print("--")
+session.dir()
+print("--")
+print("File close:")
 file.close()
-print("#7, session close")
+print("Session close")
 session.close()
 
 

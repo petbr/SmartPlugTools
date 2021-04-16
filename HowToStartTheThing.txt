@@ -4,3 +4,5 @@ python test.py -t 192.168.1.18 -c energy | tee /var/log/DranpumpData/ful_log.txt
 watch -n 300 'echo ; echo ; date ; ls -al /var/log ; echo ;  df -h '
 watch -n 300 'date ; df -h '
 watch -n 300 'date ; time python3.5 SendFileToFtp.py <FTP site> <User> <Password>'
+
+source FtpFileIfChanged.bash /var/log/DranpumpData/BeforeWater.html <File to watch> <FTP site> <User> <Password>'
