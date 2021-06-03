@@ -6,3 +6,7 @@ watch -n 300 'date ; df -h '
 watch -n 300 'date ; time python3.5 SendFileToFtp.py <FTP site> <User> <Password>'
 
 source FtpFileIfChanged.bash /var/log/DranpumpData/BeforeWater.html <File to watch> <FTP site> <User> <Password>'
+
+How to STOP/START
+sudo /etc/init.d/lighttpd stop
+sudo /etc/init.d/lighttpd start
