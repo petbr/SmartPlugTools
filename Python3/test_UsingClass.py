@@ -59,8 +59,12 @@ print("turnOnCmd_C:    {tOnC}"  .format(tOnC=PlugDevice.turnOnCmd_C))
 print("turnOffCmd_C:   {tOffC}" .format(tOffC=PlugDevice.turnOffCmd_C))
 
 
-plug1Info = plug1.getInfo()["relay_state"]
-print("plug1.getInfo = ", plug1Info)
+print("plugDrainpump.getInfo = ", plugDrainpump.getInfo())
+print("\n\n")
+print("plug1.getInfo() = ", plug1.getInfo())
+print("\n\n")
+#print("plug2.getInfo() = ", plug2.getInfo())
+#print("plug3.getInfo() = ", plug3.getInfo())
 
 # plug1.setPowerOff()
 #plug1.setPowerOn(True)
