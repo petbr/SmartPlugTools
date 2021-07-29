@@ -656,15 +656,15 @@ def startup():
 
   # Power tresholds
   P_idleTreshold = 20
-  P_airPumpingTreshold = 220
+  P_airPumpingTreshold = 280
   P_waterPumpingTreshold = 300
 
   # Time tresholds.
   T_wantedPumpTime          = 13.0
   T_minPumpingWater         = 2
-  T_pumpingAirBeforeTurnOff = 5
+  T_pumpingAirBeforeTurnOff = 2
   T_reportAfterOffTime      = 2
-  T_defaultMaxOffTime       = 40
+  T_defaultMaxOffTime       = 10
   T_maxOffTime              = 300
   T_shortIdleTime           = 5
 #  T_lowResSleep             = 2
@@ -808,6 +808,16 @@ while contRunning:
     #       .format(p=powerValue))
     changeTime = time.time()      
     duration = changeTime-switchTime
+    
+    
+    
+    
+    print ("Duration: {dur:5.2f}   Power: {pow:6.2f}"
+           .format(dur=duration, pow=powerValue))
+           
+           
+           
+           
     if (powerValue < P_airPumpingTreshold) and (duration >= T_minPumpingWater):
       shortestPumpWaterDuration = min(duration, shortestPumpWaterDuration)
       longestPumpWaterDuration = max(duration, longestPumpWaterDuration)
