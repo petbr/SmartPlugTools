@@ -758,7 +758,7 @@ while contRunning:
     if isVirginList:
       # Report the current list of graph items and start a new one     
       title  = "          title: 'Dranpump (W) tOffTime={t_off:03d}  "
-      title += "waterTime={waterTime:2.2f}'"
+      title += "waterTime={waterTime:2.2f}   Petra was here!'"
       title = title.format(t_off=T_maxOffTime, waterTime=latestWaterTime)
       print title
       contents = createHtmlContents(listOfGraphItems_Power, title, "Effekt")

@@ -87,6 +87,7 @@ class PlugDevice(object):
   powerCmd_C   = commands_C["energy"]
   turnOnCmd_C  = commands_C["on"]
   turnOffCmd_C = commands_C["off"]
+  rebootCmd_C  = commands_C["reboot"]
   
   def __init__(self, name, hostName):
     self.name     = name
@@ -270,10 +271,10 @@ class PlugDevice(object):
 #('Sent:     ', '{"system":{"set_relay_state":{"state":0}}}')
 #('Received: ', '{"system":{"set_relay_state":{"err_code":0}}}')
   def setPowerOn(self, security):
-    turnOnResult = powerData = self.sendAndReceiveOnSocket(self.turnOnCmd_C)
-    decryptedTimeData = decrypt(turnOnResult[4:])
+    turnOnResult = self.sendAndReceiveOnSocket(self.turnOnCmd_C)
+    decryptedTurnOnData = decrypt(turnOnResult[4:])
   
-    turnOnRes = {'err_code' : int(findValueStr(decryptedTimeData, "err_code"))}
+    turnOnRes = {'err_code' : int(findValueStr(decryptedTurnOnData, "err_code"))}
   
     #print("TURN_ON: E:{e:01d}"
     #    .format(e=turnOnRes["err_code"]))
@@ -312,6 +313,16 @@ class PlugDevice(object):
     print("infoRes = ", infoRes)
   
     return infoRes
+
+  def reboot(self):
+    rebootResult = self.sendAndReceiveOnSocket(self.rebootCmd_C)
+    decryptedRebootData = decrypt(rebootResult[4:])
+  
+    rebootRes = {'err_code' : int(findValueStr(decryptedRebootData, "err_code"))}
+    
+    return rebootRes
+
+
 
 
 ##### class PlugDevice(object):
