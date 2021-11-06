@@ -18,7 +18,7 @@ def getFanSpeedAndTemp1():
 		if len(line) == 0:
 			line = 'EMPTY'
 		lineArray = line.split()
-		if line == 'acpitz-virtual-0':
+		if line == 'acpitz-acpi-0':
 			lineArray = stdoutArray[i+2].split()
 			temp1 = float(lineArray[1][:-2])
 		if lineArray[0] == 'fan1:':
@@ -42,18 +42,18 @@ while True:
 	
 	if temp1 > 52:
 		setFanSpeed(7)
-	elif temp1 > 50:
+	elif temp1 > 54:
 		setFanSpeed(6)
-	elif temp1 > 48:
+	elif temp1 > 50:
 		setFanSpeed(5)
 	elif temp1 > 46:
-		setFanSpeed(4)
+		setFanSpeed(5)
 	elif temp1 > 44:
-		setFanSpeed(3)
+		setFanSpeed(5)
 	elif temp1 > 42:
-		setFanSpeed(2)
+		setFanSpeed(5)
 	else:
-		setFanSpeed(1)
+		setFanSpeed(5)
 
 	time.sleep(5)	
 
