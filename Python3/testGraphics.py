@@ -2,22 +2,25 @@ from graphics import *
 
 
 def main():
-    win = GraphWin('Face', 600, 450) # give title and dimensions
+    win = GraphWin('Face', 300, 450) # give title and dimensions
     #win.yUp() # make right side up coordinates!
 
     head = Circle(Point(40,100), 25) # set center and radius
     head.setFill("yellow")
     head.draw(win)
 
-    eye1 = Circle(Point(30, 105), 5)
+    # Left eye
+    eye1 = Circle(Point(30, 90), 5)
     eye1.setFill('blue')
     eye1.draw(win)
 
-    eye2 = Line(Point(45, 105), Point(55, 105)) # set endpoints
-    eye2.setWidth(3)
-    eye2.draw(win)
+    # Closed Right eye
+    eye2Closed = Line(Point(45, 90), Point(55, 90)) # set endpoints
+    eye2Closed.setWidth(3)
+    eye2Closed.draw(win)
 
-    mouth = Oval(Point(30, 90), Point(50, 85)) # set corners of bounding box
+    # Mouth
+    mouth = Oval(Point(30, 105), Point(50, 110)) # set corners of bounding box
     mouth.setFill("red")
     mouth.draw(win)
 
@@ -27,6 +30,14 @@ def main():
     message = Text(Point(win.getWidth()/2, 20), 'Click anywhere to quit.')
     message.draw(win)
     win.getMouse()
+    
+    # Open Right eye
+    eye2Open = Circle(Point(50, 90), 5)
+    eye2Open.setFill('blue')
+    eye2Open.draw(win)
+    
+    win.getMouse()
+
     win.close()
 
 main()
