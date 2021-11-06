@@ -2,7 +2,7 @@ from graphics import *
 
 
 def main():
-    win = GraphWin('Face', 300, 450) # give title and dimensions
+    win = GraphWin('Face', 450, 450) # give title and dimensions
     #win.yUp() # make right side up coordinates!
 
     head = Circle(Point(40,100), 25) # set center and radius
@@ -38,6 +38,12 @@ def main():
     
     win.getMouse()
 
+    for x in range(400):
+        for y in range(400):
+            win.plotPixel(x,y)
+
+    win.getMouse()
+	
     win.close()
 
 main()
