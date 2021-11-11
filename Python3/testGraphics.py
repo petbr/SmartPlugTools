@@ -40,7 +40,7 @@ def main():
 
     for x in range(400):
         for y in range(400):
-            win.plotPixel(x,y)
+            win.plot(x,y)
 
     win.getMouse()
 	
