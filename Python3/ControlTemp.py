@@ -47,13 +47,13 @@ while True:
 	elif temp1 > 50:
 		setFanSpeed(5)
 	elif temp1 > 46:
-		setFanSpeed(5)
+		setFanSpeed(4)
 	elif temp1 > 44:
-		setFanSpeed(5)
+		setFanSpeed(3)
 	elif temp1 > 42:
-		setFanSpeed(5)
+		setFanSpeed(3)
 	else:
-		setFanSpeed(5)
+		setFanSpeed(3)
 
 	time.sleep(5)	
 
