@@ -78,7 +78,6 @@ class PlugDevice(object):
                 'countdown': '{"count_down":{"get_rules":{}}}',
                 'antitheft': '{"anti_theft":{"get_rules":{}}}',
                 'reboot'   : '{"system":{"reboot":{"delay":1}}}',
-                'reset'    : '{"system":{"reset":{"delay":1}}}',
                 'energy'   : '{"emeter":{"get_realtime":{}}}'}
 
   port_C = 9999

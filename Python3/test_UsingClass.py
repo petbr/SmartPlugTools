@@ -2,7 +2,14 @@
 #
 # Wanted features
 # *
+# 
+# Nice python links/methods/classes/types
 #
+# https://docs.python.org/3/library/datetime.html
+# from datetime import timedelta
+# delta2 = timedelta(hours=25, seconds=2)
+# from datetime import date
+# from datetime import time
 import time
 import sys
 import json
@@ -72,7 +79,16 @@ print("\n\n")
 #plug1.setPowerOff(True)
 
 print("Petra was here!")
+
+for x in range(66):
+  td = plugDrainpump.getDateTime()
+
+  print("x = ", x)
+  print("td = ", td)
+  time.sleep(5.5)
+
 quit()
+
 
 # Instance variables plug1
 print("------------------------------------------------------------------------------------")
