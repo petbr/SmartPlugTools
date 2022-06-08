@@ -664,7 +664,7 @@ def startup():
   T_minPumpingWater         = 2
   T_pumpingAirBeforeTurnOff = 2
   T_reportAfterOffTime      = 2
-  T_defaultMaxOffTime       = 10
+  T_defaultMaxOffTime       = 100
   T_maxOffTime              = 300
   T_shortIdleTime           = 5
 #  T_lowResSleep             = 2
