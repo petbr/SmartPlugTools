@@ -45,13 +45,20 @@ while [ $count -lt "$ping_repeat" ] ; do
     sleep "$ping_delay"
     # shellcheck disable=SC2015 # SC2015 is intended logic
     ping -c1 "$1" &> /dev/null && (( count="0" )) || (( count="$count + 1" ))
+
+    if  [ -f /var/log/DranpumpData/REBOOT ]
+    then
+        count=1000
+        echo ---------- Fake no internet with REBOOT touched file >> /var/log/DranpumpData/TheThing.log
+    fi
+
 done
 
 echo ---------- The shit is not ping responding EXIT in five minutes after copying log file >> /var/log/DranpumpData/TheThing.log
 date >> /var/log/DranpumpData/TheThing.log
 echo ----------- Let us reboot >> /var/log/DranpumpData/TheThing.log
 
-cat /var/log/DranpumpData/TheThing.log >> /home/pi/TheThing.log
+cp /var/log/DranpumpData/TheThing.log /home/pi/TheThing.log
 
 sleep 300
 
