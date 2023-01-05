@@ -54,16 +54,18 @@ while [ $count -lt "$ping_repeat" ] ; do
 
 done
 
+
 echo ---------- The shit is not ping responding EXIT in five minutes after copying log file >> /var/log/DranpumpData/TheThing.log
 date >> /var/log/DranpumpData/TheThing.log
 
 echo ---------- Reboot drainpump plug  >> /var/log/DranpumpData/TheThing.log
+cp /var/log/DranpumpData/TheThing.log /home/pi/TheThing.log
+
 /usr/bin/python3.5 /home/pi/repo/SmartPlugTools/Python3/restartDevice_UsingClass.py 
 echo ---------- Reboot drainpump plug DONE!  >> /var/log/DranpumpData/TheThing.log
+cp /var/log/DranpumpData/TheThing.log /home/pi/TheThing.log
 
 echo ----------- Let us reboot >> /var/log/DranpumpData/TheThing.log
-
-
 cp /var/log/DranpumpData/TheThing.log /home/pi/TheThing.log
 
 sleep 300
