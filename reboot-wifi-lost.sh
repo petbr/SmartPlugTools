@@ -62,7 +62,7 @@ echo ---------- restartDevice_UsingClass.py  as  >> /var/log/DranpumpData/TheThi
 whoami >> /var/log/DranpumpData/TheThing.log
 cp /var/log/DranpumpData/TheThing.log /home/pi/TheThing.log
 
-/usr/bin/python3.5 /home/pi/repo/SmartPlugTools/Python3/restartDevice_UsingClass.py 
+python3.5 /home/pi/repo/SmartPlugTools/Python3/restartDevice_UsingClass.py 
 echo ---------- Reboot drainpump plug DONE!  >> /var/log/DranpumpData/TheThing.log
 cp /var/log/DranpumpData/TheThing.log /home/pi/TheThing.log
 
