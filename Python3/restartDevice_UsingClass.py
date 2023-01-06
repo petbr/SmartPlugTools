@@ -62,8 +62,7 @@ print("rebootCmd_C:    {rebootC}" .format(rebootC = PlugDevice.rebootCmd_C))
 
 print("plugDrainpump.getInfo = ", plugDrainpump.getInfo())
 print("\n\n")
-print("plug1.getInfo() = ", plug1.getInfo())
-print("\n\n")
+#print("plug1.getInfo() = ", plug1.getInfo())
 #print("plug2.getInfo() = ", plug2.getInfo())
 #print("plug3.getInfo() = ", plug3.getInfo())
 
