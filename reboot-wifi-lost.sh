@@ -66,10 +66,9 @@ python3.5 /home/pi/repo/SmartPlugTools/Python3/restartDevice_UsingClass.py
 echo ---------- Reboot drainpump plug DONE!  >> /var/log/DranpumpData/TheThing.log
 cp /var/log/DranpumpData/TheThing.log /home/pi/TheThing.log
 
-echo ----------- Let us reboot as >> /var/log/DranpumpData/TheThing.log
+echo ----------- Let us reboot in 5 minutes as >> /var/log/DranpumpData/TheThing.log
 whoami >> /var/log/DranpumpData/TheThing.log
 cp /var/log/DranpumpData/TheThing.log /home/pi/TheThing.log
-
 sleep 300
 
 #reboot
