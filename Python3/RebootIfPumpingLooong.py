@@ -134,6 +134,9 @@ while contRunning:
     print("")
     print("Working high")
     TurnOffAirTimer()
+    cmd = "touch /var/log/DranpumpData/REBOOT_PUMPING"
+    returned_value = os.system(cmd)  # returns the exit code in unix
+    print('PUMPING, returned value:', returned_value)
 
   if (justPower>lowAirpumpTreshold) and (justPower<highAirpumpTreshold):
     print("DateTime:       ", dateTime)
