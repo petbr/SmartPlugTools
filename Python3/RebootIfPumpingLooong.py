@@ -102,10 +102,10 @@ def StartAirTimer():
 
   print("StartAirTimer()")
   if pumpAirTimer == False:
-    pumpAirTimer = time.time()
+    pumpAirStart = time.time()
  
   pumpAirTimer = True
-  timeInAir = time.time() - pumpAirTimer
+  timeInAir = time.time() - pumpAirStart
   
   cmd = "touch /var/log/DranpumpData/REBOOT_StartAirTimer"
   returned_value = os.system(cmd)  # returns the exit code in unix
