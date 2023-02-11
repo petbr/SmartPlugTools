@@ -256,12 +256,12 @@ class PlugDevice(object):
     powerData = self.retrievePower(jsp_decryptedPowerData)
     # print("getPower powerData = ", powerData)
 
-    print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
-          .format(i=powerData['Current'],
-                  u=powerData['Voltage'],
-                  p=powerData['Power'],
-                  t=powerData['Total'],
-                  e=powerData['ErrCode']))
+#    print("POWER: I={i:5.5f} U={u:5.2f} P={p:5.5f} T={t:5.6f} E:{e:01d}"
+#          .format(i=powerData['Current'],
+#                  u=powerData['Voltage'],
+#                  p=powerData['Power'],
+#                  t=powerData['Total'],
+#                  e=powerData['ErrCode']))
     
     return powerData
 

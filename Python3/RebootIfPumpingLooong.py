@@ -3,11 +3,14 @@
 # Wanted features
 # *
 #
+import os
 import time
 import sys
 import json
 from datetime import datetime
 from PlugDevice import PlugDevice
+
+
 
 def printArr(arr):
   for e in arr:
@@ -80,6 +83,42 @@ print("Info drainpump: ", info)
 print("PowerData:      ", powerData)
 print("Power:          ", justPower)
 
+pumpAirTimer = False
+pumpAirStart = -1
+
+
+def TurnOffAirTimer():
+  global pumpAirTimer
+  global pumpAirStart
+
+  pumpAirTimer = False
+  pumpAirStart = -1
+  cmd = "touch /var/log/DranpumpData/REBOOT_TurnOffAirTimer"
+  returned_value = os.system(cmd)  # returns the exit code in unix
+
+def StartAirTimer():
+  global pumpAirTimer
+  global pumpAirStart
+
+  print("StartAirTimer()")
+  if pumpAirTimer == False:
+    pumpAirTimer = time.time()
+ 
+  pumpAirTimer = True
+  timeInAir = time.time() - pumpAirTimer
+  
+  cmd = "touch /var/log/DranpumpData/REBOOT_StartAirTimer"
+  returned_value = os.system(cmd)  # returns the exit code in unix
+  print('StartAirTimer, returned value:', returned_value)
+  
+  if timeInAir > 10:
+    cmd = "touch /var/log/DranpumpData/REBOOT"
+    returned_value = os.system(cmd)  # returns the exit code in unix
+    print('StartAirTimer(), returned value:', returned_value)
+    print("I am in AIR tooo long!")
+
+
+
 lowAirpumpTreshold  = 10
 highAirpumpTreshold = 250
 contRunning = True
@@ -88,34 +127,31 @@ while contRunning:
   powerData = plugDrainpump.getPower()
   justPower = powerData['Power']
 
-  print("DateTime:       ", dateTime)
-  print("PowerData:      ", powerData)
-  print("Power:          ", justPower)
-  print("")
-
   if justPower>highAirpumpTreshold:
+    print("DateTime:       ", dateTime)
+    print("PowerData:      ", powerData)
+    print("Power:          ", justPower)
+    print("")
     print("Working high")
-    print("Working high")
-    print("Working high")
-    print("Working high")
-    print("Working high")
-    print("Working high")
-    print("Working high")
+    TurnOffAirTimer()
 
   if (justPower>lowAirpumpTreshold) and (justPower<highAirpumpTreshold):
+    print("DateTime:       ", dateTime)
+    print("PowerData:      ", powerData)
+    print("Power:          ", justPower)
+    print("")
     print("Pumping AIR!!!!!!!!!!!!!!")
-    print("Pumping AIR!!!!!!!!!!!!!!")
-    print("Pumping AIR!!!!!!!!!!!!!!")
-    print("Pumping AIR!!!!!!!!!!!!!!")
-    print("Pumping AIR!!!!!!!!!!!!!!")
-    print("Pumping AIR!!!!!!!!!!!!!!")
-    print("Pumping AIR!!!!!!!!!!!!!!")
+    StartAirTimer()
 
   if (justPower<lowAirpumpTreshold):
-    print("Idle")
+    TurnOffAirTimer()
+    cmd = "touch /var/log/DranpumpData/REBOOT_Idle"
+    returned_value = os.system(cmd)  # returns the exit code in unix
 
 
-  time.sleep(1)
+
+
+  time.sleep(5)
 	
 quit()
 
