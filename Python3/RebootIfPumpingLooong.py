@@ -110,6 +110,7 @@ def StartAirTimer():
   cmd = "touch /var/log/DranpumpData/REBOOT_StartAirTimer"
   returned_value = os.system(cmd)  # returns the exit code in unix
   print('StartAirTimer, returned value:', returned_value)
+  print('StartAirTimer, timeInAir:', timeInAir)
   
   if timeInAir > 10:
     cmd = "touch /var/log/DranpumpData/REBOOT"
@@ -151,10 +152,7 @@ while contRunning:
     cmd = "touch /var/log/DranpumpData/REBOOT_Idle"
     returned_value = os.system(cmd)  # returns the exit code in unix
 
-
-
-
-  time.sleep(5)
+  time.sleep(1)
 	
 quit()
 
