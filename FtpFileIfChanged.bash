@@ -37,7 +37,7 @@ while true; do
     date
     echo $m1
     m1=$m2
-    python3.5 SendFileToFtp.py $sajt $user $pwd {$dirPath}/BeforeWater.html
+    python3.5 SendFileToFtp.py $sajt $user $pwd $dirPath "BeforeWater.html"
   fi
 
 
@@ -50,9 +50,9 @@ while true; do
     date
     echo $mlog1
     mlog1=$mlog2
-    python3.5 SendLogToFtp.py $sajt $user $pwd $dirPath "BeforeWater.html"
+    python3.5 SendFileToFtp.py $sajt $user $pwd $dirPath "BeforeWater.html"
   fi
 
-  python3.5 SendLogToFtp.py $sajt $user $pwd $dirPath "HEARTBEAT"
+  python3.5 SendFileToFtp.py $sajt $user $pwd $dirPath "HEARTBEAT"
 
 done
