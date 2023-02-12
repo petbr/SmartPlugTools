@@ -45,6 +45,7 @@
 # /etc/init.d/redis-server stop
 # /etc/init.d/redis-server start
 
+import os
 import socket
 import time
 import datetime
@@ -948,6 +949,9 @@ while contRunning:
       listOfGraphItems_Power = listOfGraphItems_Power + "\n" + gItem
       #sys.stdout.flush()
     time.sleep(T_highResSleep)
+
+  cmd = "date > /var/log/DranpumpData/HEARTBEAT"
+  returned_value = os.system(cmd)  # returns the exit code in unix
 
   prevPower = powerValue
 
