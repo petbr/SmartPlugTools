@@ -2,6 +2,9 @@ filename="$1"
 sajt="$2"
 user="$3"
 pwd="$4"
+
+dirPath=/var/log/DranpumpData/
+
 echo Sajt: $sajt
 echo "User: $user"
 echo "Pwd: $pwd"
@@ -34,7 +37,7 @@ while true; do
     date
     echo $m1
     m1=$m2
-    python3.5 SendFileToFtp.py $sajt $user $pwd
+    python3.5 SendFileToFtp.py $sajt $user $pwd {$dirPath}/BeforeWater.html
   fi
 
 
@@ -47,7 +50,9 @@ while true; do
     date
     echo $mlog1
     mlog1=$mlog2
-    python3.5 SendLogToFtp.py $sajt $user $pwd
+    python3.5 SendLogToFtp.py $sajt $user $pwd $dirPath "BeforeWater.html"
   fi
+
+  python3.5 SendLogToFtp.py $sajt $user $pwd $dirPath "HEARTBEAT"
 
 done
