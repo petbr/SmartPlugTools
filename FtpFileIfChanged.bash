@@ -50,7 +50,7 @@ while true; do
     date
     echo $mlog1
     mlog1=$mlog2
-    python3.5 SendFileToFtp.py $sajt $user $pwd $dirPath "BeforeWater.html"
+    python3.5 SendFileToFtp.py $sajt $user $pwd $dirPath "TheThing.log"
   fi
 
   python3.5 SendFileToFtp.py $sajt $user $pwd $dirPath "HEARTBEAT"
