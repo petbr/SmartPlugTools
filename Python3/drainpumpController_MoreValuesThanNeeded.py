@@ -12,12 +12,8 @@ async def monitor_and_control():
     # Initiera pluggen
     plug = IotPlug(DEVICE_IP)
     plugState : bool
-    plugState = True    
-
-    # Power tresholds
-    P_idleTreshold = 20
-    P_airPumpingTreshold = 280
-    P_waterPumpingTreshold = 300    
+    plugState = True
+    
     
     try:
         while True:
@@ -30,15 +26,32 @@ async def monitor_and_control():
             
             # all_modules: 'Energy', 'schedule', 'usage', 'anti_theft', 'Time', 'cloud'            
             energyData     = allModules['Energy'].data
+            scheduleData   = allModules['schedule'].data
+            usageData      = allModules['usage'].data
+            anti_theftData = allModules['anti_theft'].data
             timeData       = allModules['Time'].data
+            cloudData      = allModules['cloud'].data
             """
             print(f"energyData:     {energyData}\n")
-            print(f"timeData:       {timeData}\n")      """
+            print(f"scheduleData:   {scheduleData}\n")
+            print(f"usageData:      {usageData}\n")
+            print(f"anti_theftData: {anti_theftData}\n")
+            print(f"timeData:       {timeData}\n")
+            print(f"cloudData:      {cloudData}\n")             """
+
 
             # Hämta den råa realtime datan
             realtimeData = energyData['get_realtime']
+
+            # Räkna om från milli till standardenheter
+            voltage  = realtimeData['voltage_mv'] / 1000  # Volt
+            current  = realtimeData['current_ma'] / 1000  # Ampere
             power    = realtimeData['power_mw'] / 1000    # Watt
+            total    = realtimeData['total_wh'] / 1000    # kWh 
+            print(f"Spänning:          {voltage} V")
+            print(f"Ström:             {current} A")
             print(f"Effekt:            {power} W")
+            print(f"Total förbrukning: {total} kWh")            
             
             # Hämta den råa Daystat datan            
             daystat_data  = plug.modules['Energy'].data['get_daystat']
@@ -55,10 +68,17 @@ async def monitor_and_control():
             tHour   = theTime['hour']
             tMin    = theTime['min']
             tSec    = theTime['sec']
+            """ print(f"theTime: {theTime}")            
+            print(f"tYear:  {tYear}")            
+            print(f"tMonth: {tMonth}")            
+            print(f"tMday:  {tMday}")            
+            print(f"tHour:  {tHour}")            
+            print(f"tMin:   {tMin}")            
+            print(f"tSec:   {tSec}")            """
 
             now = f"{tHour:02}:{tMin:02}:{tSec:02}"
             
-            print(f"[{now}] Status: {'PÅ' if is_on else 'AV'} | Effekt: {power:.2f} W")
+            print(f"[{now}] Status: {'PÅ' if is_on else 'AV'} | Effekt: {power:.2f} W | Spänning: {voltage:.1f} V")
 
             # EXEMPEL PÅ LOGIK (ON/OFF):
             # Om du vill slå av den vid för hög effekt (t.ex. över 2000W i husbilen)
@@ -68,11 +88,30 @@ async def monitor_and_control():
 
             # Vänta 1 sekund innan nästa poll
             await asyncio.sleep(5.0)
-                        
+            
+            print(f"plugState = {plugState}")
+            if plugState:
+                print("plug OFF")
+                await plug.turn_off()
+                plugState = False
+            else:
+                print("plug ON")
+                await plug.turn_on()
+                plugState = True
+            
     except Exception as e:
         print(f"Ett fel uppstod: {e}")
 
-# Funktion för att bara slå PÅ/AV (kan
+# Funktion för att bara slå PÅ/AV (kan anropas separat)
+async def switch_power(state: bool):
+    print("switch_power({state})")
+    plug = SmartPlug(DEVICE_IP)
+    if state:
+        await plug.turn_on()
+        print("Pluggen är nu PÅ")
+    else:
+        await plug.turn_off()
+        print("Pluggen är nu AV")
 
 if __name__ == "__main__":
     try:
@@ -164,26 +203,4 @@ all_modules:   'Energy', 'schedule', 'usage', 'anti_theft', 'Time', 'cloud'
  'Time': <Module Time (time) for 192.168.1.160>, 
  'cloud': <Module Cloud (cnCloud) for 192.168.1.160>, 'Led': <Module Led (system) for 192.168.1.160>}
 
-
-            print(f"plugState = {plugState}")
-            if plugState:
-                print("plug OFF")
-                await plug.turn_off()
-                plugState = False
-            else:
-                print("plug ON")
-                await plug.turn_on()
-                plugState = True
-
-
- anropas separat)
-async def switch_power(state: bool):
-    print("switch_power({state})")
-    plug = SmartPlug(DEVICE_IP)
-    if state:
-        await plug.turn_on()
-        print("Pluggen är nu PÅ")
-    else:
-        await plug.turn_off()
-        print("Pluggen är nu AV")
 """
