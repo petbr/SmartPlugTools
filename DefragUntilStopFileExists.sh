@@ -18,7 +18,7 @@ walk_dir () {
             ls -alh "$pathname"
             e4defrag -v -c "$pathname"
             date
-            #sleep 4
+            # sleep 4
         fi
         echo ""
         echo ""
