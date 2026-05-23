@@ -1,0 +1,280 @@
+För att förstå var informationen ligger i rådatan behöver vi titta på hur strängen är uppbyggd. I din logg ser vi att meddelandet oftast börjar med en "header" (som innehåller viss statusinfo) följt av själva batteridatan som startar med DB 80.
+
+Här är en karta över positionerna i den vanligaste strängen du skickade:
+Data-karta (Offset för DB80-sekvensen)
+
+Vi använder strängen: DB 80 01 00 35 00 63 00 0F 0B 00 00 00 00 50 0D 58 0D 57 0D 52 0D...
+
+
+R��-str��ng f��r analys: DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003F2
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B00000000500D570D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 2035000000000000DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003E8
+
+
+0-1		DB80
+2		01
+3-4		0035
+5-6		0063
+7-8		000F
+9-10	0B00
+000000500D580D570D520D00000000000000000000000000000000000000000000000003F2
+
+Byte-index,Hex-exempel,Funktion,Förklaring
+0 - 1,DB 80,Start-ID,Identifierar början på Skanbatt/JBD-datapaketet.
+2,01,Status,Ofta systemstatus eller läge.
+3 - 4,00 35,Cykler,0x0035 = 53 decimalt.
+5 - 6,00 63,SOC (%),0x0063 = 99% laddning.
+7 - 8,00 0F,Skydd,"Bitmask för larm/skydd (000F betyder ofta ""Normal"")."
+9 - 10,0B 00,Temperatur,Läses ofta baklänges (Little Endian) eller som offset från Kelvin.
+11 - 14,00 00 00 00,Ström (A),Momentan ström. Allt nollat här = ingen last.
+15 - 16,50 0D,Cell 1,Little Endian: 0D50 = 3408 mV (3.408V).
+17 - 18,58 0D,Cell 2,Little Endian: 0D58 = 3416 mV (3.416V).
+19 - 20,57 0D,Cell 3,Little Endian: 0D57 = 3415 mV (3.415V).
+21 - 22,52 0D,Cell 4,Little Endian: 0D52 = 3410 mV (3.410V).
+
+
+
+
+
+Viktigt om "Little Endian"
+
+Notera att spänningen för cellerna skickas med den minst signifikanta byten först.
+
+    Du ser: 50 0D
+
+    Datorn läser det som: 0D50
+
+    0D50 i hex är 3408 i decimalform (millivolt).
+
+Variationer i dina loggar
+
+I början av vissa rader ser du 20 35 00 00 0A.... Detta är en extra header som ibland skickas av vissa Bluetooth-bryggor eller gränssnitt. Den innehåller ofta:
+
+    20 35: Kan vara en tidstämpel eller enhets-ID.
+
+    0A 00 00 00: Kan indikera datalängd eller meddelandetyp.
+
+Tips för avkodning:
+Om du bygger något eget (t.ex. i Arduino eller Home Assistant), leta alltid efter sekvensen DB 80. Det är din fasta ankarpunkt. Allt som kommer efter DB 80 följer det fasta mönstret ovan.
+
+Är det någon specifik del av datan, som t.ex. larmkoder eller temperaturberäkningen, som du vill att vi djupdyker i?
+
+
+
+
+
+
+
+
+
+
+R��-str��ng f��r analys: DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003F2
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B00000000500D570D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 2035000000000000DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003E8
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB80010035006300000000000000000000000000000000003F0
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D580D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 2035000000000000DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003E8
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D570D570D520D00000000000000000000000000000000000000000000000003F0
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D570D570D520D00000000000000000000000000000000000000000000000003F0
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D570D570D510D00000000000000000000000000000000000000000000000003EF
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 2035000000000000DB800100350063000F0B000000004F0D570D570D510D00000000000000000000000000000000000000000000000003E5
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003F2
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B00000000500D570D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B00000000500D570D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 2035000000000000DB800100350063000F0B000000004F0D570D570D520D00000000000000000000000000000000000000000000000003E6
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D580D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D580D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B00000000500D570D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D580D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 2035000000000000DB800100350063000F0B000000004F0D580D570D520D00000000000000000000000000000000000000000000000003E7
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D580D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D580D570D520D00000000000000000000000000000000000000000000000003F1
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 2035000000000000DB800100350063000F0B000000004F0D570D570D520D00000000000000000000000000000000000000000000000003E6
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003F2
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B000000004F0D570D570D520D00000000000000000000000000000000000000000000000003F0
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 203500000A000000DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003F2
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 20350000F6FFFFFFDB800100350063000F0B00000000500D570D570D520D00000000000000000000000000000000000000000000000007DA
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 2035000000000000DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003E8
+--- BATTERIDATA HITTAD ---
+Status: Laddning (SOC): 99%
+Status: Cykler: 53 st
+R��-str��ng f��r analys: 2035000000000000DB800100350063000F0B00000000500D580D570D520D00000000000000000000000000000000000000000000000003E8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Var bor temperaturen?
+
+Här är de tre vanligaste ställena att leta på i en SkanBatt/Pylontech-sträng:
+
+    Precis efter Celldata: Efter de 4 cellerna (8 bytes/16 tecken) kommer ofta 1–2 temperatursensorer.
+
+    Mellan Cykler och SOC: Ofta grupperas miljödata (Temp + Fukt) nära cykelmätaren.
+
+    Kelvin-metoden: Vi letar efter hex-värdet 0B8E till 0BC0.
+
+        20°C=293.15K≈2931 (Hex: 0B73)
+
+        25°C=298.15K≈2981 (Hex: 0BA5)
+        
+        
+        
+        
+Formeln
+
+För att få fram värdet i rådatan gör vi följande:
+
+    Omvandla Celsius till Kelvin: 10∘C+273.15=283.15 K
+
+    Multiplicera med 10 (för att få enheten 0.1 K): 2831.5
+
+    Avrunda till heltal: 2831
+
+    Omvandla 2831 till Hexadecimalt: 0B0F
+            
+            
+            
+            
+            
+            
+            
+            
+
+För att få fram värdet i rådatan gör vi följande:
+
+    Omvandla Celsius till Kelvin: 10∘C+273.15=283.15 K
+
+    Multiplicera med 10 (för att få enheten 0.1 K): 2831.5
+
+    Avrunda till heltal: 2831
+
+    Omvandla 2831 till Hexadecimalt: 0B0F
+
+
+
+
+
+
+
+
+	cTempLsb = hexStr[posTempLsb:posTempLsb+2]
+	print(f"cTempLsb=[{cTempLsb}]")
+	
+	valTempLsb = int(cTempLsb, 16)
+	print(f"valTempMsb=[{valTempLsb}]")
+	
+	
+        
+	tempMsb = valTempMsb*256 + valTempLsb
+	print(f"tempMsb=[{tempMsb}]")
+        
+	tempLsb = hexStr[30]*16+frameDB80[31]
+        print(f"Kallee..............tempLsb={tempLsb}")
+        
+        kelvinTen = (tempMsb << 8) | tempLsb
+        print(f"Kallee..............tempLsb={tempLsb}        #2")
+        print(f"Kallee..............kelvin_ten={kelvin_ten}")
+
+        celcius = (kelvin_ten / 10)  - 273.15
+        print(f"Kallee..............celcius={celcius}")
+	
+
+            
