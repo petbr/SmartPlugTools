@@ -16,7 +16,7 @@ print(f"Programmet startade: {datetime.now().strftime('%H:%M:%S')}")
 ADDRESS = "B0:B1:13:75:11:12"
 NOTIFY_UUID = "0000ffe4-0000-1000-8000-00805f9b34fb"
 filePath = "/tmp/theBatt.txt"
-SleepTimeBetweenMeasurements = 1800
+SleepTimeBetweenMeasurements = 1200
 
 is_parsing = False    # Global flagga
 buffer = ""
@@ -121,7 +121,7 @@ def validate_and_parse(frame):
 
     sekunder_sedan_start = time.monotonic() - start_tid
     nuvarande_datum      = datetime.now()
-    datum_klockslag  = nuvarande_datum.strftime(f"%Y-%m-%d %H:%M:%S    Sekunder sedan start: {sekunder_sedan_start}")
+    datum_klockslag  = nuvarande_datum.strftime(f"%Y-%m-%d %H:%M:%S    Sekunder sedan start: {sekunder_sedan_start}      thrown={thrownResults}")
 
     lFrame = frame.upper().strip()
     #lFrame = frame.upper()
@@ -222,12 +222,11 @@ def validate_and_parse(frame):
     currCapacity             = fullCapacity*SocStateOfCharge/100
     
     if (v1 < throwLowLimit) or (v2 < throwLowLimit) or (v3 < throwLowLimit) or (v4 < throwLowLimit):
+        thrownResults += 1
+        print(f"ThrownnResults = {thrownResults}")
         print(f"Throw temp result.....v1={v1}, v1={v2}, v1={v3}, v1={v4},    throwLowLimit = {throwLowLimit}")
         print(f"Thrown frame = {origFrame}\n\n\n")
-        origFrame
-        
-        thrownResults += 1
-        return
+        return False
         
     else:
         minTemp = min(minTemp, temp)
@@ -261,7 +260,7 @@ def validate_and_parse(frame):
     writeStringToFile(totalFileText)
 
 
-    return
+    return True
     
     # Sök efter SOC-markör (63) och Cykel-markör (35) från position 10
     start_search = 10
@@ -388,6 +387,8 @@ def callback(sender, data):
     
     # Vi väntar tills vi har ett rejält block innan vi analyserar
     #print(f"Buffer len = {len(buffer)}")                
+    
+    newValueWasFound = False
     if len(buffer) > 230:
         is_parsing = True                        
         try:
@@ -396,12 +397,21 @@ def callback(sender, data):
             dPrint(f"\n\n>>>>>>>>230, Call validate_and_parse......BEGIN, len(buffer)={len(sendBuffer)}")                    
             dPrint(f"\n{sendBuffer}")                    
                         
-            validate_and_parse(sendBuffer)
-            dPrint(f"Call validate_and_parse......END")
+            newValueWasFound = validate_and_parse(sendBuffer)
+            dPrint(f"callback(), Call validate_and_parse")
         finally:            
-            time.sleep(SleepTimeBetweenMeasurements)
-            is_parsing = False  # Now finished and can retrieve next chunk
+            dPrint(f"callback(), Finally......END")
+            #is_parsing = False  # Now finished and can retrieve next chunk
 
+    dPrint(f"callback(), Before last if is_parsing, is_parsing={is_parsing}")
+    
+    if newValueWasFound and is_parsing:
+        dPrint(f"callback() Value OK, Sleep!!!")
+        time.sleep(SleepTimeBetweenMeasurements)
+    else:
+        dPrint(f"callback() Value NOK when Parsing, don't sleep!!!     callbackNr = {callbackNr}")
+
+    is_parsing = False
     dPrint(f"callback() #{callbackNr} ENDENDENDENDEND")
 
 async def run_monitor():
@@ -424,7 +434,7 @@ async def run_monitor():
         while True:
             dPrint(f"await asyncio.sleep(10)......")
             await asyncio.sleep(1)
-            time.sleep(SleepTimeBetweenMeasurements)
+            # time.sleep(SleepTimeBetweenMeasurements)
 
             dPrint(f"...asyncio.sleep(10) READY!")
             
