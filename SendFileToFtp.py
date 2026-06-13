@@ -1,5 +1,6 @@
 import sys
 import ftplib
+from datetime import datetime
 
 print ("Usage:      python3.5 <FTP site> <User> <Password>")
 print('Argument List:', sys.argv)
@@ -19,7 +20,12 @@ print("dirPath=     ", dirPath)
 print("Filename=    ", filename)
 print("FilenamePath=", filenamePath)
 
+nu = datetime.now()
 
+# Format: ÅR-MÅNAD-DAG TIMME:MINUT:SEKUND
+formaterat_datum = nu.strftime("%Y-%m-%d %H:%M:%S")
+
+print("Klockan är:", formaterat_datum)
 
 session = ftplib.FTP(ftpSite, user, password)
 print("--")

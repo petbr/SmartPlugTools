@@ -16,9 +16,10 @@ print(f"Programmet startade: {datetime.now().strftime('%H:%M:%S')}")
 ADDRESS = "B0:B1:13:75:11:12"
 NOTIFY_UUID = "0000ffe4-0000-1000-8000-00805f9b34fb"
 filePath = "/tmp/theBatt.txt"
-SleepTimeBetweenMeasurements = 1200
+SleepTimeBetweenMeasurements = 10
 
-is_parsing = False    # Global flagga
+requestBuffer = False    # Global flagga
+newValueWasFound = False
 buffer = ""
 
 ########################
@@ -126,7 +127,7 @@ def validate_and_parse(frame):
     lFrame = frame.upper().strip()
     #lFrame = frame.upper()
 
-    dPrint(f"validate_and_parse(), is_parsing = {is_parsing}")
+    dPrint(f"validate_and_parse(), requestBuffer = {requestBuffer}")
     
     pos_StartPattern = lFrame.find(StartPattern)    
     dPrint(f"validate_and_parse(), pos_StartPattern = {pos_StartPattern}")    
@@ -365,16 +366,19 @@ def dPrint(str):
 
 def callback(sender, data):
     global buffer
-    global is_parsing
+    global requestBuffer
+    global newValueWasFound
     global dbgPrinting
     global callbackNr
     
-    if is_parsing:
+    print(f"callback(), START!!!!!!!!!!!")
+    if requestBuffer == False:
+        print(f"callback(), requestBuffer == False......return #{callbackNr} START")
         return
         
     callbackNr += 1
 
-    dPrint(f"callback() #{callbackNr} START")
+    print(f"callback() #{callbackNr} START")
 
     # \r gör att raden skrivs över istället för att skapa nya rader
     #### print(f"callback() #{callbackNr} START, Klockan: {nuvarande_klockslag} | Sekunder sedan start: {sekunder_sedan_start:.2f} s", end="\r")
@@ -383,38 +387,44 @@ def callback(sender, data):
                 
     chunk = data.decode('ascii', errors='ignore')
     buffer += chunk
-    dPrint(f"size of buffer = {len(buffer)}\nbuffer={buffer}\n\n")
+    print(f"size of buffer = {len(buffer)}\nbuffer={buffer}\n\n")
     
     # Vi väntar tills vi har ett rejält block innan vi analyserar
     #print(f"Buffer len = {len(buffer)}")                
     
     newValueWasFound = False
     if len(buffer) > 230:
-        is_parsing = True                        
+        requestBuffer = False                        
         try:
             sendBuffer = buffer
             buffer = ""
-            dPrint(f"\n\n>>>>>>>>230, Call validate_and_parse......BEGIN, len(buffer)={len(sendBuffer)}")                    
+            print(f"\n\n>>>>>>>>TTTTTTTT230, Call validate_and_parse......BEGIN, len(buffer)={len(sendBuffer)}")                    
             dPrint(f"\n{sendBuffer}")                    
                         
+            # NOW is the moment....is it a valid Buffer and parsed OK?
             newValueWasFound = validate_and_parse(sendBuffer)
-            dPrint(f"callback(), Call validate_and_parse")
+            print(f"TTTTTTTTcallback(), Call validate_and_parse")
         finally:            
-            dPrint(f"callback(), Finally......END")
-            #is_parsing = False  # Now finished and can retrieve next chunk
+            print(f"FFFFFFFFFFcallback(), Finally......END")            
 
-    dPrint(f"callback(), Before last if is_parsing, is_parsing={is_parsing}")
+    dPrint(f"callback(), Before last if requestBuffer, requestBuffer={requestBuffer}")
     
-    if newValueWasFound and is_parsing:
-        dPrint(f"callback() Value OK, Sleep!!!")
-        time.sleep(SleepTimeBetweenMeasurements)
-    else:
-        dPrint(f"callback() Value NOK when Parsing, don't sleep!!!     callbackNr = {callbackNr}")
+    #if newValueWasFound and is_parsing:
+    #    print(f"callback() Value OK, Sleep!!! Before sleep")
+    #    time.sleep(SleepTimeBetweenMeasurements)
+    #    print(f"callback() Value OK, Sleep!!! After sleep")
+    #else:
+    #    dPrint(f"callback() Value NOK when Parsing, don't sleep!!!     callbackNr = {callbackNr}")
 
-    is_parsing = False
-    dPrint(f"callback() #{callbackNr} ENDENDENDENDEND")
+    #is_parsing = False
+    #print(f"callback() #{callbackNr} ENDENDENDENDEND, Do NOT sleep 10")
+    ##time.sleep(10)
+    #print(f"callback() #{callbackNr} ENDENDENDENDEND, ENDDDDDDDDDDDDDDDDDD")
+    return
 
 async def run_monitor():
+    global requestBuffer
+    global newValueWasFound    
     global SleepTimeBetweenMeasurements
     
     print(f"Ansluter till SkanBatt...")
@@ -431,12 +441,15 @@ async def run_monitor():
         await client.start_notify(NOTIFY_UUID, callback)
         print(f"...client.start_notify(NOTIFY_UUID, callback), READY!    Lyssnar... (Bryt med Ctrl+C)")
                 
-        while True:
-            dPrint(f"await asyncio.sleep(10)......")
+        requestBuffer = True        
+        while newValueWasFound != True:
+            print(f"---------------await asyncio.sleep(5)......")
+            print(f"---------------run_monitor(), requestBuffer = {requestBuffer}")
+        
             await asyncio.sleep(1)
             # time.sleep(SleepTimeBetweenMeasurements)
 
-            dPrint(f"...asyncio.sleep(10) READY!")
+            print(f"---------------...asyncio.sleep(10) READY!")
             
     except Exception as e:
         print(f"Anslutningsfel: {e}")
@@ -488,46 +501,6 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-async def run_monitor_Orig():
-    print(f"Ansluter till SkanBatt...")
-    client = BleakClient(ADDRESS)
-    
-    try:
-        await client.connect()
-        buffer = ""
-
-        def callback(sender, data):
-            nonlocal buffer
-            print(f"callback!!!!!!!!")
-            try:
-                chunk = data.decode('ascii', errors='ignore')
-                buffer += chunk
-                
-                # Vi väntar tills vi har ett rejält block innan vi analyserar
-                print(f"Buffer len = {len(buffer)}")
-                if len(buffer) > 360:
-                    print(f"Call validate_and_parse......BEGIN, length={len(buffer)}")
-                    validate_and_parse(buffer)
-                    print(f"Call validate_and_parse......END")
-                    buffer = "" 
-            except: pass
-
-        await client.start_notify(NOTIFY_UUID, callback)
-        print("Lyssnar... (Bryt med Ctrl+C)")
-        
-        while True:
-            print(f"await......")
-            await asyncio.sleep(5)
-            
-    except Exception as e:
-        print(f"Anslutningsfel: {e}")
-    finally:
-        await client.disconnect()
 
 
 

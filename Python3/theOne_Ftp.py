@@ -257,7 +257,7 @@ def validate_and_parse(frame):
     print(f"{sampleText}")
     
     totalFileText += sampleText
-    writeStringToFile(sampleText)
+    writeStringToFile(totalFileText)
 
 
     return True
