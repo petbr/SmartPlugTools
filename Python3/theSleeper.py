@@ -429,37 +429,82 @@ async def run_monitor():
     
     print(f"Ansluter till SkanBatt...")
     client = BleakClient(ADDRESS)
+
+    while True:
     
-    try:
-        print(f"await client.connect()...")
-        await client.connect()
-        print(f"...client.connect(), READY!")
-        buffer = ""
+        try:
+            print(f"await client.connect()...")
+            await client.connect()
+            print(f"...client.connect(), READY!")
+            buffer = ""
 
 
-        print(f"await client.start_notify(NOTIFY_UUID, callback)...")
-        await client.start_notify(NOTIFY_UUID, callback)
-        print(f"...client.start_notify(NOTIFY_UUID, callback), READY!    Lyssnar... (Bryt med Ctrl+C)")
-                
-        requestBuffer = True        
-        while newValueWasFound != True:
-            print(f"---------------await asyncio.sleep(5)......")
-            print(f"---------------run_monitor(), requestBuffer = {requestBuffer}")
-        
-            await asyncio.sleep(1)
-            # time.sleep(SleepTimeBetweenMeasurements)
-
-            print(f"---------------...asyncio.sleep(10) READY!")
+            print(f"await client.start_notify(NOTIFY_UUID, callback)...")
+            await client.start_notify(NOTIFY_UUID, callback)
+            print(f"...client.start_notify(NOTIFY_UUID, callback), READY!    Lyssnar... (Bryt med Ctrl+C)")
+                    
+            requestBuffer = True        
+            while newValueWasFound != True:
+                print(f"---------------await asyncio.sleep(5)......")
+                print(f"---------------run_monitor(), requestBuffer = {requestBuffer}")
             
-    except Exception as e:
-        print(f"Anslutningsfel: {e}")
-    finally:
+                await asyncio.sleep(1)
+                # time.sleep(SleepTimeBetweenMeasurements)
+
+                print(f"---------------...asyncio.sleep(10) READY!")
+                                
+        except Exception as e:
+            print(f"Anslutningsfel: {e}")
+        finally:
+            print(f"---------------...STOP Nofity!")
+            print(f"---------------...STOP Nofity!")
+            print(f"---------------...STOP Nofity!")
+            await client.stop_notify(NOTIFY_UUID)                
+            
+            
+        print(f"await client.disconnect()...")
+        print(f"await client.disconnect()...")
+        print(f"await client.disconnect()...")
+        print(f"await client.disconnect()...")
+        print(f"await client.disconnect()...")
         print(f"await client.disconnect()...")
         await client.disconnect()
         print(f"...client.disconnect(), READY!")
+        print(f"...client.disconnect(), READY!")
+        print(f"...client.disconnect(), READY!")
+        print(f"...client.disconnect(), READY!")
+        print(f"---------Sleep 60")
+        print(f"---------Sleep 60")
+        print(f"---------Sleep 60")
+        print(f"---------Sleep 60")
+        print(f"---------Sleep 60")
+        print(f"---------Sleep 60")
+        print(f"---------Sleep 60")
+        time.sleep(60)
 
 if __name__ == "__main__":
-    asyncio.run(run_monitor())
+    print(f"---------START MAIN run_monitor-----------")
+    print(f"---------START MAIN run_monitor-----------")
+    print(f"---------START MAIN run_monitor-----------")
+    print(f"---------START MAIN run_monitor-----------")
+    print(f"---------START MAIN run_monitor-----------")
+    
+    try:
+        asyncio.run(run_monitor())
+    except Exception as e:
+        print(f"Exception::::::::::::run_monitor: {e}")
+        print(f"Exception::::::::::::run_monitor: {e}")
+        print(f"Exception::::::::::::run_monitor: {e}")
+        print(f"Exception::::::::::::run_monitor: {e}")
+        print(f"Exception::::::::::::run_monitor: {e}")
+        
+            
+        
+    print(f"---------END MAIN run_monitor-----------")
+    print(f"---------END MAIN run_monitor-----------")
+    print(f"---------END MAIN run_monitor-----------")
+    print(f"---------END MAIN run_monitor-----------")
+    print(f"---------END MAIN run_monitor-----------")
 
 
 
