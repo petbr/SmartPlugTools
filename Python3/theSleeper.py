@@ -4,6 +4,7 @@ from datetime import datetime
 from datetime import date
 import asyncio
 from PettraHelpers import *
+from typing import NamedTuple
 
 from bleak import BleakClient
 
@@ -22,6 +23,23 @@ requestBuffer = False    # Global flagga
 newValueWasFound = False
 buffer = ""
 
+# Definiera din struct
+class BattSample(NamedTuple):
+    dayTime          : str
+    secondsRun       : int
+    cycleCounter     : int
+    socStateOfCharge : int
+    roundedTemp      : float
+    v1               : float
+    v2               : float
+    v3               : float
+    v4               : float
+    minDiffmV        : float
+    maxDiffmV        : float    
+    vDiff            : float
+    thrownResults    : int
+
+    
 ########################
 pos_Offset       = 0
 ########################
@@ -239,8 +257,25 @@ def validate_and_parse(frame):
         maxDiff_mV = max(maxDiff_mV, diff_mV)
 
     roundedTemp = round(temp, 1)
+    
+    battSample = BattSample(
+        dayTime           = datum_klockslag,
+        secondsRun        = 123,
+        cycleCounter      = cycleCounter,
+        socStateOfCharge  = SocStateOfCharge,
+        roundedTemp       = roundedTemp,
+        v1                = v1,
+        v2                = v2,
+        v3                = v3,
+        v4                = v4,
+        minDiffmV         = minDiff_mV,
+        maxDiffmV         = maxDiff_mV,
+        vDiff             = diff_mV,
+        thrownResults     = thrownResults
+    )
 
-    sampleText = f"\n\n{datum_klockslag}" + "\n"
+    sampleText = f"\n\nLEGACYYYYYYYYYYYYYYYYY\n"    
+    sampleText += f"\n\n{datum_klockslag}" + "\n"
     sampleText += f"--------- Cycle Counter     : {cycleCounter}" + "\n"
     sampleText += f"--------- SOC               : {SocStateOfCharge}          ({minSOC} .. {maxSOC})" + "\n"
     sampleText += f"--------- fullCapacity      : {fullCapacity}" + "\n"
@@ -254,8 +289,32 @@ def validate_and_parse(frame):
     sampleText += f"--------- vTotal            : {total_V} V" + "\n"
     sampleText += f"--------- Diff:             : {diff_mV} mV ({minDiff_mV} .. {maxDiff_mV})mV" + "\n"
     sampleText += f"--------- Thrown results    : {thrownResults} times" + "\n" + "\n"
-    
+
+    hotText = f"\n\nHOTHOTHOTTTTTTTTTTTTTtt!\n"    
+    hotText += f"Date: {battSample.dayTime}" + "\n"
+    hotText += f"--------- Cycle Counter     : {battSample.cycleCounter}" + "\n"
+    hotText += f"--------- SOC               : {battSample.socStateOfCharge}          ({minSOC} .. {maxSOC})" + "\n"
+    hotText += f"--------- fullCapacity      : {fullCapacity}" + "\n"
+    hotText += f"--------- currCapacity      : {fullCapacity * battSample.socStateOfCharge/100}" + "\n"
+    #print(f"--------- Exact Temp       : {temp} grader ({minTemp} .. {maxTemp})"
+    hotText += f"--------- Temp              : {battSample.roundedTemp} grader" + "\n"
+    hotText += f"--------- v1                : {battSample.v1} V" + "\n"
+    hotText += f"--------- v2                : {battSample.v2} V" + "\n"
+    hotText += f"--------- v3                : {battSample.v3} V" + "\n"
+    hotText += f"--------- v4                : {battSample.v4} V" + "\n"
+    hotText += f"--------- minDiffmV         : {battSample.minDiffmV} mV" + "\n"
+    hotText += f"--------- maxDiffmV         : {battSample.maxDiffmV} mV" + "\n"
+    calcedTotalV = battSample.v1 + battSample.v2 + battSample.v3 + battSample.v4
+    hotText += f"--------- vTotal            : {calcedTotalV} V\n" + "\n"
+    hotText += f"--------- Diff:             : {battSample.vDiff} mV ({minDiff_mV} .. {maxDiff_mV})mV" + "\n"
+    hotText += f"--------- Thrown results    : {battSample.thrownResults} times" + "\n" + "\n"
+
+
+
+
+
     print(f"{sampleText}")
+    print(f"{hotText}")
     
     totalFileText += sampleText
     writeStringToFile(totalFileText)

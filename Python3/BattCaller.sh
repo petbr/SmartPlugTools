@@ -10,5 +10,5 @@ while true; do
     
     python /home/pi/repo/SmartPlugTools/Python3/theSleeper.py
     # Vänta 1200 sekunder (så att scriptet inte äter upp all CPU)
-    sleep 1200
+    sleep 60
 done
