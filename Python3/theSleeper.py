@@ -5,6 +5,7 @@ from datetime import date
 import asyncio
 from PettraHelpers import *
 from typing import NamedTuple
+from jinja2 import Template
 
 from bleak import BleakClient
 
@@ -29,6 +30,8 @@ class BattSample(NamedTuple):
     secondsRun       : int
     cycleCounter     : int
     socStateOfCharge : int
+    capacityAh       : str
+    totalCapacityAh  : str
     roundedTemp      : float
     v1               : float
     v2               : float
@@ -36,7 +39,7 @@ class BattSample(NamedTuple):
     v4               : float
     minDiffmV        : float
     maxDiffmV        : float    
-    vDiff            : float
+    vDiffmV          : float
     thrownResults    : int
 
     
@@ -121,6 +124,54 @@ def writeStringToFile(s):
 nuvarande_klockslag = datetime.now().strftime("%H:%M:%S")
 totalFileText = ""
 
+
+
+def createBattPage(battSample: BattSample):
+        
+    batteryData = {
+        "socStateOfCharge" : battSample.socStateOfCharge,
+        "cycleCounter"     : battSample.cycleCounter,
+        "roundedTemp"     : battSample.roundedTemp,        
+        "capacityAh"       : battSample.capacityAh,
+        "totalCapacityAh"  : battSample.totalCapacityAh,
+        "v1"               : round(battSample.v1, 3),
+        "v2"               : round(battSample.v2, 3),
+        "v3"               : round(battSample.v3, 3),
+        "v4"               : round(battSample.v4, 3),
+        "v1PixelHeight"    : round((battSample.v1-3.2)*500, 0),
+        "v2PixelHeight"    : round((battSample.v2-3.2)*500, 0),
+        "v3PixelHeight"    : round((battSample.v3-3.2)*500, 0),
+        "v4PixelHeight"    : round((battSample.v4-3.2)*500, 0),
+        "vDiffmV"          : battSample.vDiffmV,
+        "vTotal"           : round(battSample.v1 + battSample.v2 + battSample.v3 + battSample.v4, 2)
+    }
+    # 1. Läs in din HTML-mall
+    with open("BattTemplate_DoubleBirdwings.html", "r", encoding="utf-8") as f:
+        html_mall_innehall = f.read()
+
+    # 2. Skapa en Jinja2-mall och baka in värdena
+    mall = Template(html_mall_innehall)
+    print(f"\nbatteryData = {batteryData}\n\n")
+    fardig_html = mall.render(batteryData)
+
+    # 3. Spara den färdiga HTML-sidan (som du sedan kan öppna i webbläsaren)
+    with open("/tmp/BattPage.html", "w", encoding="utf-8") as f:
+        f.write(fardig_html)
+
+    print("HTML-sidan har uppdaterats!")
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 def validate_and_parse(frame):
     global pos_cycleCounter
     global pos_SOC
@@ -257,12 +308,14 @@ def validate_and_parse(frame):
         maxDiff_mV = max(maxDiff_mV, diff_mV)
 
     roundedTemp = round(temp, 1)
-    
+    roundedCapacity = round(fullCapacity * SocStateOfCharge/100,1)
     battSample = BattSample(
         dayTime           = datum_klockslag,
         secondsRun        = 123,
         cycleCounter      = cycleCounter,
         socStateOfCharge  = SocStateOfCharge,
+        capacityAh        = f"{roundedCapacity}",
+        totalCapacityAh   = "98,5",
         roundedTemp       = roundedTemp,
         v1                = v1,
         v2                = v2,
@@ -270,10 +323,12 @@ def validate_and_parse(frame):
         v4                = v4,
         minDiffmV         = minDiff_mV,
         maxDiffmV         = maxDiff_mV,
-        vDiff             = diff_mV,
+        vDiffmV           = diff_mV,
         thrownResults     = thrownResults
     )
 
+    createBattPage(battSample)
+    
     sampleText = f"\n\nLEGACYYYYYYYYYYYYYYYYY\n"    
     sampleText += f"\n\n{datum_klockslag}" + "\n"
     sampleText += f"--------- Cycle Counter     : {cycleCounter}" + "\n"
@@ -306,7 +361,7 @@ def validate_and_parse(frame):
     hotText += f"--------- maxDiffmV         : {battSample.maxDiffmV} mV" + "\n"
     calcedTotalV = battSample.v1 + battSample.v2 + battSample.v3 + battSample.v4
     hotText += f"--------- vTotal            : {calcedTotalV} V\n" + "\n"
-    hotText += f"--------- Diff:             : {battSample.vDiff} mV ({minDiff_mV} .. {maxDiff_mV})mV" + "\n"
+    hotText += f"--------- Diff:             : {battSample.vDiffmV} mV ({minDiff_mV} .. {maxDiff_mV})mV" + "\n"
     hotText += f"--------- Thrown results    : {battSample.thrownResults} times" + "\n" + "\n"
 
 
@@ -314,7 +369,10 @@ def validate_and_parse(frame):
 
 
     print(f"{sampleText}")
-    print(f"{hotText}")
+    
+    battPage = createBattPage(battSample)
+
+    print(f"Batt page = {battPage}")
     
     totalFileText += sampleText
     writeStringToFile(totalFileText)
@@ -618,3 +676,12 @@ if __name__ == "__main__":
 #     GUL (51 - 100 mV): Ok, men systemet jobbar med balansering.
 # 
 #     RÖD (> 100 mV): Varning, obalans eller en cell som börjar bli dålig/full mycket snabbare än de andra.
+
+
+
+
+################
+
+
+
+
