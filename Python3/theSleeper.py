@@ -129,6 +129,7 @@ totalFileText = ""
 def createBattPage(battSample: BattSample):
         
     batteryData = {
+        "pageUpdatedTime"  : datetime.now().strftime("%H:%M:%S"),
         "socStateOfCharge" : battSample.socStateOfCharge,
         "cycleCounter"     : battSample.cycleCounter,
         "roundedTemp"     : battSample.roundedTemp,        
