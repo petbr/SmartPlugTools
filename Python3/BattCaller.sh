@@ -9,6 +9,6 @@ while true; do
     cat /tmp/theBatt.txt
 
     python /home/pi/repo/SmartPlugTools/Python3/theSleeper.py
-    # Vänta 300 sekunder (så att scriptet inte äter upp all CPU)
-    sleep 300
+    # Vänta 1200 sekunder (så att scriptet inte äter upp all CPU)
+    sleep 1200
 done
