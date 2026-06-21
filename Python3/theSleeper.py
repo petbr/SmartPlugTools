@@ -555,8 +555,11 @@ async def run_monitor():
             await client.connect()
             print(f"...client.connect(), READY!")
             buffer = ""
+        except Exception as e:
+            print(f"client.connect() Failed: {e}")
 
 
+        try:
             print(f"await client.start_notify(NOTIFY_UUID, callback)...")
             await client.start_notify(NOTIFY_UUID, callback)
             print(f"...client.start_notify(NOTIFY_UUID, callback), READY!    Lyssnar... (Bryt med Ctrl+C)")
