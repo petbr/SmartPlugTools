@@ -112,11 +112,17 @@ for i in range(0, NrOfMinMaxValues, 2):
 
 
 filePath = "/tmp/theBatt.txt"
-
 def writeStringToFile(s):
     global filePath
     
     with open(filePath, "a") as f:
+        f.write(s)
+
+errFilePath = "/home/pi/ErrFile.txt"
+def writeStringToErrFile(s):
+    global errFilePath
+    
+    with open(errFilePath, "a") as f:
         f.write(s)
     
     
@@ -546,19 +552,30 @@ async def run_monitor():
     global SleepTimeBetweenMeasurements
     
     print(f"Ansluter till SkanBatt...")
+    writeStringToErrFile("\nAnsluter till SkanBatt...maybe no error\nProgrammet startade: {datetime.now().strftime('%H:%M:%S')}\n")
+    
     client = BleakClient(ADDRESS)
 
-    while True:
-    
+    connectTries    = 0
+    connectedResult = False
+    while (connectTries < 5) & (connectedResult == False):
         try:
+            
+            connectTries = connectTries + 1
             print(f"await client.connect()...")
+            
             await client.connect()
-            print(f"...client.connect(), READY!")
+            print(f"...client.connect(), READY!     , Tries={connectTries}")
+            connectedResult = True
             buffer = ""
         except Exception as e:
-            print(f"client.connect() Failed: {e}")
+            print(f"client.connect() Failed: {e}, Tries={connectTries}")
+            writeStringToErrFile(f"client.connect() Failed: {e}, {connectTries}")
+            connectedResult = False
 
-
+    if connectedResult == True:
+        print(f"connectedResult == True  => Fix a Sample")
+        writeStringToErrFile(f"connectedResult == True  => Fix a Sample, connectTries={connectTries}\n")
         try:
             print(f"await client.start_notify(NOTIFY_UUID, callback)...")
             await client.start_notify(NOTIFY_UUID, callback)
@@ -582,26 +599,26 @@ async def run_monitor():
             print(f"---------------...STOP Nofity!")
             await client.stop_notify(NOTIFY_UUID)                
             
-            
-        print(f"await client.disconnect()...")
-        print(f"await client.disconnect()...")
-        print(f"await client.disconnect()...")
-        print(f"await client.disconnect()...")
-        print(f"await client.disconnect()...")
-        print(f"await client.disconnect()...")
-        await client.disconnect()
-        print(f"...client.disconnect(), READY!")
-        print(f"...client.disconnect(), READY!")
-        print(f"...client.disconnect(), READY!")
-        print(f"...client.disconnect(), READY!")
-        print(f"---------Sleep 60")
-        print(f"---------Sleep 60")
-        print(f"---------Sleep 60")
-        print(f"---------Sleep 60")
-        print(f"---------Sleep 60")
-        print(f"---------Sleep 60")
-        print(f"---------Sleep 60")
-        time.sleep(60)
+        
+    print(f"await client.disconnect()...")
+    print(f"await client.disconnect()...")
+    print(f"await client.disconnect()...")
+    print(f"await client.disconnect()...")
+    print(f"await client.disconnect()...")
+    print(f"await client.disconnect()...")
+    await client.disconnect()
+    print(f"...client.disconnect(), READY!")
+    print(f"...client.disconnect(), READY!")
+    print(f"...client.disconnect(), READY!")
+    print(f"...client.disconnect(), READY!")
+    print(f"---------Sleep 60")
+    print(f"---------Sleep 60")
+    print(f"---------Sleep 60")
+    print(f"---------Sleep 60")
+    print(f"---------Sleep 60")
+    print(f"---------Sleep 60")
+    print(f"---------Sleep 60")
+    time.sleep(60)
 
 if __name__ == "__main__":
     print(f"---------START MAIN run_monitor-----------")
