@@ -2,6 +2,7 @@
 
 
 echo "Startar loop the Sleeper"
+cp /home/pi/ErrFile.txt /tmp/theBatt.txt
 
 # Loopa för evigt
 while true; do
@@ -18,12 +19,13 @@ while true; do
     if [ "$m5_Before" == "$m5_After" ] ; then
         echo "REBOOT-----------------------------" >> /tmp/theBatt.txt
         sleep 120
+        cp   /tmp/theBatt.txt   /home/pi/ErrFile.txt
         sudo reboot
     else
         echo "Keep running-----------------------------"
     fi
 
     # Vänta 1200 sekunder (så att scriptet inte äter upp all CPU)
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Will sleep 300 seconds: $0" >> /tmp/theBatt.txt
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Will sleep 1200 seconds: $0" >> /tmp/theBatt.txt
     sleep 1200
 done
