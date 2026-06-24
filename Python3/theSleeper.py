@@ -125,6 +125,10 @@ def writeStringToErrFile(s):
     with open(errFilePath, "a") as f:
         f.write(s)
     
+def writeStringToBothFiles(s):
+    writeStringToFile(s)
+    writeStringToErrFile(s)
+    
     
     
 nuvarande_klockslag = datetime.now().strftime("%H:%M:%S")
@@ -552,7 +556,8 @@ async def run_monitor():
     global SleepTimeBetweenMeasurements
     
     print(f"Ansluter till SkanBatt...")
-    writeStringToErrFile("\nAnsluter till SkanBatt...maybe no error\nProgrammet startade: {datetime.now().strftime('%H:%M:%S')}\n")
+    t1 = datetime.now().strftime('%H:%M:%S')
+    writeStringToBothFiles(f"\nAnsluter till SkanBatt...maybe no error\nProgrammet startade: {t1}\n")
     
     client = BleakClient(ADDRESS)
 
@@ -560,6 +565,9 @@ async def run_monitor():
     connectedResult = False
     while (connectTries < 5) & (connectedResult == False):
         try:
+            connectTries = connectTries + 1
+            t2 = datetime.now().strftime('%H:%M:%S')
+            writeStringToBothFiles(f"Connect SkanBatt: {t1}, {connectTries} TIMES!\n")
             
             connectTries = connectTries + 1
             print(f"await client.connect()...")
@@ -570,12 +578,12 @@ async def run_monitor():
             buffer = ""
         except Exception as e:
             print(f"client.connect() Failed: {e}, Tries={connectTries}")
-            writeStringToErrFile(f"client.connect() Failed: {e}, {connectTries}")
+            writeStringToBothFiles(f"client.connect() Failed: {e}, {connectTries}")
             connectedResult = False
 
     if connectedResult == True:
         print(f"connectedResult == True  => Fix a Sample")
-        writeStringToErrFile(f"connectedResult == True  => Fix a Sample, connectTries={connectTries}\n")
+        writeStringToBothFiles(f"connectedResult == True  => Fix a Sample, connectTries={connectTries}\n")
         try:
             print(f"await client.start_notify(NOTIFY_UUID, callback)...")
             await client.start_notify(NOTIFY_UUID, callback)
