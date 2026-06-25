@@ -557,7 +557,7 @@ async def run_monitor():
     
     print(f"Ansluter till SkanBatt...")
     t1 = datetime.now().strftime('%H:%M:%S')
-    writeStringToBothFiles(f"\nAnsluter till SkanBatt...maybe no error\nProgrammet startade: {t1}\n")
+    writeStringToErrFile(f"\nAnsluter till SkanBatt...maybe no error\nProgrammet startade: {t1}\n")
     
     client = BleakClient(ADDRESS)
 
@@ -567,7 +567,7 @@ async def run_monitor():
         try:
             connectTries = connectTries + 1
             t2 = datetime.now().strftime('%H:%M:%S')
-            writeStringToBothFiles(f"Connect SkanBatt: {t1}, {connectTries} TIMES!\n")
+            writeStringToErrFile(f"Connect SkanBatt: {t1}, {connectTries} TIMES!\n")
             
             connectTries = connectTries + 1
             print(f"await client.connect()...")
@@ -578,12 +578,12 @@ async def run_monitor():
             buffer = ""
         except Exception as e:
             print(f"client.connect() Failed: {e}, Tries={connectTries}")
-            writeStringToBothFiles(f"client.connect() Failed: {e}, {connectTries}")
+            writeStringToErrFile(f"client.connect() Failed: {e}, {connectTries}")
             connectedResult = False
 
     if connectedResult == True:
         print(f"connectedResult == True  => Fix a Sample")
-        writeStringToBothFiles(f"connectedResult == True  => Fix a Sample, connectTries={connectTries}\n")
+        writeStringToErrFile(f"connectedResult == True  => Fix a Sample, connectTries={connectTries}\n")
         try:
             print(f"await client.start_notify(NOTIFY_UUID, callback)...")
             await client.start_notify(NOTIFY_UUID, callback)
