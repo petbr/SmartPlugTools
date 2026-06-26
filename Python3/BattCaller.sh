@@ -16,10 +16,10 @@ while true; do
     
     m5_After=$(md5sum "/tmp/theBatt.txt")
 
-    if [ "$m5_Before" == "$m5_After" ] ; then
+    if [ "$m5_Before" == "$m5_After" ] || [ -f /tmp/REBOOT ] ; then
         echo "REBOOT-----------------------------" >> /tmp/theBatt.txt
         sleep 120
-        cp   /tmp/theBatt.txt   /home/pi/ErrFile.txt
+#        cat /tmp/theBatt.txt  >> /home/pi/ErrFile.txt
         sudo reboot
     else
         echo "Keep running-----------------------------"
