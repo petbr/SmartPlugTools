@@ -2,7 +2,7 @@
 
 
 echo "Startar loop the Sleeper"
-cp /home/pi/ErrFile.txt /tmp/theBatt.txt
+cp /home/pi/theBatt.txt /tmp/theBatt.txt
 
 # Loopa för evigt
 while true; do
@@ -19,7 +19,7 @@ while true; do
     if [ "$m5_Before" == "$m5_After" ] || [ -f /tmp/REBOOT ] ; then
         echo "REBOOT-----------------------------" >> /tmp/theBatt.txt
         sleep 120
-#        cat /tmp/theBatt.txt  >> /home/pi/ErrFile.txt
+        cat /tmp/theBatt.txt  >> /home/pi/theBatt.txt
         sudo reboot
     else
         echo "Keep running-----------------------------"
