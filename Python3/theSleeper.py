@@ -125,11 +125,6 @@ def writeStringToErrFile(s):
     with open(errFilePath, "a") as f:
         f.write(s)
     
-def writeStringToBothFiles(s):
-    writeStringToFile(s)
-    writeStringToErrFile(s)
-    
-    
     
 nuvarande_klockslag = datetime.now().strftime("%H:%M:%S")
 totalFileText = ""
