@@ -25,9 +25,9 @@ while true; do
     else
         echo "Keep running, first TRIM the file-----------------------------"
         tail -n 1000 /tmp/theBatt.txt > /tmp/theBatt.tmp && mv /tmp/theBatt.tmp /tmp/theBatt.txt
+        # Vänta 1200 sekunder (så att scriptet inte äter upp all CPU)
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Will sleep 1200 seconds: $0" >> /tmp/theBatt.txt
+        sleep 1200        
     fi
 
-    # Vänta 1200 sekunder (så att scriptet inte äter upp all CPU)
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Will sleep 1200 seconds: $0" >> /tmp/theBatt.txt
-    sleep 1200
 done
