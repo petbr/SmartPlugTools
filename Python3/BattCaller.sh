@@ -23,7 +23,8 @@ while true; do
         #cat /tmp/theBatt.txt  >> /home/pi/theBatt.txt
         sudo reboot
     else
-        echo "Keep running-----------------------------"
+        echo "Keep running, first TRIM the file-----------------------------"
+        tail -n 1000 /tmp/theBatt.txt > /tmp/theBatt.tmp && mv /tmp/theBatt.tmp /tmp/theBatt.txt
     fi
 
     # Vänta 1200 sekunder (så att scriptet inte äter upp all CPU)
