@@ -1,4 +1,5 @@
 import time
+import os
 from pathlib import Path
 from datetime import datetime
 from datetime import date
@@ -19,6 +20,7 @@ print(f"Programmet startade: {datetime.now().strftime('%H:%M:%S')}")
 ADDRESS = "B0:B1:13:75:11:12"
 NOTIFY_UUID = "0000ffe4-0000-1000-8000-00805f9b34fb"
 filePath = "/tmp/theBatt.txt"
+persFilePath = "/tmp/persFile.txt"
 SleepTimeBetweenMeasurements = 10
 
 requestBuffer = False    # Global flagga
@@ -132,9 +134,10 @@ totalFileText = ""
 
 
 
-def createBattPage(battSample: BattSample):
-        
-    batteryData = {
+def createBattPage(battSample: BattSample):        
+    global batteryData
+    
+    batteryDataWithoutHooks = {
         "pageUpdatedTime"  : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "socStateOfCharge" : battSample.socStateOfCharge,
         "cycleCounter"     : battSample.cycleCounter,
@@ -152,14 +155,38 @@ def createBattPage(battSample: BattSample):
         "vDiffmV"          : battSample.vDiffmV,
         "vTotal"           : round(battSample.v1 + battSample.v2 + battSample.v3 + battSample.v4, 2)
     }
+    
+    batteryData = {
+        "pageUpdatedTime"  : [datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
+        "socStateOfCharge" : [battSample.socStateOfCharge],
+        "cycleCounter"     : [battSample.cycleCounter],
+        "roundedTemp"      : [battSample.roundedTemp],        
+        "capacityAh"       : [battSample.capacityAh],
+        "totalCapacityAh"  : [battSample.totalCapacityAh],
+        "v1"               : [round(battSample.v1, 3)],
+        "v2"               : [round(battSample.v2, 3)],
+        "v3"               : [round(battSample.v3, 3)],
+        "v4"               : [round(battSample.v4, 3)],
+        "v1PixelHeight"    : [round((battSample.v1-3.2)*500, 0)],
+        "v2PixelHeight"    : [round((battSample.v2-3.2)*500, 0)],
+        "v3PixelHeight"    : [round((battSample.v3-3.2)*500, 0)],
+        "v4PixelHeight"    : [round((battSample.v4-3.2)*500, 0)],
+        "vDiffmV"          : [battSample.vDiffmV],
+        "vTotal"           : [round(battSample.v1 + battSample.v2 + battSample.v3 + battSample.v4, 2)]
+    }
+
+    
     # 1. Läs in din HTML-mall
     with open("BattTemplate_DoubleBirdwings.html", "r", encoding="utf-8") as f:
         html_mall_innehall = f.read()
 
     # 2. Skapa en Jinja2-mall och baka in värdena
     mall = Template(html_mall_innehall)
-    print(f"\nbatteryData = {batteryData}\n\n")
-    fardig_html = mall.render(batteryData)
+
+    print(f"\nbatteryDataWithoutHooks (in CreateBattPage) = {batteryDataWithoutHooks}\n\n")
+    print(f"\nbatteryData (in CreateBattPage) = {batteryData}\n\n")
+
+    fardig_html = mall.render(batteryDataWithoutHooks)
 
     # 3. Spara den färdiga HTML-sidan (som du sedan kan öppna i webbläsaren)
     with open("/tmp/BattPage.html", "w", encoding="utf-8") as f:
@@ -169,9 +196,17 @@ def createBattPage(battSample: BattSample):
 
 
     
-    
-    
-    
+def addDfBatteryData2PersistentFile(dfBatteryData):        
+       
+    print(f"addBatteryData2PersistentFile:\npersFilePath={persFilePath}\ndfBatteryData={dfBatteryData}")       
+    # Om filen INTE finns, skriv med rubriker (header=True)
+    # Om filen FINNS, lägg bara till data i slutet utan att upprepa rubrikerna (header=False)    
+    if not os.path.isfile(persFilePath):
+        print(f"\naddBatteryData2PersistentFile[file exists] dfBatteryData = {dfBatteryData}\n\n")        
+        dfBatteryData.to_csv(persFilePath, index=True, header=True)
+    else:
+        print(f"\naddBatteryData2PersistentFile[file doesn't exist] dfBatteryData = {dfBatteryData}\n\n")
+        dfBatteryData.to_csv(persFilePath, index=True, header=False, mode='a')    
     
     
     
@@ -180,6 +215,8 @@ def createBattPage(battSample: BattSample):
     
     
 def validate_and_parse(frame):
+    global batteryData    
+    global persFilePath    
     global pos_cycleCounter
     global pos_SOC
     global pos_temperature
@@ -348,12 +385,39 @@ def validate_and_parse(frame):
         "vDiffmV"          : [diff_mV],
         "thrownResults"    : [thrownResults]
     }
+
+    print("-----------------------------------")
+    print("-----------------------------------")
+    print("-----------------------------------")
+    print("-----------------------------------")
+    print("-----------------------------------")
+    
     dfBattData = pd.DataFrame(battData)
     #dfBattData.set_index("time", inplace=True)
     print(dfBattData)
 
+    batteryData = "Undefined!"
 
+    print("batteryData (before createBattPage) = ", batteryData)
+    print("batteryData (before createBattPage) = ", batteryData)
+    print("batteryData (before createBattPage) = ", batteryData)
+    print("batteryData (before createBattPage) = ", batteryData)
     createBattPage(battSample)
+    print("batteryData (after createBattPage) = ", batteryData)
+    print("batteryData (after createBattPage) = ", batteryData)
+    print("batteryData (after createBattPage) = ", batteryData)
+    print("batteryData (after createBattPage) = ", batteryData)
+
+
+    dfBatteryData = pd.DataFrame(batteryData)
+    dfBatteryData.set_index("pageUpdatedTime", inplace=True)
+
+    print("batteryData #1 (after createBattPage) = ", batteryData)
+    print("dfBatteryData #1 (after createBattPage) = ", dfBatteryData)
+
+    addDfBatteryData2PersistentFile(dfBatteryData)
+    
+    print("battData = ", battData)
     
     sampleText = f"\n\nLEGACYYYYYYYYYYYYYYYYY\n"    
     sampleText += f"\n\n{datum_klockslag}" + "\n"
