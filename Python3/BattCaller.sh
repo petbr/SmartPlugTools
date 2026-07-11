@@ -4,6 +4,30 @@
 echo "Startar loop the Sleeper"
 #cp /home/pi/theBatt.txt /tmp/theBatt.txt
 
+if [ -f /home/pi/persFile.txt ] ; then
+    cp /home/pi/persFile.txt /tmp/persFile.txt
+fi
+
+vanta_eller_avbryt() {
+    local total_tid=1200
+    local raknare=0
+
+    echo "Väntar i $total_tid sekunder... (Ta bort eller avbryt med /tmp/REBOOT)"
+
+    while [ $raknare -lt $total_tid ]; do
+        # Kontrollera om filen existerar
+        if [ -f "/tmp/REBOOT" ]; then
+            echo "Avbryter: Hittade /tmp/REBOOT!"
+            return 0
+        fi
+
+        sleep 1
+        ((raknare++))
+    done
+
+    echo "Tiden har löpt ut ($total_tid sekunder)."
+}
+
 # Loopa för evigt
 while true; do
     # Skriver ut innehållet i filen till terminalen
@@ -21,13 +45,18 @@ while true; do
         echo "REBOOT-----------------------------" >> /tmp/theBatt.txt
         sleep 120
         #cat /tmp/theBatt.txt  >> /home/pi/theBatt.txt
+        cp /tmp/persFile.txt /home/pi/persFile.txt
         sudo reboot
     else
         echo "Keep running, first TRIM the file-----------------------------"
         tail -n 1000 /tmp/theBatt.txt > /tmp/theBatt.tmp && mv /tmp/theBatt.tmp /tmp/theBatt.txt
         # Vänta 1200 sekunder (så att scriptet inte äter upp all CPU)
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Will sleep 1200 seconds: $0" >> /tmp/theBatt.txt
-        sleep 1200        
     fi
+        
+    if vanta_eller_avbryt; then
+        echo "Avbrott eller klar. Startar om nu!"
+        rm -f /tmp/REBOOT
+    fi        
 
 done
