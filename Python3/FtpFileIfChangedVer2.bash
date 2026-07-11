@@ -7,12 +7,14 @@ filename2="$6"
 filename3="BattPage.html"
 filename4="GoatPic1.jpg"
 filename5="persFile.txt"
+filename6="LogFile.txt"
 
 filename1WithPath="$dirPath$filename1"
 filename2WithPath="$dirPath$filename2"
 filename3WithPath="$dirPath$filename3"
 filename4WithPath="$dirPath$filename4"
 filename5WithPath="$dirPath$filename5"
+filename6WithPath="/home/pi/$filename6"
 
 echo "Sajt: $sajt"
 echo "User: $user"
@@ -23,16 +25,19 @@ echo "filename2: $filename2"
 echo "filename3: $filename3"
 echo "filename4: $filename4"
 echo "filename5: $filename5"
+echo "filename6: $filename6"
 echo "filename1WithPath: $filename1WithPath"
 echo "filename2WithPath: $filename2WithPath"
 echo "filename3WithPath: $filename3WithPath"
 echo "filename4WithPath: $filename4WithPath"
 echo "filename5WithPath: $filename5WithPath"
+echo "filename6WithPath: $filename6WithPath"
 m1_Old=""
 m2_Old=""
 m3_Old=""
 m4_Old=""
 m5_Old=""
+m6_Old=""
 
 #echo ---------- Starting FTP Thing >>  /var/log/DranpumpData/TheThing.log
 #echo Start FTP  
@@ -49,6 +54,7 @@ while true; do
   m3_New=$(md5sum "$filename3WithPath")
   m4_New=$(md5sum "$filename4WithPath")
   m5_New=$(md5sum "$filename5WithPath")
+  m6_New=$(md5sum "$filename6WithPath")
   #mlog2=$(md5sum /var/log/DranpumpData/TheThing.log)
 
   if [ "$m1_New" != "$m1_Old" ] ; then
@@ -119,6 +125,21 @@ while true; do
     date
     m5_Old=$m5_New
     python ../SendFileToFtp.py $sajt $user $pwd $dirPath $filename5
+  fi
+
+  if [ "$m6_New" != "$m6_Old" ] ; then
+    cp $filename6WithPath /tmp
+    #echo ---------- FTP Thing >> /var/log/DranpumpData/TheThing.log
+    #date  >> /var/log/DranpumpData/TheThing.log
+    date
+    #echo FTP Sending new DATA file  >> /var/log/DranpumpData/TheThing.log
+    date
+    date
+    echo "Data $filename6 is changed, time to FTP file!"
+    date
+    date
+    m6_Old=$m6_New
+    python ../SendFileToFtp.py $sajt $user $pwd $dirPath $filename6
   fi
 
   #if [ "$mlog1" != "$mlog2" ] ; then#

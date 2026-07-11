@@ -6,6 +6,10 @@ echo "Startar loop the Sleeper"
 
 if [ -f /home/pi/persFile.txt ] ; then
     cp /home/pi/persFile.txt /tmp/persFile.txt
+    echo "-----------------" >> /home/pi/LogFile.txt
+    date >> /home/pi/LogFile.txt
+    echo "just cp'ed /home/pi/persfile.txt to /tmp/" >> /home/pi/LogFile.txt
+    ls -al /tmp/persFile.txt  >> /home/pi/LogFile.txt
 fi
 
 vanta_eller_avbryt() {
