@@ -28,20 +28,12 @@ formaterat_datum = nu.strftime("%Y-%m-%d %H:%M:%S")
 print("Klockan är:", formaterat_datum)
 
 session = ftplib.FTP(ftpSite, user, password)
-print("--")
 session.dir()
-print("--")
 file = open(filenamePath,'rb')
 ftpCommand = "STOR " + filename
-print("Session storbinary")
 ftpResponseMessage = session.storbinary(ftpCommand, file)
-print("FtpCommand Response: ", ftpResponseMessage);
-print("--")
 session.dir()
-print("--")
-print("File close:")
 file.close()
-print("Session close")
 session.close()
 
 
