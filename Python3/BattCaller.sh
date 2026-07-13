@@ -4,13 +4,22 @@
 echo "Startar loop the Sleeper"
 #cp /home/pi/theBatt.txt /tmp/theBatt.txt
 
+echo "-----------------" >> /home/pi/LogFile.txt
+date >> /home/pi/LogFile.txt
+
 if [ -f /home/pi/persFile.txt ] ; then
     cp /home/pi/persFile.txt /tmp/persFile.txt
-    echo "-----------------" >> /home/pi/LogFile.txt
-    date >> /home/pi/LogFile.txt
     echo "just cp'ed /home/pi/persfile.txt to /tmp/" >> /home/pi/LogFile.txt
-    ls -al /tmp/persFile.txt  >> /home/pi/LogFile.txt
 fi
+
+if [ -f /home/pi/theBatt.txt ] ; then
+    cp /home/pi/theBatt.txt /tmp/
+    echo "just cp'ed /home/pi/theBatt.txt to /tmp/" >> /home/pi/LogFile.txt
+fi
+
+ls -al /tmp/persFile.txt  >> /home/pi/LogFile.txt
+ls -al /tmp/theBatt.txt   >> /home/pi/LogFile.txt
+ls -al /tmp/LogFile.txt   >> /home/pi/LogFile.txt
 
 vanta_eller_avbryt() {
     local total_tid=1200
@@ -21,7 +30,6 @@ vanta_eller_avbryt() {
     while [ $raknare -lt $total_tid ]; do
         # Kontrollera om filen existerar
         if [ -f "/tmp/REBOOT" ]; then
-            echo "Avbryter: Hittade /tmp/REBOOT!"
             return 0
         fi
 
@@ -30,6 +38,7 @@ vanta_eller_avbryt() {
     done
 
     echo "Tiden har löpt ut ($total_tid sekunder)."
+    return 1
 }
 
 # Loopa för evigt
@@ -46,10 +55,23 @@ while true; do
 
     # If nothing happened....measurement has failed
     if [ "$m5_Before" == "$m5_After" ] || [ -f /tmp/REBOOT ] ; then
-        echo "REBOOT-----------------------------" >> /tmp/theBatt.txt
+        echo "REBOOT as no sample found or /tmp/REBOOT-----------------------------" >> /tmp/theBatt.txt
         sleep 120
         #cat /tmp/theBatt.txt  >> /home/pi/theBatt.txt
-        cp /tmp/persFile.txt /home/pi/persFile.txt
+        
+        echo "-----------------" >> /home/pi/LogFile.txt
+        date >> /home/pi/LogFile.txt
+        
+        cp /tmp/persFile.txt /home/pi/
+        echo "just cp'ed /tmp/persfile.txt to /home/pi/" >> /home/pi/LogFile.txt        
+
+        cp /tmp/theBatt.txt /home/pi/
+        echo "just cp'ed /tmp/theBatt.txt to /home/pi/" >> /home/pi/LogFile.txt        
+
+        ls -al /home/pi/persFile.txt  >> /home/pi/LogFile.txt        
+        ls -al /home/pi/theBatt.txt  >> /home/pi/LogFile.txt
+        ls -al /home/pi/LogFile.txt  >> /home/pi/LogFile.txt
+    
         sudo reboot
     else
         echo "Keep running, first TRIM the file-----------------------------"
@@ -59,7 +81,9 @@ while true; do
     fi
         
     if vanta_eller_avbryt; then
-        echo "Avbrott eller klar. Startar om nu!"
+        echo "-----------------" >> /home/pi/LogFile.txt
+        date >> /home/pi/LogFile.txt
+        echo "Avbryter: Hittade /tmp/REBOOT!" >> /home/pi/LogFile.txt                        
         rm -f /tmp/REBOOT
     fi        
 

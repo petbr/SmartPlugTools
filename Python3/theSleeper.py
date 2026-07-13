@@ -33,6 +33,7 @@ class BattSample(NamedTuple):
     secondsRun       : int
     cycleCounter     : int
     socStateOfCharge : int
+    socColour        : str
     capacityAh       : str
     totalCapacityAh  : str
     roundedTemp      : float
@@ -140,8 +141,9 @@ def createBattPage(battSample: BattSample):
     batteryDataWithoutHooks = {
         "pageUpdatedTime"  : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "socStateOfCharge" : battSample.socStateOfCharge,
+        "socColour"        : battSample.socColour,
         "cycleCounter"     : battSample.cycleCounter,
-        "roundedTemp"     : battSample.roundedTemp,        
+        "roundedTemp"      : battSample.roundedTemp,        
         "capacityAh"       : battSample.capacityAh,
         "totalCapacityAh"  : battSample.totalCapacityAh,
         "v1"               : round(battSample.v1, 3),
@@ -272,7 +274,15 @@ def validate_and_parse(frame):
     #dPrint(f"pos_v4  = {pos_v4}")
 
     cycleCounter = "Unset"
+    
+    ############################################################    
     SocStateOfCharge = "Unset"
+    
+    # Until we know SOC better...check if-else below
+    SocColour        = "#ff0000"
+    #SocColour        = "Unset"
+    ############################################################
+    
     temp = "Unset"
     v1 =  "Unset"
     v2 =  "Unset"
@@ -306,6 +316,19 @@ def validate_and_parse(frame):
             cycleCounter = dvWrapped
         elif i == pos_SOC:
             SocStateOfCharge = dvWrapped
+            if SocStateOfCharge > 70:
+                SocColour = "#2ecc71"      #Grön
+                
+            elif SocStateOfCharge >40:
+                SocColour = "#3498db"      #Blå
+                
+            elif SocStateOfCharge >25:
+                SocColour = "#e67e22"      #Orange
+            
+            else:
+                SocColour = "#ff0000"      #Röd
+                
+                
         elif i == pos_temperature:
             dPrint(f"temp calculation, hexVal={hexVal}, hexWrappedVal={hexWrappedVal}, dv={dv}, dvWrapped={dvWrapped}, dvSigned={dvSigned}, dvSigned={dvWrappedSigned}")
             temp, _ = calcTemp(dvWrapped)
@@ -358,6 +381,7 @@ def validate_and_parse(frame):
         secondsRun        = 123,
         cycleCounter      = cycleCounter,
         socStateOfCharge  = SocStateOfCharge,
+        socColour         = SocColour,
         capacityAh        = f"{roundedCapacity}",
         totalCapacityAh   = "98,5",
         roundedTemp       = roundedTemp,
@@ -375,6 +399,7 @@ def validate_and_parse(frame):
         "dayTime"          : [datetime.now()],
         "cycleCounter"     : [cycleCounter],
         "socStateOfCharge" : [SocStateOfCharge],
+        "socColour"        : [SocColour],
         "capacityAh"       : [roundedCapacity],
         "totalCapacityAh"  : ["98,5"],
         "roundedTemp"      : [roundedTemp],

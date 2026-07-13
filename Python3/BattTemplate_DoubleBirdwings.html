@@ -86,7 +86,7 @@
             width: 100%;
             background: var(--accent);
             position: absolute;
-            bottom: 4px;
+            bottom: 1px;
             left: 0;
             right: 0;
             border-radius: 2px;
@@ -138,7 +138,7 @@
 
 <div class="container">
     <header>
-        <h1>BMS Status - Batteripaket Goat</h1>
+        <h1>Brude Goat - BMS Status</h1>
         <p style="color: var(--text-dim)">Updated: {{pageUpdatedTime}}</p>
     </header>
 
@@ -151,7 +151,7 @@
                 <div class="battery-body">
                   <!-- Python: sätt height till SOC% och byt färg om < 20 -->
                   <div class="battery-level"
-		    style="height: {{socStateOfCharge}}%; background: var(--accent);background-color: #00ff00;">
+		    style="height: {{socStateOfCharge}}%; background-color: {{socColour}};">
 		  </div>
                 </div>
                 <div>
