@@ -314,8 +314,12 @@ def validate_and_parse(frame):
 
         if i == pos_cycleCounter:
             cycleCounter = dvWrapped
+            
         elif i == pos_SOC:
             SocStateOfCharge = dvWrapped
+            
+            # Override correct value for testing colours
+            #SocStateOfCharge = 16
             if SocStateOfCharge > 70:
                 SocColour = "#2ecc71"      #Grön
                 
