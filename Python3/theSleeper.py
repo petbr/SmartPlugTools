@@ -8,6 +8,7 @@ from PettraHelpers import *
 from typing import NamedTuple
 from jinja2 import Template
 import pandas as pd
+import csv
 
 from bleak import BleakClient
 
@@ -46,6 +47,23 @@ class BattSample(NamedTuple):
     vDiffmV          : float
     thrownResults    : int
 
+#,99,60,29.0,97.5,"98,5",3.373,3.379,3.378,3.373,87.0,89.0,89.0,87.0,6.0,13.5
+#    dayTime          : str,
+#    secondsRun       : int
+#    cycleCounter     : int
+#    socStateOfCharge : int
+#    socColour        : str
+#    capacityAh       : str
+#    totalCapacityAh  : str
+#    roundedTemp      : float
+#    v1               : float
+#    v2               : float
+#    v3               : float
+#    v4               : float
+#    minDiffmV        : float
+#    maxDiffmV        : float    
+#    vDiffmV          : float
+#    thrownResults    : int
     
 ########################
 pos_Offset       = 0
@@ -200,19 +218,51 @@ def createBattPage(battSample: BattSample):
     
 def addDfBatteryData2PersistentFile(dfBatteryData):        
        
-    print(f"addBatteryData2PersistentFile:\npersFilePath={persFilePath}\ndfBatteryData={dfBatteryData}")       
+    print("\n")
+    print(f"######addBatteryData2PersistentFile:\npersFilePath={persFilePath}\ndfBatteryData={dfBatteryData}")
+    print("\n")
     # Om filen INTE finns, skriv med rubriker (header=True)
     # Om filen FINNS, lägg bara till data i slutet utan att upprepa rubrikerna (header=False)    
     if not os.path.isfile(persFilePath):
-        print(f"\naddBatteryData2PersistentFile[file exists] dfBatteryData = {dfBatteryData}\n\n")        
+        print(f"\naddBatteryData2PersistentFile[file doesn't exist] dfBatteryData = {dfBatteryData}\n\n")        
         dfBatteryData.to_csv(persFilePath, index=True, header=True)
     else:
-        print(f"\naddBatteryData2PersistentFile[file doesn't exist] dfBatteryData = {dfBatteryData}\n\n")
+        print(f"\naddBatteryData2PersistentFile[file exist] dfBatteryData = {dfBatteryData}\n\n")
         dfBatteryData.to_csv(persFilePath, index=True, header=False, mode='a')    
     
     
     
-    
+inFilePath  = persFilePath
+outFilePath = "/tmp/persFileSorted.txt"
+def FIX_sortera_csv_pa_datum(in_filpath: str, ut_filpath: str):
+    """Läser en CSV-fil, sorterar raderna efter första kolumnen (datum/tid)
+
+    och sparar resultatet i en ny fil.
+    """
+    rader = []
+
+    # 1. Läs in filen
+    with open(in_filpath, mode="r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        for rad in reader:
+            if rad:  # Hoppa över tomma rader
+                rader.append(rad)
+
+    # 2. Sortera raderna baserat på det första elementet (index 0 = datum/tid)
+    # key=lambda x: x[0] säger åt Python att titta på första kolumnen vid sortering
+    rader.sort(key=lambda x: x[0])
+
+    # 3. Skriv tillbaka de sorterade raderna till den nya filen
+    with open(ut_filpath, mode="w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(rader)
+
+    print(f"🎉 Klart! Filen är sorterad och sparad som '{ut_filpath}'.")
+
+
+# --- Så här använder du funktionen ---
+# Om du vill skriva över originalfilen sätter du bara samma namn på båda platserna
+#FIX_sortera_csv_pa_datum("batteridata.csv", "batteridata_sorterad.csv")    
     
     
     

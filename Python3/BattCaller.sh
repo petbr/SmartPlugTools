@@ -5,6 +5,7 @@ echo "Startar loop the Sleeper"
 #cp /home/pi/theBatt.txt /tmp/theBatt.txt
 
 echo "-----------------" >> /home/pi/LogFile.txt
+echo "Starting..." >> /home/pi/LogFile.txt
 date >> /home/pi/LogFile.txt
 
 if [ -f /home/pi/persFile.txt ] ; then
@@ -61,6 +62,7 @@ while true; do
         
         echo "-----------------" >> /home/pi/LogFile.txt
         date >> /home/pi/LogFile.txt
+        echo "REBOOT as no sample found or /tmp/REBOOT-----------------------------" >> /home/pi/LogFile.txt
         
         cp /tmp/persFile.txt /home/pi/
         echo "just cp'ed /tmp/persfile.txt to /home/pi/" >> /home/pi/LogFile.txt        
