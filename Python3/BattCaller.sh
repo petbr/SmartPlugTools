@@ -57,6 +57,7 @@ while true; do
     # If nothing happened....measurement has failed
     if [ "$m5_Before" == "$m5_After" ] || [ -f /tmp/REBOOT ] ; then
         echo "REBOOT as no sample found or /tmp/REBOOT-----------------------------" >> /tmp/theBatt.txt
+        rm -f /tmp/REBOOT
         sleep 120
         #cat /tmp/theBatt.txt  >> /home/pi/theBatt.txt
         
@@ -86,7 +87,6 @@ while true; do
         echo "-----------------" >> /home/pi/LogFile.txt
         date >> /home/pi/LogFile.txt
         echo "Avbryter: Hittade /tmp/REBOOT!" >> /home/pi/LogFile.txt                        
-        rm -f /tmp/REBOOT
     fi        
 
 done
