@@ -232,8 +232,6 @@ def addDfBatteryData2PersistentFile(dfBatteryData):
     
     
     
-inFilePath  = persFilePath
-outFilePath = "/tmp/persFileSorted.txt"
 def FIX_sortera_csv_pa_datum(in_filpath: str, ut_filpath: str):
     """Läser en CSV-fil, sorterar raderna efter första kolumnen (datum/tid)
 
@@ -487,7 +485,6 @@ def validate_and_parse(frame):
     print("batteryData (after createBattPage) = ", batteryData)
     print("batteryData (after createBattPage) = ", batteryData)
 
-
     dfBatteryData = pd.DataFrame(batteryData)
     dfBatteryData.set_index("pageUpdatedTime", inplace=True)
 
@@ -495,6 +492,10 @@ def validate_and_parse(frame):
     print("dfBatteryData #1 (after createBattPage) = ", dfBatteryData)
 
     addDfBatteryData2PersistentFile(dfBatteryData)
+
+    # Sort the persFile.txt file
+    FIX_sortera_csv_pa_datum(persFilePath, "/tmp/persFileSorted.txt")
+
     
     print("battData = ", battData)
     
