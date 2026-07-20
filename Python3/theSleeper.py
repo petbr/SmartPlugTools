@@ -131,6 +131,30 @@ for i in range(0, NrOfMinMaxValues, 2):
     bagOfMin_AV[i] = +999999.99
     
 
+def readCsvFile(fileNameWithPath):
+    
+    kolumner = [
+        "pageUpdatedTime", "socStateOfCharge", "cycleCounter",
+        "capacityAh", "totalCapacityAh", "v1", "v2", "v3", "v4",
+        "v1PixelHeight", "v2PixelHeight", "v3PixelHeight", "v4PixelHeight", "diffmV", "totalVolt"
+    ]
+
+    dfBatteryData = pd.read_csv(
+        fileNameWithPath,
+        header=None,         # Berätta att filen saknar rubrikrad
+        names=kolumner,      # Sätt dina egna kolumnnamn
+        decimal=",",         # Gör att "98,5" automatiskt konverteras till talet 98.5
+        parse_dates=["pageUpdatedTime"]  # Gör automatiskt om datumsträngen till riktigt datum-objekt
+    )
+    
+    dfBatteryData.set_index("pageUpdatedTime", inplace=True)
+    
+    # (Valfritt) Sortera på datum om raderna skulle ligga i fel ordning
+    dfBatteryData.sort_index(inplace=True)    
+    
+    return dfBatteryData
+
+
 
 
 filePath = "/tmp/theBatt.txt"
@@ -225,8 +249,16 @@ def addDfBatteryData2PersistentFile(dfBatteryData):
     # Om filen FINNS, lägg bara till data i slutet utan att upprepa rubrikerna (header=False)    
     if not os.path.isfile(persFilePath):
         print(f"\naddBatteryData2PersistentFile[file doesn't exist] dfBatteryData = {dfBatteryData}\n\n")        
+        print(f"\naddBatteryData2PersistentFile[file doesn't exist] dfBatteryData = {dfBatteryData}\n\n")        
+        print(f"\naddBatteryData2PersistentFile[file doesn't exist] dfBatteryData = {dfBatteryData}\n\n")        
+        print(f"\naddBatteryData2PersistentFile[file doesn't exist] dfBatteryData = {dfBatteryData}\n\n")        
+        print(f"\naddBatteryData2PersistentFile[file doesn't exist] dfBatteryData = {dfBatteryData}\n\n")        
         dfBatteryData.to_csv(persFilePath, index=True, header=True)
     else:
+        print(f"\naddBatteryData2PersistentFile[file exist] dfBatteryData = {dfBatteryData}\n\n")
+        print(f"\naddBatteryData2PersistentFile[file exist] dfBatteryData = {dfBatteryData}\n\n")
+        print(f"\naddBatteryData2PersistentFile[file exist] dfBatteryData = {dfBatteryData}\n\n")
+        print(f"\naddBatteryData2PersistentFile[file exist] dfBatteryData = {dfBatteryData}\n\n")
         print(f"\naddBatteryData2PersistentFile[file exist] dfBatteryData = {dfBatteryData}\n\n")
         dfBatteryData.to_csv(persFilePath, index=True, header=False, mode='a')    
     
@@ -471,8 +503,7 @@ def validate_and_parse(frame):
     
     dfBattData = pd.DataFrame(battData)
     #dfBattData.set_index("time", inplace=True)
-    print(dfBattData)
-
+        
     batteryData = "Undefined!"
 
     print("batteryData (before createBattPage) = ", batteryData)
@@ -488,16 +519,39 @@ def validate_and_parse(frame):
     dfBatteryData = pd.DataFrame(batteryData)
     dfBatteryData.set_index("pageUpdatedTime", inplace=True)
 
+    print("-------------------------")
+    print("-------------------------")
+    print("-------------------------")
+    print("battData   = ", battData)
+    print("dfBattData = ", dfBattData)
+
+    print("-------------------------")
+
     print("batteryData #1 (after createBattPage) = ", batteryData)
     print("dfBatteryData #1 (after createBattPage) = ", dfBatteryData)
+    
+    print("-------------------------")
+    print("-------------------------")
+    print("-------------------------")
 
     addDfBatteryData2PersistentFile(dfBatteryData)
 
     # Sort the persFile.txt file
     FIX_sortera_csv_pa_datum(persFilePath, "/tmp/persFileSorted.txt")
 
-    
-    print("battData = ", battData)
+    dfReadBatteryData = readCsvFile("/tmp/persFileSorted.txt")
+        
+    print("dfReadBatteryData = ", dfReadBatteryData)
+    print("dfReadBatteryData = ", dfReadBatteryData)
+    print("dfReadBatteryData = ", dfReadBatteryData)
+    print("dfReadBatteryData = ", dfReadBatteryData)
+    print("dfReadBatteryData.head()")
+    print("dfReadBatteryData.head()")
+    print("dfReadBatteryData.head()")
+    print(dfReadBatteryData.head())
+    print("dfReadBatteryData.head()")
+    print("dfReadBatteryData.head()")
+    print("dfReadBatteryData.head()")
     
     sampleText = f"\n\nLEGACYYYYYYYYYYYYYYYYY\n"    
     sampleText += f"\n\n{datum_klockslag}" + "\n"
