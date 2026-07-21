@@ -9,13 +9,17 @@ echo "Starting..." >> /home/pi/LogFile.txt
 date >> /home/pi/LogFile.txt
 
 if [ -f /home/pi/persFile.txt ] ; then
-    cp /home/pi/persFile.txt /tmp/persFile.txt
-    echo "just cp'ed /home/pi/persfile.txt to /tmp/" >> /home/pi/LogFile.txt
+    # -u ser till att /tmp/persFile.txt inte skrivs över om den redan är nyare.
+    # && gör att loggraden bara körs om cp lyckades utföra en kopiering.
+    cp -u /home/pi/persFile.txt /tmp/persFile.txt
+    echo "just cp'ed /home/pi/persfile.txt to /tmp/ (if newer)" >> /home/pi/LogFile.txt
 fi
 
 if [ -f /home/pi/theBatt.txt ] ; then
-    cp /home/pi/theBatt.txt /tmp/
-    echo "just cp'ed /home/pi/theBatt.txt to /tmp/" >> /home/pi/LogFile.txt
+    # -u ser till att /tmp/persFile.txt inte skrivs över om den redan är nyare.
+    # && gör att loggraden bara körs om cp lyckades utföra en kopiering.
+    cp -u /home/pi/theBatt.txt /tmp/
+    echo "just cp'ed /home/pi/theBatt.txt to /tmp/ (if newer)" >> /home/pi/LogFile.txt
 fi
 
 ls -al /tmp/persFile.txt  >> /home/pi/LogFile.txt
