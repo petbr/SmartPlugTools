@@ -1,5 +1,6 @@
 import time
 import os
+import socket
 from pathlib import Path
 from datetime import datetime
 from datetime import date
@@ -155,6 +156,22 @@ def readCsvFile(fileNameWithPath):
     return dfBatteryData
 
 
+def get_local_ip():
+    # Skapar en UDP-socket för att hitta vilket nätverkskort som används
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Ansluter inte på riktigt, men tvingar OS att välja rätt nätverksgränssnitt
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+    except Exception:
+        local_ip = "127.0.0.1"
+    finally:
+        s.close()
+    return local_ip
+
+localIp = get_local_ip()
+
+print ("localIp = ", localIp)
 
 
 filePath = "/tmp/theBatt.txt"
@@ -295,7 +312,7 @@ def FIX_sortera_csv_pa_datum(in_filpath: str, ut_filpath: str):
 #FIX_sortera_csv_pa_datum("batteridata.csv", "batteridata_sorterad.csv")    
     
     
-    
+        
 def validate_and_parse(frame):
     global batteryData    
     global persFilePath    
@@ -317,7 +334,7 @@ def validate_and_parse(frame):
 
     sekunder_sedan_start = time.monotonic() - start_tid
     nuvarande_datum      = datetime.now()
-    datum_klockslag  = nuvarande_datum.strftime(f"%Y-%m-%d %H:%M:%S    Sekunder sedan start: {sekunder_sedan_start}      thrown={thrownResults}")
+    datum_klockslag  = nuvarande_datum.strftime(f"%Y-%m-%d %H:%M:%S  localIp={localIp}  Sekunder sedan start: {sekunder_sedan_start}      thrown={thrownResults}")
 
     lFrame = frame.upper().strip()
     #lFrame = frame.upper()
