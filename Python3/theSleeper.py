@@ -417,13 +417,17 @@ def validate_and_parse(frame):
             
             # Override correct value for testing colours
             #SocStateOfCharge = 16
+            # Grön   = 70
+            # Blå    = 50
+            # Orange = 30
+            # Röd    = Annars
             if SocStateOfCharge > 70:
                 SocColour = "#2ecc71"      #Grön
                 
-            elif SocStateOfCharge >40:
+            elif SocStateOfCharge >50:
                 SocColour = "#3498db"      #Blå
                 
-            elif SocStateOfCharge >25:
+            elif SocStateOfCharge >30:
                 SocColour = "#e67e22"      #Orange
             
             else:
