@@ -81,6 +81,9 @@ while true; do
     
         sudo reboot
     else
+        echo "Keep running, backup persFile.txt to /home/pi/-----------------------------"
+        cp /tmp/persFile.txt /home/pi/
+    
         echo "Keep running, first TRIM the file-----------------------------"
         tail -n 1000 /tmp/theBatt.txt > /tmp/theBatt.tmp && mv /tmp/theBatt.tmp /tmp/theBatt.txt
         # Vänta 1200 sekunder (så att scriptet inte äter upp all CPU)
