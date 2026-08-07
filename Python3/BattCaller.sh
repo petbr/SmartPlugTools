@@ -1,8 +1,8 @@
 #!/bin/bash
 
 
-echo "Startar loop the Sleeper"
-#cp /home/pi/theBatt.txt /tmp/theBatt.txt
+echo "Startar BattCaller.sh, version 1.10"
+cp /home/pi/repo/SmartPlugTools/Python3/GoatPic1.jpg /tmp/
 
 echo "-----------------" >> /home/pi/LogFile.txt
 echo "Starting..." >> /home/pi/LogFile.txt
@@ -64,22 +64,26 @@ while true; do
         rm -f /tmp/REBOOT
         sleep 120
         #cat /tmp/theBatt.txt  >> /home/pi/theBatt.txt
-        
-        echo "-----------------" >> /home/pi/LogFile.txt
-        date >> /home/pi/LogFile.txt
-        echo "REBOOT as no sample found or /tmp/REBOOT-----------------------------" >> /home/pi/LogFile.txt
-        
-        cp /tmp/persFile.txt /home/pi/
-        echo "just cp'ed /tmp/persfile.txt to /home/pi/" >> /home/pi/LogFile.txt        
+        timeout -k 10s 1m python /home/pi/repo/SmartPlugTools/Python3/theSleeper.py
+        m5_After2=$(md5sum "/tmp/theBatt.txt")
+        echo "md5sum = $m5_After2-----------------------------"
+        if [ "$m5_Before" == "$m5_After2" ] || [ -f /tmp/REBOOT ] ; then
+            echo "-----------------" >> /home/pi/LogFile.txt
+            date >> /home/pi/LogFile.txt
+            echo "REBOOT as no sample found or /tmp/REBOOT-----------------------------" >> /home/pi/LogFile.txt
 
-        cp /tmp/theBatt.txt /home/pi/
-        echo "just cp'ed /tmp/theBatt.txt to /home/pi/" >> /home/pi/LogFile.txt        
+            cp /tmp/persFile.txt /home/pi/
+            echo "just cp'ed /tmp/persfile.txt to /home/pi/" >> /home/pi/LogFile.txt
 
-        ls -al /home/pi/persFile.txt  >> /home/pi/LogFile.txt        
-        ls -al /home/pi/theBatt.txt  >> /home/pi/LogFile.txt
-        ls -al /home/pi/LogFile.txt  >> /home/pi/LogFile.txt
-    
-        sudo reboot
+            cp /tmp/theBatt.txt /home/pi/
+            echo "just cp'ed /tmp/theBatt.txt to /home/pi/" >> /home/pi/LogFile.txt
+
+            ls -al /home/pi/persFile.txt  >> /home/pi/LogFile.txt
+            ls -al /home/pi/theBatt.txt  >> /home/pi/LogFile.txt
+            ls -al /home/pi/LogFile.txt  >> /home/pi/LogFile.txt
+        
+            sudo reboot
+        fi
     else
         echo "Keep running, backup persFile.txt to /home/pi/-----------------------------"
         cp /tmp/persFile.txt /home/pi/
