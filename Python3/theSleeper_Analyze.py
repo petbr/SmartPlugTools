@@ -287,12 +287,14 @@ def FIX_sortera_csv_pa_datum(in_filpath: str, ut_filpath: str):
     och sparar resultatet i en ny fil.
     """
     rader = []
+    print("FIX_sortera_csv_pa_datum Begin, line by line\n\n")
 
     # 1. Läs in filen
     with open(in_filpath, mode="r", encoding="utf-8") as f:
         reader = csv.reader(f)
         for rad in reader:
             if rad:  # Hoppa över tomma rader
+                print(rad)
                 rader.append(rad)
 
     # 2. Sortera raderna baserat på det första elementet (index 0 = datum/tid)
@@ -304,7 +306,15 @@ def FIX_sortera_csv_pa_datum(in_filpath: str, ut_filpath: str):
         writer = csv.writer(f)
         writer.writerows(rader)
 
-    print(f"🎉 Klart! Filen är sorterad och sparad som '{ut_filpath}'.")
+    lenRader = len(rader)
+    print("FIX_sortera_csv_pa_datum Begin, rader, size=", lenRader, "\n")
+    print("rader[lenRader-4][0] = ", rader[lenRader-4][0])
+    print("rader[lenRader-3][0] = ", rader[lenRader-3][0])
+    print("rader[lenRader-2][0] = ", rader[lenRader-2][0])
+    print("rader[lenRader-1][0] = ", rader[lenRader-1][0])
+
+    print("\n\nFIX_sortera_csv_pa_datum End\n\n")
+    print(f"Klart! Filen är sorterad och sparad som '{ut_filpath}'.")
 
 
 # --- Så här använder du funktionen ---

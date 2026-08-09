@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-echo "Startar BattCaller.sh, version 1.10"
+echo "Startar BattCaller.sh, version 1.11"
 cp /home/pi/repo/SmartPlugTools/Python3/GoatPic1.jpg /tmp/
 
 echo "-----------------" >> /home/pi/LogFile.txt
@@ -48,6 +48,7 @@ vanta_eller_avbryt() {
 
 # Loopa för evigt
 while true; do
+    echo "BattCaller.sh, while true...."
     # Skriver ut innehållet i filen till terminalen
     cat /tmp/theBatt.txt
 
@@ -60,17 +61,18 @@ while true; do
 
     # If nothing happened....measurement has failed
     if [ "$m5_Before" == "$m5_After" ] || [ -f /tmp/REBOOT ] ; then
-        echo "REBOOT as no sample found or /tmp/REBOOT-----------------------------" >> /tmp/theBatt.txt
-        rm -f /tmp/REBOOT
-        sleep 120
+        echo "No sample found or /tmp/REBOOT #1#-----------------------------" >> /tmp/theBatt.txt
+        echo "No sample found or /tmp/REBOOT #1#-----------------------------"
+        sleep 180
         #cat /tmp/theBatt.txt  >> /home/pi/theBatt.txt
+        m5_Before=$(md5sum "/tmp/theBatt.txt")
         timeout -k 10s 1m python /home/pi/repo/SmartPlugTools/Python3/theSleeper.py
         m5_After2=$(md5sum "/tmp/theBatt.txt")
         echo "md5sum = $m5_After2-----------------------------"
         if [ "$m5_Before" == "$m5_After2" ] || [ -f /tmp/REBOOT ] ; then
             echo "-----------------" >> /home/pi/LogFile.txt
             date >> /home/pi/LogFile.txt
-            echo "REBOOT as no sample found or /tmp/REBOOT-----------------------------" >> /home/pi/LogFile.txt
+            echo "REBOOT as no sample found or /tmp/REBOOT #2#----------" >> /home/pi/LogFile.txt
 
             cp /tmp/persFile.txt /home/pi/
             echo "just cp'ed /tmp/persfile.txt to /home/pi/" >> /home/pi/LogFile.txt
@@ -82,6 +84,7 @@ while true; do
             ls -al /home/pi/theBatt.txt  >> /home/pi/LogFile.txt
             ls -al /home/pi/LogFile.txt  >> /home/pi/LogFile.txt
         
+            rm -f /tmp/REBOOT
             sudo reboot
         fi
     else
