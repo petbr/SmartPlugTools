@@ -61,7 +61,7 @@ while true; do
 
     # If nothing happened....measurement has failed
     if [ "$m5_Before" == "$m5_After" ] || [ -f /tmp/REBOOT ] ; then
-        echo "No sample found or /tmp/REBOOT #1#-----------------------------" >> /tmp/theBatt.txt
+        echo "No sample found or /tmp/REBOOT #1#-----------------------------" >> /home/pi/LogFile.txt
         echo "No sample found or /tmp/REBOOT #1#-----------------------------"
         sleep 180
         #cat /tmp/theBatt.txt  >> /home/pi/theBatt.txt
@@ -73,6 +73,7 @@ while true; do
             echo "-----------------" >> /home/pi/LogFile.txt
             date >> /home/pi/LogFile.txt
             echo "REBOOT as no sample found or /tmp/REBOOT #2#----------" >> /home/pi/LogFile.txt
+            echo "No sample found or /tmp/REBOOT #2#-----------------------------"
 
             cp /tmp/persFile.txt /home/pi/
             echo "just cp'ed /tmp/persfile.txt to /home/pi/" >> /home/pi/LogFile.txt
