@@ -1,9 +1,14 @@
 import os
 import time
 import csv
+import sys
 
-FILE_TO_WATCH = "/tmp/persFile.txt"
-
+if len(sys.argv) > 1:
+    FILE_TO_WATCH = sys.argv[1]
+    print(f"Första argumentet är: {FILE_TO_WATCH}")
+else:
+    print("Inget argument skickades med!")
+    sys.exit(1) # Avsluta skriptet om argument saknas
 
 def read_csv(in_filpath: str):
     """Läser en CSV-fil, sorterar raderna efter första kolumnen (datum/tid)
