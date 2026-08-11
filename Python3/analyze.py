@@ -1,7 +1,11 @@
 import os
 import time
+from datetime import datetime
 import csv
 import sys
+
+TIME_ENT = 0
+SOC_ENT  = 1
 
 if len(sys.argv) > 1:
     FILE_TO_WATCH = sys.argv[1]
@@ -63,8 +67,10 @@ def wait_for_file_change(file_path, poll_interval=1.0):
             continue
 
 def filter_rows(allRows):
-    print("filter_rader() STARTED")
-    SOC_ENT = 1
+    global TIME_ENT
+    global SOC_ENT
+    
+    print("filter_rows() STARTED")
     
     filteredRows = []
     lenAllRows = len(allRows)
@@ -84,9 +90,51 @@ def filter_rows(allRows):
     return filteredRows
     
 
+def filter_rows_and_delta(allRows):
+    global TIME_ENT
+    global SOC_ENT
+    
+    print("filter_rows_and_delta() STARTED")
+    print(f"TIME_ENT={TIME_ENT}, SOC_ENT={SOC_ENT} ")
+    
+    filteredDeltaRows = []
+    lenAllRows = len(allRows)
+    
+    firstRow = allRows[0]
+    
+    firstTime = firstRow[TIME_ENT]
+    firstSoc  = int(firstRow[SOC_ENT])
+    firstDeltaRow = [firstTime, firstSoc, 0]
+    filteredDeltaRows.append(firstDeltaRow)
+    
+    print("firstRow      = ", firstRow)
+    print("firstTime     = ", firstTime)
+    print("firstSoc      = ", firstSoc)
+    print("firstDeltaRow = ", firstDeltaRow)
+        
+    prevSoc = firstSoc
+    for curRow in allRows[1:]:
+        curTime     = curRow[TIME_ENT]
+        curSoc      = curRow[SOC_ENT]
+        curDeltaSoc = int(curSoc) - int(prevSoc)
+
+        curDeltaRow = [curTime, curSoc, curDeltaSoc]
+
+        filteredDeltaRows.append(curDeltaRow)
+        prevSoc = curSoc
+
+    return filteredDeltaRows
+
 
 # --- Kör funktionen ---
-#wait_for_file_change(FILE_TO_WATCH)
+def runTestTiming():
+    while True:
+        print(f"Wait for file change: : {datetime.now().strftime('%H:%M:%S')}\n")
+        wait_for_file_change(FILE_TO_WATCH)
+        print(f"NO Sleep: {datetime.now().strftime('%H:%M:%S')}\n")
+        #time.sleep(5.0)
+
+    
 print("Changed!")
 time.sleep(1.0)
 print("Fortsätter exekvering!")
@@ -98,5 +146,13 @@ filteredRows = filter_rows(allRows)
 for row in filteredRows:
     print(row)
 
+filteredDeltaRows = filter_rows_and_delta(filteredRows)
+deltaStr = ""
+for row in filteredDeltaRows:
+    print(row)
+    deltaStr = deltaStr + str(row) + "\n"
 
+print(deltaStr)
 
+with open("TestFile.txt", "w") as f:
+        f.write(deltaStr)
