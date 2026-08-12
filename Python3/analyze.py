@@ -146,7 +146,7 @@ def runTestTiming():
 
 
 
-def createHtml():
+def createHtml(battDataWithDelta):
     print("createHtml() STARTED")
 
     # --- 1. Exempeldata (Byt ut mot din faktiska data) ---
@@ -167,9 +167,9 @@ def createHtml():
     ]
 
     # --- 2. Separera datan i enskilda listor ---
-    tider = [rad[0] for rad in data]
-    soc_varden = [rad[1] for rad in data]
-    delta_varden = [rad[2] for rad in data]
+    tider = [rad[0] for rad in battDataWithDelta]
+    soc_varden = [rad[1] for rad in battDataWithDelta]
+    delta_varden = [rad[2] for rad in battDataWithDelta]
 
     # --- 3. Skapa diagram med dubbla Y-axlar ---
     # Eftersom SOC (%) och Delta (ändring) har olika skalor är 2 Y-axlar bäst
@@ -253,7 +253,7 @@ print(deltaStr)
 with open("TestFile.txt", "w") as f:
         f.write(deltaStr)
 
-createHtml()
+createHtml(filteredDeltaRows)
 
 
 
