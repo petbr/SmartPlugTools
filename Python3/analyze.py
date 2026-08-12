@@ -3,6 +3,9 @@ import time
 from datetime import datetime
 import csv
 import sys
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
 
 TIME_ENT = 0
 SOC_ENT  = 1
@@ -134,6 +137,99 @@ def runTestTiming():
         print(f"NO Sleep: {datetime.now().strftime('%H:%M:%S')}\n")
         #time.sleep(5.0)
 
+
+
+
+
+
+
+
+
+
+def createHtml():
+    print("createHtml() STARTED")
+
+    # --- 1. Exempeldata (Byt ut mot din faktiska data) ---
+    # Format: [tid, SOC, deltaSoc]
+    data = [
+        ["00:00", 85, 0],
+        ["02:00", 80, -5],
+        ["04:00", 72, -8],
+        ["06:00", 65, -7],
+        ["08:00", 60, -5],
+        ["10:00", 75, +15],  # Laddning
+        ["12:00", 90, +15],  # Laddning
+        ["14:00", 88, -2],
+        ["16:00", 82, -6],
+        ["18:00", 70, -12],
+        ["20:00", 65, -5],
+        ["22:00", 95, +30],  # Nattladdning
+    ]
+
+    # --- 2. Separera datan i enskilda listor ---
+    tider = [rad[0] for rad in data]
+    soc_varden = [rad[1] for rad in data]
+    delta_varden = [rad[2] for rad in data]
+
+    # --- 3. Skapa diagram med dubbla Y-axlar ---
+    # Eftersom SOC (%) och Delta (ändring) har olika skalor är 2 Y-axlar bäst
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    # Lägg till SOC-linjen (Vänster Y-axel)
+    fig.add_trace(
+        go.Scatter(
+            x=tider, 
+            y=soc_varden, 
+            name="SOC (%)",
+            mode="lines+markers",
+            line=dict(color="#1f77b4", width=3)
+        ),
+        secondary_y=False,
+    )
+
+    # Lägg till DeltaSOC som staplar (Höger Y-axel)
+    fig.add_trace(
+        go.Bar(
+            x=tider, 
+            y=delta_varden, 
+            name="Delta SOC",
+            marker_color=["#2ca02c" if val >= 0 else "#d62728" for val in delta_varden], # Grön för +, Röd för -
+            opacity=0.6
+        ),
+        secondary_y=True,
+    )
+
+    # --- 4. Design och rubriker ---
+    fig.update_layout(
+        title="<b>Batteristatus (SOC) & Förändring under 24 timmar</b>",
+        template="plotly_white",
+        hovermode="x unified",  # Visar båda värdena samtidigt när du för musen över en tidpunkt
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+
+    # Namnge y-axlarna
+    fig.update_yaxes(title_text="<b>SOC (%)</b>", range=[0, 100], secondary_y=False)
+    fig.update_yaxes(title_text="<b>Delta SOC</b>", secondary_y=True)
+    fig.update_xaxes(title_text="Tid")
+
+    # --- 5. Spara som HTML-fil ---
+    fig.write_html("batteri_diagram.html", include_plotlyjs="cdn")
+
+    print("Diagrammet har sparats som 'batteri_diagram.html'!")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 print("Changed!")
 time.sleep(1.0)
@@ -156,3 +252,22 @@ print(deltaStr)
 
 with open("TestFile.txt", "w") as f:
         f.write(deltaStr)
+
+createHtml()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
